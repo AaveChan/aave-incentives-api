@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+
 import { router as userRoutes } from './routes/user.routes';
 
 const app: Application = express();
