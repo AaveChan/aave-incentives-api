@@ -16,6 +16,9 @@
     "strict": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
