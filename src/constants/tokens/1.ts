@@ -3,9 +3,9 @@ import { mainnet } from 'viem/chains';
 
 import { Token } from '@/types';
 
-export const stkGHO: Token = {
-  name: 'stk GHO',
-  symbol: 'stkGHO',
+export const sGHO: Token = {
+  name: 'sGHO',
+  symbol: 'sGHO',
   address: AaveSafetyModule.STK_GHO,
   chainId: mainnet.id,
   decimals: 18,

@@ -1,0 +1,261 @@
+{
+  "ethereum-sgho": [
+    {
+      "budget": "700000000000000000000000",
+      "startTimestamp": "19125929",
+      "endTimestamp": "19517980",
+      "campaignId": "0xa5b1ff1fd12a97f766aa45528f443f59a158d55fa2d9d989123fbeff5be9e49a"
+    },
+    {
+      "budget": "700000000000000000000000",
+      "startTimestamp": "19425718",
+      "endTimestamp": "19617409",
+      "campaignId": "0x54bb7655e2b25403f9e47b79c57966a6fb6fbde792161624572f7982742da326"
+    },
+    {
+      "budget": "700000000000000000000000",
+      "startTimestamp": "19617409",
+      "endTimestamp": "19766500",
+      "campaignId": "0xed2693f82f6659dfde101b22e07f3648beb246509c5d902b74c7f67ac914a2a8"
+    },
+    {
+      "budget": "700000000000000000000000",
+      "startTimestamp": "19766500",
+      "endTimestamp": "19981055",
+      "campaignId": "0xc40e9a082cd5eb072457c4281d6de2825b37a7268a98d66b667c504f65180ed5"
+    },
+    {
+      "budget": "700000000000000000000000",
+      "startTimestamp": "19981055",
+      "endTimestamp": "20188000",
+      "campaignId": "0xbe0620e21d3e93bfbb0b80117bec84284e4fecac7031f47698f62cc6a392bd5b"
+    },
+    {
+      "budget": "694370000000000000000000",
+      "startTimestamp": "20188001",
+      "endTimestamp": "20410000",
+      "campaignId": "0x7e94c7d1bdd69ee22f5593ec788ef903e45204552a82bf541a68dcb4ed251232"
+    },
+    {
+      "budget": "1188105000000000000000000",
+      "startTimestamp": "20410001",
+      "endTimestamp": "20627000",
+      "campaignId": "0xf7126a9637dc316a142981df6dfbfbc6114b1c18ef247639f7abfac7fe2aab1b"
+    },
+    {
+      "budget": "1000000000000000000000000",
+      "startTimestamp": "20627001",
+      "endTimestamp": "20841000",
+      "campaignId": "0x66427aaa2181b4245859924ca9cc1b855fd24f902710aaaffd57f375b2cf4231"
+    },
+    {
+      "budget": "1025297626159076325883975",
+      "startTimestamp": "20841001",
+      "endTimestamp": "21065000",
+      "campaignId": "0x7180fe3f5d350e6e67aee8f9ed37c944537d0144651b281b641ec4b66325dc25"
+    },
+
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23274801",
+      "endTimestamp": "23325200",
+      "campaignId": "0xe1a32700afa2e8dc88b842dba7fc0aff2d9acb43d4a8b29177263425ae301a9c"
+    },
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23325201",
+      "endTimestamp": "23375601",
+      "campaignId": "0x35d40e01478d72a3d0b0c21458b45b1ecb84181da611f715a1c7f234c85834f8"
+    },
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23375602",
+      "endTimestamp": "23426002"
+    },
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23426003",
+      "endTimestamp": "23476403"
+    },
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23476404",
+      "endTimestamp": "23526804"
+    },
+    {
+      "budget": "275000000000000000000000",
+      "startTimestamp": "23526805",
+      "endTimestamp": "23577205"
+    }
+  ],
+  "avalanche-supply-savax": [
+    {
+      "budget": "500000000000000000000000",
+      "startTimestamp": "12345678",
+      "endTimestamp": "12567890"
+    }
+  ],
+  "sonic-supply-usdc": [
+    {
+      "startTimestamp": "21981140",
+      "endTimestamp": "22031540",
+      "campaignId": "0xc51aa1ab752b4510f4ea3e43cd044b27fb7298492566be5d7ad7452dfe5608c8"
+    },
+    {
+      "startTimestamp": "22031541",
+      "endTimestamp": "22081941",
+      "campaignId": "0x957406c7e39d861623bc71f70f0a5b88dd935e44447ad245bdbe0491bec6880b"
+    },
+    {
+      "startTimestamp": "22081942",
+      "endTimestamp": "22130000",
+      "campaignId": "0x31fe7426e0bb0597c5ec29fe656e7f08933517b0652ccdca6a98afb374cf678c"
+    },
+    {
+      "startTimestamp": "22130001",
+      "endTimestamp": "22179700",
+      "campaignId": "0x88e7d20994be6a97dd5af665e6f6c3a0c042b7716e99355de81002fee09dc9fc"
+    },
+    {
+      "startTimestamp": "22179701",
+      "endTimestamp": "22222400",
+      "campaignId": "0xb98d62c104d1aa59b4410b7dfa3c06e097cc1a71c20c6f66fe770652496427ec"
+    },
+    {
+      "startTimestamp": "22222401",
+      "endTimestamp": "22272801",
+      "campaignId": "0x4ec2401800218e5f43114b931c8196150a7b9afd4565aa40744264d6f5b7cdaf"
+    },
+    {
+      "startTimestamp": "22272802",
+      "endTimestamp": "22323202",
+      "campaignId": "0x8f1aef324635ff819e9db404366b667abd40bfe8406e4a5f05e74150ab12ce5f"
+    },
+    {
+      "startTimestamp": "22323203",
+      "endTimestamp": "22373603",
+      "campaignId": "0x46aad326a183dd1bab2bd4fd74f11e4291525588a288fc2a0f37f7ad69533476"
+    },
+    {
+      "startTimestamp": "22373604",
+      "endTimestamp": "22424004",
+      "campaignId": "0x224f4b56c3e4c331d7545a11cc62b29f151ca21e7beb19e7c128a4406316cdb5"
+    },
+    {
+      "startTimestamp": "22424005",
+      "endTimestamp": "22473000",
+      "campaignId": "0xc1b810246561e6d3621f1f64bd24378239db89b27155515ac1e0aa53a8f6d75e"
+    },
+    {
+      "startTimestamp": "22473001",
+      "endTimestamp": "22523000",
+      "campaignId": "0xa10776f1889c899d9e8e7cf99f4ede78f53a37362f0b8e444c40b935b4e33d97"
+    },
+    {
+      "startTimestamp": "22523001",
+      "endTimestamp": "22573000",
+      "campaignId": "0xbc63a9ef347981f2431b226f25014692c01400ced93b9fc20d0230786ad8cfa3"
+    },
+    {
+      "startTimestamp": "22573001",
+      "endTimestamp": "22623400",
+      "campaignId": "0x919ccfb4254b158a59fa6155cb1d3e478cb9e9df1e3487a2c3e1a6de95e5b87b"
+    },
+    {
+      "startTimestamp": "22623401",
+      "endTimestamp": "22673800",
+      "campaignId": "0x01515232e471f1c2081c2e784927f52b6320b71583cac58d20175ebece5d7624"
+    },
+    {
+      "startTimestamp": "22673801",
+      "endTimestamp": "22724201",
+      "campaignId": "0xaa88a02af58e98c71cf5b1134ec00ddca9c9a0a206b7f52e430fac2283dac6d4"
+    },
+    {
+      "startTimestamp": "22724202",
+      "endTimestamp": "22774600",
+      "campaignId": "0x0f2f5a0567d25bea002d24cfba993224e1078cfe711e396139246fb0aace901e"
+    },
+    {
+      "startTimestamp": "22774601",
+      "endTimestamp": "22825000",
+      "campaignId": "0xdc98310d871cf4972c7825f4f4b9e4f8d9022ff75d5670366068af4200a193a8"
+    },
+    {
+      "startTimestamp": "22825001",
+      "endTimestamp": "22875400",
+      "campaignId": "0x0a6936a030b0773adea1d9ae299ffab3dbfe849b8359964689624f138d5a43de"
+    },
+    {
+      "startTimestamp": "22875401",
+      "endTimestamp": "22924500",
+      "campaignId": "0xa8fcef50b4ac31444a2e5a646fc86e1cdce1da26b925c7454692e13f2a96c777"
+    },
+    {
+      "startTimestamp": "22924501",
+      "endTimestamp": "22974900",
+      "campaignId": "0xaf62882ca31f7bd32afb35a2e7c257dd7b1321e05f34019fdf83dffd5b0ee290"
+    },
+    {
+      "startTimestamp": "22974901",
+      "endTimestamp": "23025400",
+      "campaignId": "0x2dbffa5561d247da8d6c891fd0231c9bf4c1b73a4209117e05ad0136af9eb342"
+    },
+    {
+      "startTimestamp": "23025401",
+      "endTimestamp": "23075801",
+      "campaignId": "0x70078ad0782d55fbef833bc5dd8be2e61d02a3305713a2ef3b6a0ba638f8263a"
+    },
+    {
+      "startTimestamp": "23075802",
+      "endTimestamp": "23126200",
+      "campaignId": "0x61f29dcf2643003dcef9ae39c875aa1cc99bf8744e24f50421c8aa20cf0d2a86"
+    },
+    {
+      "startTimestamp": "23126201",
+      "endTimestamp": "23176600",
+      "campaignId": "0x049554ef41c7d493c95df7efa59a0f5a6e1240c9e888d9235a26560f19e4454d"
+    },
+    {
+      "startTimestamp": "23176601",
+      "endTimestamp": "23227000",
+      "campaignId": "0xe000ae7713d89289ddcf183f42e56cd8c484e89a7549398c04ae055db9117d04"
+    },
+    {
+      "startTimestamp": "23227001",
+      "endTimestamp": "23277400",
+      "campaignId": "0x23e420560f7c617a8523a6da70e62b30f9f7e13d609d67fe6c3973fc0320c226"
+    },
+    {
+      "startTimestamp": "23277401",
+      "endTimestamp": "23326500",
+      "campaignId": "0xd405ce238e63434319baf9a2ec131900702d81ac324fe0f95b5f2f58106d7f29"
+    },
+    {
+      "apr": "2.5",
+      "startTimestamp": "23326501",
+      "endTimestamp": "23376900",
+      "campaignId": "0x5e207faacd6d04485463def72368c1d72e03902b0cb1ffb367272287e39b0705"
+    },
+    {
+      "apr": "2.5",
+      "startTimestamp": "23376901",
+      "endTimestamp": "23427301"
+    },
+    {
+      "apr": "2.5",
+      "startTimestamp": "23376901",
+      "endTimestamp": "23427301"
+    },
+    {
+      "apr": "2.5",
+      "startTimestamp": "23427302",
+      "endTimestamp": "23477700"
+    },
+    {
+      "apr": "2.5",
+      "startTimestamp": "23477701",
+      "endTimestamp": "23528100"
+    }
+  ]
+}
