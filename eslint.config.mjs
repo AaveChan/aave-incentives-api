@@ -23,7 +23,7 @@ export default [
       import: importPlugin,
     },
     rules: {
-      'no-unused-vars': 'error',
+      'no-unused-vars': 'off', // Use noUnusedLocals & noUnusedParameters in tsconfig.json instead. Reason: https://stackoverflow.com/a/63767419
       'no-undef': 'off',
       'prefer-const': 'error',
       'no-console': 'warn',

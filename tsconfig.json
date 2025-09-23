@@ -5,10 +5,11 @@
     "files": true
   },
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "target": "ES2024",
+    "module": "nodenext",
+    "lib": ["ES2024"],
     "rootDir": "./src",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "checkJs": true,
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -17,6 +18,8 @@
     "noImplicitAny": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"]
     }
