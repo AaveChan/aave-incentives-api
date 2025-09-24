@@ -3,15 +3,37 @@ import { Incentive, IncentiveSource, IncentiveType, RewardType, Token } from '@/
 import { FetchOptions, IncentiveProvider } from '..';
 import { MerklOpportunity } from './types';
 
+type MerklApiOptions = {
+  chainId?: number;
+  mainProtocolId?: string;
+  // other potential filters can be added here
+};
+
 export class MerklProvider implements IncentiveProvider {
-  name = 'Merkl';
   apiUrl = 'https://api.merkl.xyz/v4/opportunities';
   claimLink = 'https://app.merkl.xyz/';
   incentiveType = IncentiveType.OFFCHAIN;
   rewardType = RewardType.TOKEN;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const response = await fetch(`${this.apiUrl}?mainProtocolId=aave`);
+    const url = new URL(this.apiUrl);
+    // if (fetchOptions?.chainId) {
+    //   url.searchParams.append('chainId', fetchOptions.chainId.toString());
+    // }
+    // url.searchParams.append('mainProtocolId', 'aave');
+
+    const merklApiOptions: MerklApiOptions = {
+      chainId: fetchOptions?.chainId,
+      mainProtocolId: 'aave',
+    };
+    for (const [key, value] of Object.entries(merklApiOptions)) {
+      if (value !== undefined) {
+        url.searchParams.append(key, value.toString());
+      }
+    }
+
+    const response = await fetch(url.toString());
+
     const merklOpportunities = (await response.json()) as MerklOpportunity[];
 
     const allIncentives: Incentive[] = [];

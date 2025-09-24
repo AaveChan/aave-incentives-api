@@ -8,7 +8,8 @@ export class IncentivesController {
 
   async getAllIncentives(req: Request, res: Response) {
     try {
-      const incentives = await this.incentivesService.getAllIncentives();
+      const chainId = req.query.chainId ? parseInt(req.query.chainId as string, 10) : undefined;
+      const incentives = await this.incentivesService.getAllIncentives({ chainId });
 
       console.log('Fetched incentives:', incentives);
 

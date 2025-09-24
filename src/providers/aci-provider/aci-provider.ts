@@ -1,15 +1,14 @@
 import { Incentive, IncentiveSource, IncentiveType, RewardType, Status } from '@/types';
 
-import { IncentiveProvider } from '..';
+import { FetchOptions, IncentiveProvider } from '..';
 import { campaignsData } from './campaigns';
 import campaignsRoundsFile from './rounds.json';
 import { CampaignName, Round } from './types';
 
 export class ACIProvider implements IncentiveProvider {
-  name = 'ACI';
   claimLink = 'https://apps.aavechan.com/merit';
 
-  async getIncentives(): Promise<Incentive[]> {
+  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const incentives: Incentive[] = [];
 
     for (const [campaignName, campaign] of Object.entries(campaignsData)) {
@@ -42,6 +41,10 @@ export class ACIProvider implements IncentiveProvider {
         infosLink: campaign.infosLink,
         status,
       });
+    }
+
+    if (fetchOptions?.chainId) {
+      return incentives.filter((i) => i.chainId === fetchOptions.chainId);
     }
 
     console.log('ACI incentives:', incentives.length);

@@ -36,15 +36,15 @@ export interface Point {
 
 /* eslint-disable no-unused-vars */
 export enum IncentiveType {
-  ONCHAIN,
-  OFFCHAIN,
-  EXTERNAL,
+  ONCHAIN = 'ONCHAIN',
+  OFFCHAIN = 'OFFCHAIN',
+  EXTERNAL = 'EXTERNAL',
 }
 
 export enum RewardType {
-  TOKEN,
-  POINTS,
-  EXTERNAL_POINT,
+  TOKEN = 'TOKEN',
+  POINTS = 'POINTS',
+  EXTERNAL_POINT = 'EXTERNAL_POINT',
 }
 
 export enum Status {
