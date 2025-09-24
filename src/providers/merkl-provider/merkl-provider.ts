@@ -2,6 +2,8 @@ import { Incentive, IncentiveSource, IncentiveType, RewardType, Token } from '@/
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { MerklOpportunity } from './types';
+// import { getViemClient } from '@/clients/viem';
+// import { Address, erc20Abi } from 'viem';
 
 type MerklApiOptions = {
   chainId?: number;
@@ -13,6 +15,7 @@ export class MerklProvider implements IncentiveProvider {
   claimLink = 'https://app.merkl.xyz/';
   incentiveType = IncentiveType.OFFCHAIN;
   rewardType = RewardType.TOKEN;
+  unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const merklOpportunities = await this.fetchIncentives(fetchOptions);
@@ -48,10 +51,34 @@ export class MerklProvider implements IncentiveProvider {
         rewardedTokenDecimals = rewardMerklToken.decimals;
         rewardedTokenName = rewardMerklToken.name;
       } else {
-        // fetch onchain
-        // For simplicity, we'll skip this part in this example
-        rewardedTokenName = 'UNKNOWN';
-        rewardedTokenSymbol = 'UNKNOWN';
+        // fetch onchain => quite slow
+        // const client = getViemClient(opportunity.chainId);
+        // const data = await client.multicall({
+        //   contracts: [
+        //     {
+        //       address: rewardedTokenAddress,
+        //       abi: erc20Abi,
+        //       functionName: 'name',
+        //     },
+        //     {
+        //       address: rewardedTokenAddress,
+        //       abi: erc20Abi,
+        //       functionName: 'symbol',
+        //     },
+        //     {
+        //       address: rewardedTokenAddress,
+        //       abi: erc20Abi,
+        //       functionName: 'decimals',
+        //     },
+        //   ],
+        // });
+        // const [nameRes, symbolRes, decimalsRes] = data;
+        // rewardedTokenName = nameRes.result ?? 'UNKNOWN';
+        // rewardedTokenSymbol = symbolRes.result ?? 'UNKNOWN';
+        // rewardedTokenDecimals = decimalsRes.result ?? 18;
+
+        rewardedTokenName = this.unknown;
+        rewardedTokenSymbol = this.unknown;
         rewardedTokenDecimals = 18;
       }
 
