@@ -12,8 +12,6 @@ export class IncentivesService {
       this.providers.map((provider) => provider.getIncentives(fetchOptions)),
     );
 
-    console.log('Incentives fetch results:', results);
-
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);

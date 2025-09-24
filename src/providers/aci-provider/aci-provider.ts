@@ -9,13 +9,11 @@ export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const incentives: Incentive[] = [];
+    let incentives: Incentive[] = [];
 
     for (const [campaignName, campaign] of Object.entries(campaignsData)) {
-      // const campaign = campaignsData[campaignName as CampaignName];
-
       const rounds: Round[] = campaignsRoundsFile[campaignName as CampaignName];
-      const lastRound = rounds[rounds.length - 1]; // Get the latest round only
+      const lastRound = rounds[rounds.length - 1];
 
       if (!lastRound) continue;
 
@@ -43,9 +41,9 @@ export class ACIProvider implements IncentiveProvider {
       });
     }
 
-    if (fetchOptions?.chainId) {
-      return incentives.filter((i) => i.chainId === fetchOptions.chainId);
-    }
+    incentives = incentives.filter((i) =>
+      fetchOptions?.chainId ? i.chainId === fetchOptions?.chainId : true,
+    );
 
     console.log('ACI incentives:', incentives.length);
 

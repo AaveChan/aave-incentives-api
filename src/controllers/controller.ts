@@ -11,8 +11,6 @@ export class IncentivesController {
       const chainId = req.query.chainId ? parseInt(req.query.chainId as string, 10) : undefined;
       const incentives = await this.incentivesService.getAllIncentives({ chainId });
 
-      console.log('Fetched incentives:', incentives);
-
       const response: GetIncentivesResponse = {
         success: true,
         data: {
@@ -35,23 +33,6 @@ export class IncentivesController {
       });
     }
   }
-
-  // async getIncentivesByChain(req: Request, res: Response) {
-  //   try {
-  //     const chainId = parseInt(req.params.chainId);
-  //     const incentives = await this.incentiveService.getIncentivesByChain(chainId);
-
-  //     res.json({
-  //       success: true,
-  //       data: { incentives, chainId },
-  //     });
-  //   } catch (error) {
-  //     res.status(500).json({
-  //       success: false,
-  //       error: { message: 'Failed to fetch incentives by chain', code: 'CHAIN_FETCH_ERROR' },
-  //     });
-  //   }
-  // }
 
   async getHealthStatus(req: Request, res: Response) {
     try {

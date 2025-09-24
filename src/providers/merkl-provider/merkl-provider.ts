@@ -6,7 +6,6 @@ import { MerklOpportunity } from './types';
 type MerklApiOptions = {
   chainId?: number;
   mainProtocolId?: string;
-  // other potential filters can be added here
 };
 
 export class MerklProvider implements IncentiveProvider {
@@ -16,34 +15,11 @@ export class MerklProvider implements IncentiveProvider {
   rewardType = RewardType.TOKEN;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const url = new URL(this.apiUrl);
-    // if (fetchOptions?.chainId) {
-    //   url.searchParams.append('chainId', fetchOptions.chainId.toString());
-    // }
-    // url.searchParams.append('mainProtocolId', 'aave');
+    const merklOpportunities = await this.fetchIncentives(fetchOptions);
 
-    const merklApiOptions: MerklApiOptions = {
-      chainId: fetchOptions?.chainId,
-      mainProtocolId: 'aave',
-    };
-    for (const [key, value] of Object.entries(merklApiOptions)) {
-      if (value !== undefined) {
-        url.searchParams.append(key, value.toString());
-      }
-    }
-
-    const response = await fetch(url.toString());
-
-    const merklOpportunities = (await response.json()) as MerklOpportunity[];
-
-    const allIncentives: Incentive[] = [];
+    let allIncentives: Incentive[] = [];
 
     for (const opportunity of merklOpportunities) {
-      // If chainId filter is provided, skip non-matching opportunities
-      if (fetchOptions?.chainId && opportunity.chainId !== fetchOptions.chainId) {
-        continue;
-      }
-
       const rewardMerklToken = opportunity?.rewardsRecord?.breakdowns[0]?.token;
 
       const rewardedTokenAddress = opportunity.explorerAddress;
@@ -87,7 +63,6 @@ export class MerklProvider implements IncentiveProvider {
         chainId: opportunity.chainId,
       };
 
-      // Map Merkl opportunity to Incentive
       allIncentives.push({
         name: opportunity.name,
         description: opportunity.description,
@@ -106,9 +81,45 @@ export class MerklProvider implements IncentiveProvider {
       });
     }
 
+    allIncentives = allIncentives.filter((i) =>
+      fetchOptions?.chainId ? i.chainId === fetchOptions?.chainId : true,
+    );
+
     console.log('Merkl incentives:', allIncentives.length);
 
     return allIncentives;
+  }
+
+  private async fetchIncentives(fetchOptions?: FetchOptions): Promise<MerklOpportunity[]> {
+    const url = new URL(this.apiUrl);
+
+    const merklApiOptions: MerklApiOptions = {
+      chainId: fetchOptions?.chainId,
+      mainProtocolId: 'aave',
+    };
+    for (const [key, value] of Object.entries(merklApiOptions)) {
+      if (value !== undefined) {
+        url.searchParams.append(key, value.toString());
+      }
+    }
+
+    const allMerklOpportunities: MerklOpportunity[] = [];
+
+    let merklOpportunities: MerklOpportunity[] = [];
+    const itemsPerPage = 100;
+    url.searchParams.set('items', itemsPerPage.toString());
+    let page = 0;
+
+    do {
+      url.searchParams.set('page', page.toString());
+      const response = await fetch(url.toString());
+      merklOpportunities = (await response.json()) as MerklOpportunity[];
+
+      allMerklOpportunities.push(...merklOpportunities);
+      page++;
+    } while (merklOpportunities.length > 0);
+
+    return allMerklOpportunities;
   }
 
   getSource(): IncentiveSource {
