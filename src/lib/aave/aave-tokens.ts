@@ -38,6 +38,7 @@ export type BookType = {
 export enum AaveTokenType {
   A = 'A_TOKEN',
   V = 'V_TOKEN',
+  STATA = 'STATA_TOKEN',
   STK = 'STK_TOKEN',
   UNDERLYING = 'UNDERLYING',
   NOT_LISTED = 'NOT_LISTED',
@@ -47,6 +48,7 @@ export enum AaveInstanceType {
   CORE = 'Core',
   PRIME = 'Prime',
   ETHERFI = 'EtherFi',
+  HORIZON_RWA = 'Horizon RWA',
 }
 
 console.log(AaveV3HorizonRWA);
@@ -101,12 +103,16 @@ export const getAaveToken = (tokenAddress: Address, chainId: number) => {
   let name: string | undefined;
   switch (tokenInfo?.type) {
     case AaveTokenType.A:
-      symbol = getATokenSymbol(tokenInfo.name, chain.name);
-      name = getATokenName(tokenInfo.name, chain.name);
+      symbol = getATokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+      name = getATokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
       break;
     case AaveTokenType.V:
-      symbol = getVTokenSymbol(tokenInfo.name, chain.name);
-      name = getVTokenName(tokenInfo.name, chain.name);
+      symbol = getVTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+      name = getVTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+      break;
+    case AaveTokenType.STATA:
+      symbol = getStataTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+      name = getStataTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
       break;
     case AaveTokenType.STK:
       name = tokenInfo.name;
@@ -210,6 +216,13 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
           tokenBookName = name;
           instanceType = getAaveInstanceFromInstanceFullName(key);
           break;
+        case asset.STATA_TOKEN:
+        case asset.STATIC_A_TOKEN:
+          tokenType = AaveTokenType.STATA;
+          tokenBook = asset;
+          tokenBookName = name;
+          instanceType = getAaveInstanceFromInstanceFullName(key);
+          break;
         case asset.UNDERLYING:
           tokenType = AaveTokenType.UNDERLYING;
           tokenBook = asset;
@@ -235,31 +248,87 @@ const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
     return AaveInstanceType.PRIME;
   } else if (instanceFullName.toLowerCase().includes('etherfi')) {
     return AaveInstanceType.ETHERFI;
+  } else if (instanceFullName.toLowerCase().includes('horizon')) {
+    return AaveInstanceType.HORIZON_RWA;
   } else {
     return AaveInstanceType.CORE;
   }
 };
 
-const getSymbolPrefix = (chainName: string) => {
+const getSymbolPrefix = (chainName: string, instanceType?: AaveInstanceType) => {
+  if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
+    return 'HorRwa';
+  }
   // get the first 3 letter, and set the first letter to uppercase
-  const prefix = chainName.substring(0, 3).toLowerCase();
-  return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+  let prefix = chainName.substring(0, 3).toLowerCase();
+  prefix = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+
+  if (instanceType && instanceType !== AaveInstanceType.CORE) {
+    prefix += instanceType;
+  }
+
+  return prefix;
 };
 
-const getATokenSymbol = (underlyingSymbol: string, chainName: string) => {
-  const prefix = getSymbolPrefix(chainName);
+const getNamePrefix = (chainName: string, instanceType?: AaveInstanceType) => {
+  if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
+    return AaveInstanceType.HORIZON_RWA;
+  } else if (instanceType && instanceType !== AaveInstanceType.CORE) {
+    return `${chainName} ${instanceType}`;
+  }
+  return `${chainName}`;
+};
+
+const getATokenSymbol = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const prefix = getSymbolPrefix(chainName, instanceType);
   return `a${prefix}${underlyingSymbol}`;
 };
 
-const getATokenName = (underlyingSymbol: string, chainName: string) => {
-  return `Aave ${chainName} ${underlyingSymbol}`;
+const getStataTokenSymbol = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const aTokenSymbol = getATokenSymbol(underlyingSymbol, chainName, instanceType);
+  return `w${aTokenSymbol}`;
 };
 
-const getVTokenSymbol = (underlyingSymbol: string, chainName: string) => {
-  const prefix = getSymbolPrefix(chainName);
+const getATokenName = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const namePrefix = getNamePrefix(chainName, instanceType);
+  return `Aave ${namePrefix} ${underlyingSymbol}`;
+};
+
+const getStataTokenName = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const aTokenName = getATokenName(underlyingSymbol, chainName, instanceType);
+  return `Wrapped ${aTokenName}`;
+};
+
+const getVTokenSymbol = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const prefix = getSymbolPrefix(chainName, instanceType);
   return `variableDebt${prefix}${underlyingSymbol}`;
 };
 
-const getVTokenName = (underlyingSymbol: string, chainName: string) => {
-  return `Aave ${chainName} Variable Debt ${underlyingSymbol}`;
+const getVTokenName = (
+  underlyingSymbol: string,
+  chainName: string,
+  instanceType?: AaveInstanceType,
+) => {
+  const namePrefix = getNamePrefix(chainName, instanceType);
+  return `Aave ${namePrefix} Variable Debt ${underlyingSymbol}`;
 };
