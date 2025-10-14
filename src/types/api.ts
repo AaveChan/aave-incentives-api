@@ -4,12 +4,9 @@ export interface Incentive {
   rewardedToken: Token;
   rewardToken?: Token; // (if token incentive)
   rewardPoint?: Point; // (if point incentive)
-  budget?: string; // (if token incentive)
   apr?: number; // (if token incentive)
-  maxBudget?: string; // (if token incentive)
-  startTimestamp?: number; // (no timestamps if external points or GHO discount?)
-  endTimestamp?: number; // (no timestamps if external points or GHO discount?)
-  incentiveType: IncentiveType; // => idk: marc wants to market every campaign as MASIv campaign (masiv campaign are incentives run by the ACI, no matter what infra is). So maybe type would be: “MASIv”, “Onchain”, “External”, or “Offchain” instead of masiv
+  currentCampaignConfig?: CampaignConfig;
+  incentiveType: IncentiveType; // => So maybe type would be: “MASIv”, “Onchain”, “External”, or “Offchain” instead of masiv
   rewardType: RewardType;
   status?: Status;
   description: string; // (eg: Borrow USDC on Base. Holding aBasUSDC token dilute your rewards. An health factor of 2 is require to
@@ -27,6 +24,13 @@ export interface Token {
   // abi?: any;
   price?: number;
 }
+
+export type CampaignConfig = {
+  startTimestamp: number; // (no timestamps if external points or GHO discount?)
+  endTimestamp: number; // (no timestamps if external points or GHO discount?)
+  budget?: string; // (if token incentive)
+  apr?: number; // (if token incentive)
+};
 
 export interface Point {
   name: string;

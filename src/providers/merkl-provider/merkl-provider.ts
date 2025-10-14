@@ -1,7 +1,15 @@
-import { Incentive, IncentiveSource, IncentiveType, RewardType, Token } from '@/types';
+import {
+  CampaignConfig,
+  Incentive,
+  IncentiveSource,
+  IncentiveType,
+  RewardType,
+  Status,
+  Token,
+} from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-import { MerklOpportunity } from './types';
+import { Campaign, MerklOpportunity } from './types';
 // import { getViemClient } from '@/clients/viem';
 // import { Address, erc20Abi } from 'viem';
 
@@ -90,6 +98,8 @@ export class MerklProvider implements IncentiveProvider {
         chainId: opportunity.chainId,
       };
 
+      const currentCampaignConfig = await this.getCurrentCampaignConfig(opportunity.id);
+
       allIncentives.push({
         name: opportunity.name,
         description: opportunity.description,
@@ -97,11 +107,8 @@ export class MerklProvider implements IncentiveProvider {
         chainId: opportunity.chainId,
         rewardedToken,
         rewardToken,
+        currentCampaignConfig,
         apr: opportunity.apr,
-        budget: undefined,
-        maxBudget: undefined,
-        startTimestamp: undefined,
-        endTimestamp: undefined,
         incentiveType: this.incentiveType,
         rewardType: this.rewardType,
         status: opportunity.status,
@@ -148,6 +155,37 @@ export class MerklProvider implements IncentiveProvider {
 
     return allMerklOpportunities;
   }
+
+  private getCurrentCampaignConfig = async (opportunityId: string) => {
+    const url = new URL('https://api.merkl.xyz/v4/campaigns');
+    url.searchParams.set('opportunityId', opportunityId);
+    url.searchParams.set('status', Status.LIVE);
+
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      throw new Error(`Failed to fetch current incentives config: ${response.statusText}`);
+    }
+
+    const currentCampaigns = (await response.json()) as Campaign[];
+
+    if (currentCampaigns && currentCampaigns.length > 0) {
+      const currentCampaign = currentCampaigns[0];
+      if (currentCampaign) {
+        const aprSetup =
+          Number(currentCampaign.params.distributionMethodParameters.distributionSettings.apr) *
+          100;
+
+        const currentCampaignForOpportunity: CampaignConfig = {
+          startTimestamp: Number(currentCampaign.startTimestamp),
+          endTimestamp: Number(currentCampaign.endTimestamp),
+          budget: currentCampaign.amount,
+          apr: aprSetup,
+        };
+
+        return currentCampaignForOpportunity;
+      }
+    }
+  };
 
   getSource(): IncentiveSource {
     return IncentiveSource.MERKL_API;
