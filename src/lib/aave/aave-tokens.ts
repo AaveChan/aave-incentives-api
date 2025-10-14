@@ -17,8 +17,7 @@ import {
   AaveV3Sonic,
   AaveV3ZkSync,
 } from '@bgd-labs/aave-address-book';
-import { Address } from 'viem';
-import { mainnet } from 'viem/chains';
+import { Address, zeroAddress } from 'viem';
 import { getChain } from '../utils/chains';
 import { Token } from '@/types';
 
@@ -87,6 +86,9 @@ const AllAddressBooksChainIds: { [key: string]: number } = {
   AaveV3Celo: AaveV3Celo.CHAIN_ID,
 };
 
+const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
+const twentywstETHEightyAAVE = '0x3de27EFa2F1AA663Ae5D458857e731c129069F29';
+
 export const getAaveToken = (tokenAddress: Address, chainId: number) => {
   const tokenInfo = getAaveTokenInfo(tokenAddress, chainId);
   const chain = getChain(chainId);
@@ -102,51 +104,33 @@ export const getAaveToken = (tokenAddress: Address, chainId: number) => {
       name = getVTokenName(tokenInfo.name, chain.name);
       break;
     case AaveTokenType.STK:
-      // Handle stk tokens separately
-      switch (tokenAddress) {
-        case AaveSafetyModule.STK_GHO:
-          name = 'stkGHO';
-          symbol = 'stkGHO';
-          break;
-        case AaveSafetyModule.STK_AAVE:
-          name = 'stkAAVE';
-          symbol = 'stkAAVE';
-          break;
-        case AaveSafetyModule.STK_ABPT:
-          name = 'stkABPT';
-          symbol = 'stkABPT';
-          break;
-        case AaveSafetyModule.STK_AAVE_WSTETH_BPTV2:
-          name = 'stk AAVE/wstETH BPTv2';
-          symbol = 'stkAAVEwstETHBPTv2';
-          break;
-      }
+      name = tokenInfo.name;
+      symbol = tokenInfo.name;
+      break;
     case AaveTokenType.UNDERLYING:
     case AaveTokenType.NOT_LISTED:
     default:
-      return null;
+      return undefined;
   }
 
-  if (!symbol || !name) {
-    return null;
+  if (symbol && name) {
+    const aaveToken: Token = {
+      address: tokenAddress,
+      symbol: symbol,
+      name: name,
+      decimals: tokenInfo.book.decimals,
+      chainId: chainId,
+    };
+
+    return aaveToken;
   }
-
-  const aaveToken: Token = {
-    address: tokenAddress,
-    symbol: symbol,
-    name: name,
-    decimals: tokenInfo.book.decimals,
-    chainId: chainId,
-  };
-
-  return aaveToken;
 };
 
 export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
   let tokenType = AaveTokenType.NOT_LISTED;
   let tokenBook: BookType | undefined;
   let tokenBookName: string | undefined;
-  let instanceType: AaveInstanceType | null = null;
+  let instanceType: AaveInstanceType | undefined;
 
   const stkTokens: Address[] = [
     AaveSafetyModule.STK_GHO,
@@ -156,6 +140,48 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
   ];
   if (stkTokens.includes(tokenAddress)) {
     tokenType = AaveTokenType.STK;
+
+    let name: string | undefined;
+    let underlyingTokenAddress: Address | undefined;
+    switch (tokenAddress) {
+      case AaveSafetyModule.STK_GHO:
+        name = 'stkGHO';
+        underlyingTokenAddress = AaveV3Ethereum.ASSETS.GHO.UNDERLYING;
+        break;
+      case AaveSafetyModule.STK_AAVE:
+        name = 'stkAAVE';
+        underlyingTokenAddress = AaveV3Ethereum.ASSETS.AAVE.UNDERLYING;
+        break;
+      case AaveSafetyModule.STK_ABPT:
+        name = 'stkABPT';
+        underlyingTokenAddress = abpt;
+        break;
+      case AaveSafetyModule.STK_AAVE_WSTETH_BPTV2:
+        name = 'stkAAVEwstETHBPTv2';
+        underlyingTokenAddress = twentywstETHEightyAAVE;
+        break;
+    }
+
+    if (name && underlyingTokenAddress) {
+      const book: BookType = {
+        decimals: 18,
+        id: chainId,
+        UNDERLYING: underlyingTokenAddress,
+        A_TOKEN: zeroAddress,
+        V_TOKEN: zeroAddress,
+        INTEREST_RATE_STRATEGY: zeroAddress,
+        ORACLE: zeroAddress,
+        STATIC_A_TOKEN: zeroAddress,
+        STATA_TOKEN: zeroAddress,
+        STK_TOKEN: tokenAddress,
+      };
+      return {
+        type: tokenType,
+        book,
+        name,
+        instanceType: AaveInstanceType.CORE,
+      };
+    }
   }
 
   for (const [key, assets] of Object.entries(AllAddressBooksAssets)) {
@@ -189,17 +215,14 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
     }
   }
 
-  if (!tokenBook || !tokenBookName) {
-    // console.log(`Aave token information not found for address ${tokenAddress}`);
-    return null;
+  if (tokenBook && tokenBookName) {
+    return {
+      type: tokenType,
+      book: tokenBook,
+      name: tokenBookName,
+      instanceType,
+    };
   }
-
-  return {
-    type: tokenType,
-    book: tokenBook,
-    name: tokenBookName,
-    instanceType,
-  };
 };
 
 const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
