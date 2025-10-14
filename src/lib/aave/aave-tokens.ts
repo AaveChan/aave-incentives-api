@@ -17,6 +17,7 @@ import {
   AaveV3Sonic,
   AaveV3ZkSync,
 } from '@bgd-labs/aave-address-book';
+import { AaveV3HorizonRWA } from './horizon-assets';
 import { Address, zeroAddress } from 'viem';
 import { getChain } from '../utils/chains';
 import { Token } from '@/types';
@@ -48,6 +49,8 @@ export enum AaveInstanceType {
   ETHERFI = 'EtherFi',
 }
 
+console.log(AaveV3HorizonRWA);
+
 const AllAddressBooksAssets = {
   AaveV3Ethereum: { ...AaveV3Ethereum.ASSETS },
   AaveV3EthereumLido: { ...AaveV3EthereumLido.ASSETS },
@@ -65,6 +68,7 @@ const AllAddressBooksAssets = {
   AaveV3Sonic: { ...AaveV3Sonic.ASSETS },
   AaveV3Linea: { ...AaveV3Linea.ASSETS },
   AaveV3Celo: { ...AaveV3Celo.ASSETS },
+  AaveV3HorizonRWA: { ...AaveV3HorizonRWA.ASSETS },
 };
 
 const AllAddressBooksChainIds: { [key: string]: number } = {
@@ -84,6 +88,7 @@ const AllAddressBooksChainIds: { [key: string]: number } = {
   AaveV3Sonic: AaveV3Sonic.CHAIN_ID,
   AaveV3Linea: AaveV3Linea.CHAIN_ID,
   AaveV3Celo: AaveV3Celo.CHAIN_ID,
+  AaveV3HorizonRWA: AaveV3HorizonRWA.CHAIN_ID,
 };
 
 const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
