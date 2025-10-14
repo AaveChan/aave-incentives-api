@@ -10,6 +10,7 @@ import {
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { Campaign, MerklOpportunity } from './types';
+import { getAaveToken } from '@/lib/aave/aave-tokens';
 // import { getViemClient } from '@/clients/viem';
 // import { Address, erc20Abi } from 'viem';
 
@@ -59,35 +60,46 @@ export class MerklProvider implements IncentiveProvider {
         rewardedTokenDecimals = rewardMerklToken.decimals;
         rewardedTokenName = rewardMerklToken.name;
       } else {
-        // fetch onchain => quite slow
-        // const client = getViemClient(opportunity.chainId);
-        // const data = await client.multicall({
-        //   contracts: [
-        //     {
-        //       address: rewardedTokenAddress,
-        //       abi: erc20Abi,
-        //       functionName: 'name',
-        //     },
-        //     {
-        //       address: rewardedTokenAddress,
-        //       abi: erc20Abi,
-        //       functionName: 'symbol',
-        //     },
-        //     {
-        //       address: rewardedTokenAddress,
-        //       abi: erc20Abi,
-        //       functionName: 'decimals',
-        //     },
-        //   ],
-        // });
-        // const [nameRes, symbolRes, decimalsRes] = data;
-        // rewardedTokenName = nameRes.result ?? 'UNKNOWN';
-        // rewardedTokenSymbol = symbolRes.result ?? 'UNKNOWN';
-        // rewardedTokenDecimals = decimalsRes.result ?? 18;
+        const rewardedToken = getAaveToken(rewardedTokenAddress, opportunity.chainId);
 
-        rewardedTokenName = this.unknown;
-        rewardedTokenSymbol = this.unknown;
-        rewardedTokenDecimals = 18;
+        if (rewardedToken) {
+          rewardedTokenName = rewardedToken.name;
+          rewardedTokenSymbol = rewardedToken.symbol;
+          rewardedTokenDecimals = rewardedToken.decimals;
+        } else {
+          console.warn(
+            `Rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
+          );
+          // fetch onchain => quite slow
+          // const client = getViemClient(opportunity.chainId);
+          // const data = await client.multicall({
+          //   contracts: [
+          //     {
+          //       address: rewardedTokenAddress,
+          //       abi: erc20Abi,
+          //       functionName: 'name',
+          //     },
+          //     {
+          //       address: rewardedTokenAddress,
+          //       abi: erc20Abi,
+          //       functionName: 'symbol',
+          //     },
+          //     {
+          //       address: rewardedTokenAddress,
+          //       abi: erc20Abi,
+          //       functionName: 'decimals',
+          //     },
+          //   ],
+          // });
+          // const [nameRes, symbolRes, decimalsRes] = data;
+          // rewardedTokenName = nameRes.result ?? 'UNKNOWN';
+          // rewardedTokenSymbol = symbolRes.result ?? 'UNKNOWN';
+          // rewardedTokenDecimals = decimalsRes.result ?? 18;
+
+          rewardedTokenName = this.unknown;
+          rewardedTokenSymbol = this.unknown;
+          rewardedTokenDecimals = 18;
+        }
       }
 
       const rewardedToken: Token = {
