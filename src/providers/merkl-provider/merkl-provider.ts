@@ -11,8 +11,6 @@ import {
 import { FetchOptions, IncentiveProvider } from '..';
 import { Campaign, MerklOpportunity } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
-// import { getViemClient } from '@/clients/viem';
-// import { Address, erc20Abi } from 'viem';
 
 type MerklApiOptions = {
   chainId?: number;

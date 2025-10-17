@@ -1,42 +1,58 @@
-import { Incentive, IncentiveSource, IncentiveType, RewardType, Status } from '@/types';
+import {
+  CampaignConfig,
+  Incentive,
+  IncentiveSource,
+  IncentiveType,
+  RewardType,
+  Status,
+  Token,
+} from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-import { campaignsData } from './campaigns';
 import campaignsRoundsFile from './rounds.json';
-import { CampaignName, Round } from './types';
-
+import { Actions, Campaign, Token as AciInfraToken } from './types';
 export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
+  apiUrl = 'http://localhost:3000/api/merit/all-actions-data';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
+    const aciIncentives = await this.fetchIncentives(fetchOptions);
+
     let incentives: Incentive[] = [];
 
-    for (const [campaignName, campaign] of Object.entries(campaignsData)) {
-      const rounds: Round[] = campaignsRoundsFile[campaignName as CampaignName];
-      const lastRound = rounds[rounds.length - 1];
+    // 2 things to fix
+    // - provide rounds with timestamp instead of blockNumber through ACI API
+    // - setupAction data not in an array, or create a function to gather all data from the array in 1 string
+    // - make the name of ACIInfraToken type defined
+    for (const [actionName, action] of Object.entries(aciIncentives)) {
+      const currentCampaignConfig = this.getCampaignConfig(action.campaigns, Status.LIVE);
+      const nextCampaignConfig = this.getCampaignConfig(action.campaigns, Status.UPCOMING);
 
-      if (!lastRound) continue;
+      let status: Status | undefined;
+      if (nextCampaignConfig) {
+        status = Status.UPCOMING;
+      }
+      if (currentCampaignConfig) {
+        status = Status.LIVE;
+      }
 
-      const status = this.getStatus(
-        Number(lastRound.startTimestamp),
-        Number(lastRound.endTimestamp),
-      );
+      const description = action.info.actionsData[0]?.description; // mayb change it for not an array
+
+      const actionToken = action.actionTokens[0] as AciInfraToken; // ensure it's defined (not clean but do the job)
 
       incentives.push({
-        name: campaign.actionName ?? campaign.displayName,
-        description: campaign.actionName ?? campaign.displayName,
+        name: action.displayName,
+        description: description ? description : '',
         claimLink: this.claimLink,
-        chainId: campaign.actionToken.chainId,
-        rewardedToken: campaign.actionToken,
-        rewardToken: campaign.rewardToken,
-        apr: lastRound.apr ? parseFloat(lastRound.apr) : undefined,
-        budget: lastRound.budget ? lastRound.budget : undefined,
-        maxBudget: lastRound.maxBudget ? lastRound.maxBudget : undefined,
-        startTimestamp: Number(lastRound.startTimestamp),
-        endTimestamp: Number(lastRound.endTimestamp),
+        chainId: action.chainId,
+        rewardedToken: this.convertAciInfraTokenToIncentiveToken(actionToken),
+        rewardToken: this.convertAciInfraTokenToIncentiveToken(action.rewardToken),
+        apr: action.apr,
+        currentCampaignConfig,
+        nextCampaignConfig,
         incentiveType: IncentiveType.OFFCHAIN,
         rewardType: RewardType.TOKEN,
-        infosLink: campaign.infosLink,
+        infosLink: action.info.forumLink.link,
         status,
       });
     }
@@ -50,52 +66,78 @@ export class ACIProvider implements IncentiveProvider {
     return incentives;
   }
 
-  private getStatus(start: number, end: number): Status {
-    const now = Date.now();
-    if (now < start) return Status.UPCOMING;
-    if (now >= start && now <= end) return Status.LIVE;
-    return Status.PAST;
+  private convertAciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
+    const token: Token = {
+      name: aciInfraToken.name ? aciInfraToken.name : '', // TODO: fix the potential undefined name
+      symbol: aciInfraToken.symbol,
+      address: aciInfraToken.address,
+      chainId: aciInfraToken.chainId,
+      decimals: aciInfraToken.decimals,
+    };
+
+    return token;
+  };
+
+  private async fetchIncentives(fetchOptions?: FetchOptions): Promise<Actions> {
+    const url = new URL(this.apiUrl);
+
+    let allAciIncentives: Actions = {};
+
+    const response = await fetch(url.toString());
+    allAciIncentives = (await response.json()) as Actions;
+
+    return allAciIncentives;
   }
 
-  // async getIncentives(): Promise<Incentive[]> {
-  //   const campaignsRounds = campaignsRoundsFile as Rounds;
-
-  //   const incentives: Incentive[] = [];
-
-  //   for (const [campaignName, rounds] of Object.entries(campaignsRounds)) {
-  //     const lastRound = rounds[rounds.length - 1]; // Get the latest round only
-
-  //     if (!lastRound) continue;
-
-  //     // check if campaignName is of type CampaignName
-  //     if (!Object.keys(campaignsData).includes(campaignName)) continue;
-
-  //     for (const round of rounds) {
-  //       const campaign = campaignsData[campaignName as CampaignName];
-
-  //       const status = this.getStatus(Number(round.startTimestamp), Number(round.endTimestamp));
-
-  //       incentives.push({
-  //         name: campaign.actionName ?? campaign.displayName,
-  //         description: campaign.actionName ?? campaign.displayName,
-  //         claimLink: this.claimLink,
-  //         chainId: campaign.actionToken.chainId,
-  //         rewardedToken: campaign.actionToken,
-  //         rewardToken: campaign.rewardToken,
-  //         apr: round.apr ? parseFloat(round.apr) : undefined,
-  //         budget: round.budget ? BigInt(round.budget) : undefined,
-  //         maxBudget: round.maxBudget ? BigInt(round.maxBudget) : undefined,
-  //         startTimestamp: Number(round.startTimestamp),
-  //         endTimestamp: Number(round.endTimestamp),
-  //         incentiveType: IncentiveType.OFFCHAIN,
-  //         rewardType: RewardType.TOKEN,
-  //         infosLink: campaign.infosLink,
-  //         status,
-  //       });
-  //     }
-  //   }
-  //   return incentives;
+  // private getStatus(start: number, end: number): Status {
+  //   const now = Date.now();
+  //   if (now < start) return Status.UPCOMING;
+  //   if (now >= start && now <= end) return Status.LIVE;
+  //   return Status.PAST;
   // }
+
+  // private getCurrentCampaignConfig = async (campaigns: Campaign[]): CampaignConfig => {
+  //   // Campaigns are based on mainnet block numbers
+  //   const currentBlockNumber = await getViemClient(mainnet.id).getBlockNumber();
+  //   const currentCampaign = campaigns.find((campaign) => {
+  //     return currentBlockNumber >= campaign.startBlock && currentBlockNumber <= campaign.endBlock;
+  //   });
+
+  //   if (!currentCampaign) return undefined;
+
+  //   const campaignConfig: CampaignConfig = {
+  //     startTimestamp: Number(currentCampaign.startBlock),
+  //     endTimestamp: Number(currentCampaign.endBlock),
+  //     // budget: currentCampaign.budget ? currentCampaign.budget : undefined, // not provided by ACI Infra
+  //     // apr: currentCampaign.apr ? currentCampaign.apr : undefined, // not provided by ACI Infra
+  //   };
+
+  //   return campaignConfig;
+  // };
+
+  private getCampaignConfig = (campaigns: Campaign[], status: Status) => {
+    // Campaigns are based on mainnet block numbers
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const currentCampaign = campaigns.find((campaign) => {
+      return (
+        (status == Status.LIVE &&
+          currentTimestamp >= Number(campaign.startTimestamp) &&
+          currentTimestamp <= Number(campaign.endTimestamp)) ||
+        (status == Status.UPCOMING && currentTimestamp < Number(campaign.startTimestamp))
+      );
+    });
+
+    if (!currentCampaign) return undefined;
+
+    const campaignConfig: CampaignConfig = {
+      startTimestamp: Number(currentCampaign.startTimestamp),
+      endTimestamp: Number(currentCampaign.endTimestamp),
+      // budget: currentCampaign.budget ? currentCampaign.budget : undefined, // provided sometimes by ACI Infra, but sometimes wrong budget are defined (because overwritten by script)
+      // apr: currentCampaign.apr ? currentCampaign.apr : undefined, // provided sometimes by ACI Infra (overwritten by script)
+    };
+
+    return campaignConfig;
+  };
 
   async isHealthy(): Promise<boolean> {
     try {

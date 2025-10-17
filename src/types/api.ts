@@ -6,6 +6,7 @@ export interface Incentive {
   rewardPoint?: Point; // (if point incentive)
   apr?: number; // (if token incentive)
   currentCampaignConfig?: CampaignConfig;
+  nextCampaignConfig?: CampaignConfig;
   incentiveType: IncentiveType; // => So maybe type would be: “MASIv”, “Onchain”, “External”, or “Offchain” instead of masiv
   rewardType: RewardType;
   status?: Status;

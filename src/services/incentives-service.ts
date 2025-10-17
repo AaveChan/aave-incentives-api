@@ -2,7 +2,9 @@ import { ACIProvider, FetchOptions, IncentiveProvider, MerklProvider } from '@/p
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {
-  private providers: IncentiveProvider[] = [new ACIProvider(), new MerklProvider()];
+  // private providers: IncentiveProvider[] = [new ACIProvider(), new MerklProvider()];
+  // private providers: IncentiveProvider[] = [new MerklProvider()];
+  private providers: IncentiveProvider[] = [new ACIProvider()];
 
   async getAllIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
