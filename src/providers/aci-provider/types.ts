@@ -30,10 +30,18 @@ export type Token = {
 
 type ActionName = string;
 
+// export type Campaign = {
+//   roundNumber: number;
+//   startTimestamp: string;
+//   endTimestamp: string;
+//   rewardAmount?: string;
+//   campaignId?: string;
+// };
+
 export type Campaign = {
   roundNumber: number;
-  startTimestamp: string;
-  endTimestamp: string;
+  startBlock: string;
+  endBlock: string;
   rewardAmount?: string;
   campaignId?: string;
 };
