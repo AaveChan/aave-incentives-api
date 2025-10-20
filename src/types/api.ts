@@ -22,7 +22,6 @@ export interface Token {
   address: string;
   chainId: number;
   decimals: number;
-  // abi?: any;
   price?: number;
 }
 

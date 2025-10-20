@@ -21,9 +21,10 @@ export class ACIProvider implements IncentiveProvider {
     let incentives: Incentive[] = [];
 
     // 2 things to fix
-    // - provide rounds with timestamp instead of blockNumber through ACI API
-    // - setupAction data not in an array, or create a function to gather all data from the array in 1 string
-    // - make the name of ACIInfraToken type defined
+    // - ✅ provide rounds with timestamp instead of blockNumber through ACI API
+    // - ✅ setupAction data not in an array, or create a function to gather all data from the array in 1 string
+    // - ✅ make the name of ACIInfraToken type defined
+    // - ❌ switch from action.actionTokens to action.actionToken (no array)
     for (const [actionName, action] of Object.entries(aciIncentives)) {
       const currentCampaignConfig = this.getCampaignConfig(action.campaigns, Status.LIVE);
       const nextCampaignConfig = this.getCampaignConfig(action.campaigns, Status.UPCOMING);
@@ -36,7 +37,7 @@ export class ACIProvider implements IncentiveProvider {
         status = Status.LIVE;
       }
 
-      const description = action.info.actionsData[0]?.description; // mayb change it for not an array
+      const description = action.info.wholeDescriptionString;
 
       const actionToken = action.actionTokens[0] as AciInfraToken; // ensure it's defined (not clean but do the job)
 
@@ -68,7 +69,7 @@ export class ACIProvider implements IncentiveProvider {
 
   private convertAciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
     const token: Token = {
-      name: aciInfraToken.name ? aciInfraToken.name : '', // TODO: fix the potential undefined name
+      name: aciInfraToken.name,
       symbol: aciInfraToken.symbol,
       address: aciInfraToken.address,
       chainId: aciInfraToken.chainId,
@@ -88,32 +89,6 @@ export class ACIProvider implements IncentiveProvider {
 
     return allAciIncentives;
   }
-
-  // private getStatus(start: number, end: number): Status {
-  //   const now = Date.now();
-  //   if (now < start) return Status.UPCOMING;
-  //   if (now >= start && now <= end) return Status.LIVE;
-  //   return Status.PAST;
-  // }
-
-  // private getCurrentCampaignConfig = async (campaigns: Campaign[]): CampaignConfig => {
-  //   // Campaigns are based on mainnet block numbers
-  //   const currentBlockNumber = await getViemClient(mainnet.id).getBlockNumber();
-  //   const currentCampaign = campaigns.find((campaign) => {
-  //     return currentBlockNumber >= campaign.startBlock && currentBlockNumber <= campaign.endBlock;
-  //   });
-
-  //   if (!currentCampaign) return undefined;
-
-  //   const campaignConfig: CampaignConfig = {
-  //     startTimestamp: Number(currentCampaign.startBlock),
-  //     endTimestamp: Number(currentCampaign.endBlock),
-  //     // budget: currentCampaign.budget ? currentCampaign.budget : undefined, // not provided by ACI Infra
-  //     // apr: currentCampaign.apr ? currentCampaign.apr : undefined, // not provided by ACI Infra
-  //   };
-
-  //   return campaignConfig;
-  // };
 
   private getCampaignConfig = (campaigns: Campaign[], status: Status) => {
     // Campaigns are based on mainnet block numbers

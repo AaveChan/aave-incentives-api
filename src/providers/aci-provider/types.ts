@@ -18,11 +18,11 @@ type Action = {
 
 export type Token = {
   symbol: string;
+  name: string;
   address: Address;
   chainId: number;
   decimals: number;
   type: AaveTokenType;
-  name?: string;
   underlyingToken?: Token;
   instance: AaveInstanceType | null;
   book?: BookType;
@@ -48,11 +48,12 @@ enum Frequency {
   ANNUALLY = 'annually',
 }
 
-type InfoData = {
+export type InfoData = {
   actionsData: ActionData[];
   boostersData: BoosterData[];
   dilutersData: DiluterData[];
   forumLink: ForumLink;
+  wholeDescriptionString: string;
   otherInfo?: string;
 };
 
