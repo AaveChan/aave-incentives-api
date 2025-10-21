@@ -25,7 +25,7 @@ export class ACIProvider implements IncentiveProvider {
     // - ✅ setupAction data not in an array, or create a function to gather all data from the array in 1 string
     // - ✅ make the name of ACIInfraToken type defined
     // - ❌ switch from action.actionTokens to action.actionToken (no array)
-    for (const [actionName, action] of Object.entries(aciIncentives)) {
+    for (const [, action] of Object.entries(aciIncentives)) {
       const currentCampaignConfig = this.getCampaignConfig(action.campaigns, Status.LIVE);
       const nextCampaignConfig = this.getCampaignConfig(action.campaigns, Status.UPCOMING);
 
@@ -79,7 +79,7 @@ export class ACIProvider implements IncentiveProvider {
     return token;
   };
 
-  private async fetchIncentives(fetchOptions?: FetchOptions): Promise<Actions> {
+  private async fetchIncentives(_fetchOptions?: FetchOptions): Promise<Actions> {
     const url = new URL(this.apiUrl);
 
     let allAciIncentives: Actions = {};
