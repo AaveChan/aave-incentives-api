@@ -9,7 +9,6 @@ import {
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-import campaignsRoundsFile from './rounds.json';
 import { Actions, Campaign, Token as AciInfraToken } from './types';
 export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
@@ -116,7 +115,8 @@ export class ACIProvider implements IncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      return Object.keys(campaignsRoundsFile).length > 0;
+      const response = await fetch(`${this.apiUrl}`);
+      return response.ok;
     } catch {
       return false;
     }
