@@ -9,9 +9,11 @@ import {
   AaveV3EthereumEtherFi,
   AaveV3EthereumLido,
   AaveV3Gnosis,
+  AaveV3InkWhitelabel,
   AaveV3Linea,
   AaveV3Metis,
   AaveV3Optimism,
+  AaveV3Plasma,
   AaveV3Polygon,
   AaveV3Scroll,
   AaveV3Sonic,
@@ -21,6 +23,7 @@ import { AaveV3HorizonRWA } from './horizon-assets';
 import { Address, zeroAddress } from 'viem';
 import { getChain } from '../utils/chains';
 import { Token } from '@/types';
+import { ink } from 'viem/chains';
 
 export type BookType = {
   decimals: number;
@@ -51,8 +54,6 @@ export enum AaveInstanceType {
   HORIZON_RWA = 'Horizon RWA',
 }
 
-console.log(AaveV3HorizonRWA);
-
 const AllAddressBooksAssets = {
   AaveV3Ethereum: { ...AaveV3Ethereum.ASSETS },
   AaveV3EthereumLido: { ...AaveV3EthereumLido.ASSETS },
@@ -71,6 +72,8 @@ const AllAddressBooksAssets = {
   AaveV3Linea: { ...AaveV3Linea.ASSETS },
   AaveV3Celo: { ...AaveV3Celo.ASSETS },
   AaveV3HorizonRWA: { ...AaveV3HorizonRWA.ASSETS },
+  AaveV3Plasma: { ...AaveV3Plasma.ASSETS },
+  AaveV3InkWhitelabel: { ...AaveV3InkWhitelabel.ASSETS },
 };
 
 const AllAddressBooksChainIds: { [key: string]: number } = {
@@ -91,6 +94,8 @@ const AllAddressBooksChainIds: { [key: string]: number } = {
   AaveV3Linea: AaveV3Linea.CHAIN_ID,
   AaveV3Celo: AaveV3Celo.CHAIN_ID,
   AaveV3HorizonRWA: AaveV3HorizonRWA.CHAIN_ID,
+  AaveV3Plasma: AaveV3Plasma.CHAIN_ID,
+  AaveV3InkWhitelabel: AaveV3InkWhitelabel.CHAIN_ID,
 };
 
 const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
@@ -241,11 +246,15 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
     if (chainIdOfBook !== chainId) {
       continue;
     }
+    console.log('Checking Aave address book:', key, 'for token address:', tokenAddress);
+    console.log(assets);
 
     const entries: [string, BookType][] = Object.entries(assets);
+    console.log('Entries in address book:', entries.length);
     for (const [name, asset] of entries) {
       switch (tokenAddress) {
         case asset.A_TOKEN:
+          console.log('Found A_TOKEN match in book:', key, 'for token:', name);
           tokenType = AaveTokenType.A;
           tokenBook = asset;
           tokenBookName = name;
@@ -410,6 +419,8 @@ const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
 const getSymbolPrefix = (chainName: string, instanceType?: AaveInstanceType) => {
   if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
     return 'HorRwa';
+  } else if (chainName == ink.name) {
+    return 'InkWl';
   }
   // get the first 3 letter, and set the first letter to uppercase
   let prefix = chainName.substring(0, 3).toLowerCase();
@@ -425,6 +436,8 @@ const getSymbolPrefix = (chainName: string, instanceType?: AaveInstanceType) => 
 const getNamePrefix = (chainName: string, instanceType?: AaveInstanceType) => {
   if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
     return AaveInstanceType.HORIZON_RWA;
+  } else if (chainName == ink.name) {
+    return 'InkWhitelabel';
   } else if (instanceType && instanceType !== AaveInstanceType.CORE) {
     return `${chainName} ${instanceType}`;
   }
