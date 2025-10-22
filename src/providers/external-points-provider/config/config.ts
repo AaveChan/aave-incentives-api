@@ -1,4 +1,3 @@
-// services/providers/ExternalPoints/pointPrograms.ts
 import { PointCampaign } from '../types';
 import { pointCampaigns, pointPrograms } from './data';
 
@@ -8,7 +7,6 @@ export const pointProgramsMap = new Map(pointPrograms.map((program) => [program.
 // ===== OPTIMIZATION: Create index by chainId for fast lookups =====
 export const campaignsByChainId = new Map<number, PointCampaign[]>();
 
-// Build the index
 for (const campaign of pointCampaigns) {
   if (!campaignsByChainId.has(campaign.chainId)) {
     campaignsByChainId.set(campaign.chainId, []);
