@@ -28,7 +28,7 @@ export class ACIProvider implements IncentiveProvider {
       const currentCampaignConfig = this.getCampaignConfig(action.campaigns, Status.LIVE);
       const nextCampaignConfig = this.getCampaignConfig(action.campaigns, Status.UPCOMING);
 
-      let status: Status | undefined;
+      let status: Status = Status.PAST;
       if (nextCampaignConfig) {
         status = Status.UPCOMING;
       }

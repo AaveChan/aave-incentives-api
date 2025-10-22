@@ -5,11 +5,12 @@ export interface Incentive {
   rewardToken?: Token; // (if token incentive)
   rewardPoint?: Point; // (if point incentive)
   apr?: number; // (if token incentive)
+  pointValue?: number; // (if point incentive)
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
   incentiveType: IncentiveType; // => So maybe type would be: “MASIv”, “Onchain”, “External”, or “Offchain” instead of masiv
   rewardType: RewardType;
-  status?: Status;
+  status: Status;
   description: string; // (eg: Borrow USDC on Base. Holding aBasUSDC token dilute your rewards. An health factor of 2 is require to
   claimLink: string; // (eg: Merkl)
   infosLink?: string; // (eg: forum or tweet)
@@ -35,6 +36,7 @@ export type CampaignConfig = {
 export interface Point {
   name: string;
   protocol: string;
+  unit?: string;
   tgePrice?: number;
 }
 
