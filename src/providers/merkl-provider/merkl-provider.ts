@@ -12,11 +12,28 @@ import { FetchOptions, IncentiveProvider } from '..';
 import { Campaign, MerklOpportunityWithCampaign } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
+import { ink } from 'viem/chains';
 
 type MerklApiOptions = {
   chainId?: number;
   mainProtocolId?: string;
 };
+
+export type MainProtocolId = (typeof MainProtocolId)[keyof typeof MainProtocolId];
+
+export const MainProtocolId = {
+  AAVE: 'aave',
+  TYDRO: 'tydro',
+} as const;
+
+const chainProtocolMap: Record<number, MainProtocolId> = {
+  [ink.id]: MainProtocolId.TYDRO,
+  // Add more chain-specific protocols here
+  // [OTHER_CHAIN_ID]: MainProtocolId.OTHER,
+};
+
+// Default protocol for all other chains
+const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 export class MerklProvider implements IncentiveProvider {
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
@@ -26,9 +43,15 @@ export class MerklProvider implements IncentiveProvider {
   unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const merklOpportunities = await this.fetchIncentives(fetchOptions);
-
     let allIncentives: Incentive[] = [];
+
+    const chainId = fetchOptions?.chainId;
+
+    // Determine which protocol to use for this chain
+    const protocolId =
+      chainId && chainProtocolMap[chainId] ? chainProtocolMap[chainId] : DEFAULT_PROTOCOL;
+
+    const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
       const rewardMerklToken = opportunity?.rewardsRecord?.breakdowns[0]?.token;
@@ -143,13 +166,14 @@ export class MerklProvider implements IncentiveProvider {
   }
 
   private async fetchIncentives(
+    mainProtocolId: MainProtocolId,
     fetchOptions?: FetchOptions,
   ): Promise<MerklOpportunityWithCampaign[]> {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
       chainId: fetchOptions?.chainId,
-      mainProtocolId: 'aave',
+      mainProtocolId: mainProtocolId,
     };
     for (const [key, value] of Object.entries(merklApiOptions)) {
       if (value !== undefined) {
