@@ -10,7 +10,7 @@ import {
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { Campaign, MerklOpportunityWithCampaign } from './types';
-import { getAaveToken } from '@/lib/aave/aave-tokens';
+import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import { ink } from 'viem/chains';
 
@@ -54,11 +54,17 @@ export class MerklProvider implements IncentiveProvider {
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
-      const rewardMerklToken = opportunity?.rewardsRecord?.breakdowns[0]?.token;
+      const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
 
       const rewardedTokenAddress = opportunity.explorerAddress;
 
       if (!rewardMerklToken || !rewardedTokenAddress) {
+        continue;
+      }
+
+      // Skip STATA tokens
+      const tokenInfo = getAaveTokenInfo(rewardedTokenAddress, opportunity.chainId);
+      if (tokenInfo?.type === AaveTokenType.STATA) {
         continue;
       }
 
