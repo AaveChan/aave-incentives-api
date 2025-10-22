@@ -137,6 +137,47 @@ export const getAaveToken = (tokenAddress: Address, chainId: number) => {
   }
 };
 
+// export const getAaveToken = (tokenSymbol: Address, chainId: number) => {
+//   const tokenInfo = getAaveTokenInfo(tokenAddress, chainId);
+//   const chain = getChain(chainId);
+//   let symbol: string | undefined;
+//   let name: string | undefined;
+//   switch (tokenInfo?.type) {
+//     case AaveTokenType.A:
+//       symbol = getATokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getATokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.V:
+//       symbol = getVTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getVTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.STATA:
+//       symbol = getStataTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getStataTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.STK:
+//       name = tokenInfo.name;
+//       symbol = tokenInfo.name;
+//       break;
+//     case AaveTokenType.UNDERLYING:
+//     case AaveTokenType.NOT_LISTED:
+//     default:
+//       return undefined;
+//   }
+
+//   if (symbol && name) {
+//     const aaveToken: Token = {
+//       address: tokenAddress,
+//       symbol: symbol,
+//       name: name,
+//       decimals: tokenInfo.book.decimals,
+//       chainId: chainId,
+//     };
+
+//     return aaveToken;
+//   }
+// };
+
 export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
   let tokenType = AaveTokenType.NOT_LISTED;
   let tokenBook: BookType | undefined;
@@ -242,6 +283,117 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
     };
   }
 };
+
+// export const getAaveTokenInfoFromTokenSymbol = (tokenSymbol: string, chainId: number) => {
+//   let tokenType = AaveTokenType.NOT_LISTED;
+//   let tokenBook: BookType | undefined;
+//   let tokenBookName: string | undefined;
+//   let instanceType: AaveInstanceType | undefined;
+
+//   const stkTokens: string[] = ['stkGHO', 'stkAAVE', 'stkABPT', 'stkAAVEwstETHBPTv2'];
+
+//   if (stkTokens.includes(tokenSymbol)) {
+//     tokenType = AaveTokenType.STK;
+
+//     let address: Address | undefined;
+//     let underlyingTokenAddress: Address | undefined;
+//     switch (tokenSymbol) {
+//       case 'stkGHO':
+//         address = AaveSafetyModule.STK_GHO;
+//         underlyingTokenAddress = AaveV3Ethereum.ASSETS.GHO.UNDERLYING;
+//         break;
+//       case 'stkAAVE':
+//         address = AaveSafetyModule.STK_AAVE;
+//         underlyingTokenAddress = AaveV3Ethereum.ASSETS.AAVE.UNDERLYING;
+//         break;
+//       case 'stkABPT':
+//         address = AaveSafetyModule.STK_ABPT;
+//         underlyingTokenAddress = abpt;
+//         break;
+//       case 'stkAAVEwstETHBPTv2':
+//         address = AaveSafetyModule.STK_AAVE_WSTETH_BPTV2;
+//         underlyingTokenAddress = twentywstETHEightyAAVE;
+//         break;
+//     }
+
+//     if (address && underlyingTokenAddress) {
+//       const book: BookType = {
+//         decimals: 18,
+//         id: chainId,
+//         UNDERLYING: underlyingTokenAddress,
+//         A_TOKEN: zeroAddress,
+//         V_TOKEN: zeroAddress,
+//         INTEREST_RATE_STRATEGY: zeroAddress,
+//         ORACLE: zeroAddress,
+//         STATIC_A_TOKEN: zeroAddress,
+//         STATA_TOKEN: zeroAddress,
+//         STK_TOKEN: address,
+//       };
+//       return {
+//         type: tokenType,
+//         book,
+//         name: tokenSymbol,
+//         instanceType: AaveInstanceType.CORE,
+//       };
+//     }
+//   }
+
+//   for (const [key, assets] of Object.entries(AllAddressBooksAssets)) {
+//     const chainIdOfBook = AllAddressBooksChainIds[key];
+//     if (chainIdOfBook !== chainId) {
+//       continue;
+//     }
+
+//     const asset: BookType | undefined = assets[tokenSymbol as keyof typeof assets];
+
+//     if (asset) {
+//       tokenType = AaveTokenType.A;
+//       tokenBook = asset;
+//       tokenBookName = name;
+//       instanceType = getAaveInstanceFromInstanceFullName(key);
+//       return asset;
+//     }
+//     // const assetsEntries: [string, BookType][] = Object.entries(assets);
+//     // for (const [name, asset] of entries) {
+//     //   switch (tokenSymbol) {
+//     //     case asset.A_TOKEN:
+//     //       tokenType = AaveTokenType.A;
+//     //       tokenBook = asset;
+//     //       tokenBookName = name;
+//     //       instanceType = getAaveInstanceFromInstanceFullName(key);
+//     //       break;
+//     //     case asset.V_TOKEN:
+//     //       tokenType = AaveTokenType.V;
+//     //       tokenBook = asset;
+//     //       tokenBookName = name;
+//     //       instanceType = getAaveInstanceFromInstanceFullName(key);
+//     //       break;
+//     //     case asset.STATA_TOKEN:
+//     //     case asset.STATIC_A_TOKEN:
+//     //       tokenType = AaveTokenType.STATA;
+//     //       tokenBook = asset;
+//     //       tokenBookName = name;
+//     //       instanceType = getAaveInstanceFromInstanceFullName(key);
+//     //       break;
+//     //     case asset.UNDERLYING:
+//     //       tokenType = AaveTokenType.UNDERLYING;
+//     //       tokenBook = asset;
+//     //       tokenBookName = name;
+//     //       instanceType = getAaveInstanceFromInstanceFullName(key);
+//     //       break;
+//     //   }
+//     // }
+//   }
+
+//   if (tokenBook && tokenBookName) {
+//     return {
+//       type: tokenType,
+//       book: tokenBook,
+//       name: tokenBookName,
+//       instanceType,
+//     };
+//   }
+// };
 
 const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
   if (instanceFullName.toLowerCase().includes('lido')) {
