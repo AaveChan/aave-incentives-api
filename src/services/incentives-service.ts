@@ -38,12 +38,7 @@ export class IncentivesService {
     };
 
     // Sort: LIVE first, then by APR descending
-    return incentives.sort((a, b) => {
-      if (a.status && b.status && a.status !== b.status) {
-        return statusOrder[a.status] - statusOrder[b.status];
-      }
-      return (b.apr || 0) - (a.apr || 0);
-    });
+    return incentives.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
   }
 
   async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {

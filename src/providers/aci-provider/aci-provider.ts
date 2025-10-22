@@ -6,6 +6,7 @@ import {
   RewardType,
   Status,
   Token,
+  TokenReward,
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
@@ -40,18 +41,25 @@ export class ACIProvider implements IncentiveProvider {
 
       const actionToken = action.actionTokens[0] as AciInfraToken; // ensure it's defined (not clean but do the job)
 
+      const rewardedToken = this.convertAciInfraTokenToIncentiveToken(actionToken);
+      const rewardToken = this.convertAciInfraTokenToIncentiveToken(action.rewardToken);
+
+      const tokenReward: TokenReward = {
+        type: RewardType.TOKEN,
+        token: rewardToken,
+        apr: action.apr,
+      };
+
       incentives.push({
         name: action.displayName,
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,
-        rewardedToken: this.convertAciInfraTokenToIncentiveToken(actionToken),
-        rewardToken: this.convertAciInfraTokenToIncentiveToken(action.rewardToken),
-        apr: action.apr,
+        rewardedToken,
+        reward: tokenReward,
         currentCampaignConfig,
         nextCampaignConfig,
         incentiveType: IncentiveType.OFFCHAIN,
-        rewardType: RewardType.TOKEN,
         infosLink: action.info.forumLink.link,
         status,
       });

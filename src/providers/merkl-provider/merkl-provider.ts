@@ -6,6 +6,7 @@ import {
   RewardType,
   Status,
   Token,
+  TokenReward,
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
@@ -110,17 +111,21 @@ export class MerklProvider implements IncentiveProvider {
 
       const currentCampaignConfig = await this.getCurrentCampaignConfig(opportunity.id);
 
+      const tokenReward: TokenReward = {
+        type: RewardType.TOKEN,
+        token: rewardToken,
+        apr: opportunity.apr,
+      };
+
       allIncentives.push({
         name: opportunity.name,
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedToken,
-        rewardToken,
+        reward: tokenReward,
         currentCampaignConfig,
-        apr: opportunity.apr,
         incentiveType: this.incentiveType,
-        rewardType: this.rewardType,
         status: opportunity.status,
       });
     }

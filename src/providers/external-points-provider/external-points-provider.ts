@@ -1,4 +1,12 @@
-import { Incentive, IncentiveSource, IncentiveType, RewardType, Status } from '@/types';
+import {
+  Incentive,
+  IncentiveSource,
+  IncentiveType,
+  Point,
+  PointReward,
+  RewardType,
+  Status,
+} from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { pointCampaigns as pointCampaignsData } from './config/data';
@@ -65,17 +73,26 @@ export class ExternalPointsProvider implements IncentiveProvider {
       }
     }
 
+    const point: Point = {
+      name: program.name,
+      protocol: program.protocol,
+      tgePrice: program.tgePrice,
+    };
+
+    const pointReward: PointReward = {
+      type: RewardType.EXTERNAL_POINT,
+      point,
+      pointValue: campaign.pointValue,
+      pointValueUnit: program.pointValueUnit,
+    };
+
     return {
       name: program.name,
       description: program.description,
       claimLink: program.externalLink,
       chainId: campaign.chainId,
       rewardedToken,
-      rewardPoint: {
-        name: program.name,
-        protocol: program.protocol,
-        tgePrice: program.tgePrice,
-      },
+      reward: pointReward,
       currentCampaignConfig:
         campaign.startTimestamp && campaign.endTimestamp
           ? {
@@ -84,7 +101,6 @@ export class ExternalPointsProvider implements IncentiveProvider {
             }
           : undefined,
       incentiveType: IncentiveType.EXTERNAL,
-      rewardType: RewardType.EXTERNAL_POINT,
       status,
     };
   }
