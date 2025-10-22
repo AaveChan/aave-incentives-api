@@ -4,10 +4,7 @@ export const POINT_PROGRAM_IDS = {
   ETHERFI: 'etherfi',
   ETHENA: 'ethena',
   KELP: 'kelp',
-  RENZO: 'renzo',
-  EIGENLAYER: 'eigenlayer',
   SONIC: 'sonic',
-  KERNEL: 'kernel',
 } as const;
 
 export type PointProgramId = (typeof POINT_PROGRAM_IDS)[keyof typeof POINT_PROGRAM_IDS];
