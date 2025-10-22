@@ -6,7 +6,7 @@ const app: Application = express();
 
 app.use('/incentives', incentivesRoutes);
 
-app.use('/', (req: Request, res: Response): void => {
+app.use('/', (_req: Request, res: Response): void => {
   res.json({ message: 'Not Found' });
 });
 
