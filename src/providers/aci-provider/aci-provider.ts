@@ -125,7 +125,6 @@ export class ACIProvider implements IncentiveProvider {
   };
 
   private getCampaignConfig = (campaign: Campaign) => {
-    console.log('Getting campaign config for campaign:', campaign);
     const campaignConfig: CampaignConfig = {
       startTimestamp: Number(campaign.startTimestamp),
       endTimestamp: Number(campaign.endTimestamp),

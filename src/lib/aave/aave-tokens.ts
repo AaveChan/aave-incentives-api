@@ -205,15 +205,12 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
     if (chainIdOfBook !== chainId) {
       continue;
     }
-    console.log('Checking Aave address book:', key, 'for token address:', tokenAddress);
-    console.log(assets);
 
     const entries: [string, BookType][] = Object.entries(assets);
-    console.log('Entries in address book:', entries.length);
+
     for (const [name, asset] of entries) {
       switch (tokenAddress) {
         case asset.A_TOKEN:
-          console.log('Found A_TOKEN match in book:', key, 'for token:', name);
           tokenType = AaveTokenType.A;
           tokenBook = asset;
           tokenBookName = name;
