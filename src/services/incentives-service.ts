@@ -1,10 +1,15 @@
 import { ACIProvider, FetchOptions, IncentiveProvider, MerklProvider } from '@/providers';
+import { ExternalPointsProvider } from '@/providers/external-points-provider/external-points-provider';
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {
-  // private providers: IncentiveProvider[] = [new ACIProvider(), new MerklProvider()];
+  private providers: IncentiveProvider[] = [
+    new ACIProvider(),
+    new MerklProvider(),
+    new ExternalPointsProvider(),
+  ];
   // private providers: IncentiveProvider[] = [new MerklProvider()];
-  private providers: IncentiveProvider[] = [new ACIProvider()];
+  // private providers: IncentiveProvider[] = [new ACIProvider()];
 
   async getAllIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
