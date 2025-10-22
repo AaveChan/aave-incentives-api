@@ -13,6 +13,7 @@ import { pointCampaigns as pointCampaignsData } from './config/data';
 import { campaignsByChainId, pointProgramsMap } from './config/config';
 import { PointCampaign, PointProgram } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
 export class ExternalPointsProvider implements IncentiveProvider {
   name = 'ExternalPoints';
@@ -36,7 +37,6 @@ export class ExternalPointsProvider implements IncentiveProvider {
         continue;
       }
 
-      // Expand campaign across all chainIds
       const incentive = this.mapCampaignToIncentive(campaign, program);
       if (incentive) {
         incentives.push(incentive);
@@ -63,7 +63,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
     }
 
     // No timestamps means LIVE indefinitely
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const currentTimestamp = getCurrentTimestamp();
     let status: Status = Status.LIVE;
     if (campaign.startTimestamp && campaign.endTimestamp) {
       if (currentTimestamp < campaign.startTimestamp) {

@@ -9,6 +9,10 @@ enum OpportunityAction {
 
 type OpportunityStatus = Status;
 
+export type MerklOpportunityWithCampaign = MerklOpportunity & {
+  campaigns: Campaign[];
+};
+
 export type MerklOpportunity = {
   name: string;
   description: string;

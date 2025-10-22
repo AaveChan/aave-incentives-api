@@ -5,6 +5,7 @@ export interface Incentive {
   reward: Reward;
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
+  allCampaignsConfigs?: CampaignConfig[];
   incentiveType: IncentiveType; // => So maybe type would be: “MASIv”, “Onchain”, “External”, or “Offchain” instead of masiv
   status: Status;
   description: string; // (eg: Borrow USDC on Base. Holding aBasUSDC token dilute your rewards. An health factor of 2 is require to

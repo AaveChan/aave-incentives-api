@@ -11,6 +11,7 @@ import {
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { Actions, Campaign, Token as AciInfraToken } from './types';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'http://localhost:3000/api/merit/all-actions-data';
@@ -26,8 +27,12 @@ export class ACIProvider implements IncentiveProvider {
     // - ✅ make the name of ACIInfraToken type defined
     // - ❌ switch from action.actionTokens to action.actionToken (no array)
     for (const [, action] of Object.entries(aciIncentives)) {
-      const currentCampaignConfig = this.getCampaignConfig(action.campaigns, Status.LIVE);
-      const nextCampaignConfig = this.getCampaignConfig(action.campaigns, Status.UPCOMING);
+      const currentCampaignConfig = this.getCampaignConfigFromStatus(action.campaigns, Status.LIVE);
+      const nextCampaignConfig = this.getCampaignConfigFromStatus(
+        action.campaigns,
+        Status.UPCOMING,
+      );
+      const allCampaignsConfigs = this.getAllCampaignsConfigs(action.campaigns);
 
       let status: Status = Status.PAST;
       if (nextCampaignConfig) {
@@ -59,6 +64,7 @@ export class ACIProvider implements IncentiveProvider {
         reward: tokenReward,
         currentCampaignConfig,
         nextCampaignConfig,
+        allCampaignsConfigs,
         incentiveType: IncentiveType.OFFCHAIN,
         infosLink: action.info.forumLink.link,
         status,
@@ -97,9 +103,9 @@ export class ACIProvider implements IncentiveProvider {
     return allAciIncentives;
   }
 
-  private getCampaignConfig = (campaigns: Campaign[], status: Status) => {
+  private getCampaignConfigFromStatus = (campaigns: Campaign[], status: Status) => {
     // Campaigns are based on mainnet block numbers
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const currentTimestamp = getCurrentTimestamp();
     const currentCampaign = campaigns.find((campaign) => {
       return (
         (status == Status.LIVE &&
@@ -111,9 +117,18 @@ export class ACIProvider implements IncentiveProvider {
 
     if (!currentCampaign) return undefined;
 
+    return this.getCampaignConfig(currentCampaign);
+  };
+
+  private getAllCampaignsConfigs = (campaigns: Campaign[]) => {
+    return campaigns.map((campaign) => this.getCampaignConfig(campaign));
+  };
+
+  private getCampaignConfig = (campaign: Campaign) => {
+    console.log('Getting campaign config for campaign:', campaign);
     const campaignConfig: CampaignConfig = {
-      startTimestamp: Number(currentCampaign.startTimestamp),
-      endTimestamp: Number(currentCampaign.endTimestamp),
+      startTimestamp: Number(campaign.startTimestamp),
+      endTimestamp: Number(campaign.endTimestamp),
       // budget: currentCampaign.budget ? currentCampaign.budget : undefined, // provided sometimes by ACI Infra, but sometimes wrong budget are defined (because overwritten by script)
       // apr: currentCampaign.apr ? currentCampaign.apr : undefined, // provided sometimes by ACI Infra (overwritten by script)
     };

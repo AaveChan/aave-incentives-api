@@ -4,14 +4,14 @@ import {
   IncentiveSource,
   IncentiveType,
   RewardType,
-  Status,
   Token,
   TokenReward,
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-import { Campaign, MerklOpportunity } from './types';
+import { Campaign, MerklOpportunityWithCampaign } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
 type MerklApiOptions = {
   chainId?: number;
@@ -19,7 +19,7 @@ type MerklApiOptions = {
 };
 
 export class MerklProvider implements IncentiveProvider {
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities';
+  apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
   claimLink = 'https://app.merkl.xyz/';
   incentiveType = IncentiveType.OFFCHAIN;
   rewardType = RewardType.TOKEN;
@@ -109,7 +109,8 @@ export class MerklProvider implements IncentiveProvider {
         chainId: opportunity.chainId,
       };
 
-      const currentCampaignConfig = await this.getCurrentCampaignConfig(opportunity.id);
+      const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
+        await this.getCampaignConfigs(opportunity.campaigns);
 
       const tokenReward: TokenReward = {
         type: RewardType.TOKEN,
@@ -125,6 +126,8 @@ export class MerklProvider implements IncentiveProvider {
         rewardedToken,
         reward: tokenReward,
         currentCampaignConfig,
+        nextCampaignConfig,
+        allCampaignsConfigs,
         incentiveType: this.incentiveType,
         status: opportunity.status,
       });
@@ -139,7 +142,9 @@ export class MerklProvider implements IncentiveProvider {
     return allIncentives;
   }
 
-  private async fetchIncentives(fetchOptions?: FetchOptions): Promise<MerklOpportunity[]> {
+  private async fetchIncentives(
+    fetchOptions?: FetchOptions,
+  ): Promise<MerklOpportunityWithCampaign[]> {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
@@ -152,9 +157,9 @@ export class MerklProvider implements IncentiveProvider {
       }
     }
 
-    const allMerklOpportunities: MerklOpportunity[] = [];
+    const allMerklOpportunities: MerklOpportunityWithCampaign[] = [];
 
-    let merklOpportunities: MerklOpportunity[] = [];
+    let merklOpportunities: MerklOpportunityWithCampaign[] = [];
     const itemsPerPage = 100;
     url.searchParams.set('items', itemsPerPage.toString());
     let page = 0;
@@ -162,7 +167,7 @@ export class MerklProvider implements IncentiveProvider {
     do {
       url.searchParams.set('page', page.toString());
       const response = await fetch(url.toString());
-      merklOpportunities = (await response.json()) as MerklOpportunity[];
+      merklOpportunities = (await response.json()) as MerklOpportunityWithCampaign[];
 
       allMerklOpportunities.push(...merklOpportunities);
       page++;
@@ -171,35 +176,46 @@ export class MerklProvider implements IncentiveProvider {
     return allMerklOpportunities;
   }
 
-  private getCurrentCampaignConfig = async (opportunityId: string) => {
-    const url = new URL('https://api.merkl.xyz/v4/campaigns');
-    url.searchParams.set('opportunityId', opportunityId);
-    url.searchParams.set('status', Status.LIVE);
+  private getCampaignConfigs = async (campaigns: Campaign[]) => {
+    let currentCampaignConfig: CampaignConfig | undefined;
+    let nextCampaignConfig: CampaignConfig | undefined;
 
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`Failed to fetch current incentives config: ${response.statusText}`);
+    const currentTimestamp = getCurrentTimestamp();
+    const currentCampaign = campaigns.filter(
+      (campaign) =>
+        Number(campaign.startTimestamp) <= currentTimestamp &&
+        Number(campaign.endTimestamp) >= currentTimestamp,
+    )[0];
+    if (currentCampaign) {
+      currentCampaignConfig = this.getCampaignConfig(currentCampaign);
     }
 
-    const currentCampaigns = (await response.json()) as Campaign[];
-
-    if (currentCampaigns && currentCampaigns.length > 0) {
-      const currentCampaign = currentCampaigns[0];
-      if (currentCampaign) {
-        const aprSetup =
-          Number(currentCampaign.params.distributionMethodParameters.distributionSettings.apr) *
-          100;
-
-        const currentCampaignForOpportunity: CampaignConfig = {
-          startTimestamp: Number(currentCampaign.startTimestamp),
-          endTimestamp: Number(currentCampaign.endTimestamp),
-          budget: currentCampaign.amount,
-          apr: aprSetup,
-        };
-
-        return currentCampaignForOpportunity;
-      }
+    const nextCampaign = campaigns.filter(
+      (campaign) =>
+        Number(campaign.startTimestamp) > currentTimestamp &&
+        Number(campaign.endTimestamp) > currentTimestamp,
+    )[0];
+    if (nextCampaign) {
+      nextCampaignConfig = this.getCampaignConfig(nextCampaign);
     }
+
+    const allCampaignsConfigs = campaigns.map((campaign) => this.getCampaignConfig(campaign));
+
+    return { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs };
+  };
+
+  private getCampaignConfig = (campaign: Campaign) => {
+    const aprSetup =
+      Number(campaign.params.distributionMethodParameters.distributionSettings.apr) * 100;
+
+    const currentCampaignForOpportunity: CampaignConfig = {
+      startTimestamp: Number(campaign.startTimestamp),
+      endTimestamp: Number(campaign.endTimestamp),
+      budget: campaign.amount,
+      apr: aprSetup,
+    };
+
+    return currentCampaignForOpportunity;
   };
 
   getSource(): IncentiveSource {
