@@ -1,4 +1,5 @@
 import {
+  CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
@@ -11,7 +12,7 @@ import {
 import { FetchOptions, IncentiveProvider } from '..';
 import { pointCampaigns as pointCampaignsData } from './config/data';
 import { campaignsByChainId, pointProgramsMap } from './config/config';
-import { PointCampaign, PointProgram } from './types';
+import { PointCampaign, PointIncentive, PointProgram } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
@@ -21,7 +22,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const incentives: Incentive[] = [];
 
-    let pointCampaigns: PointCampaign[] = [];
+    let pointCampaigns: PointIncentive[] = [];
 
     if (fetchOptions?.chainId) {
       pointCampaigns = campaignsByChainId.get(fetchOptions.chainId) || [];
@@ -54,23 +55,31 @@ export class ExternalPointsProvider implements IncentiveProvider {
     return true;
   }
 
-  private mapCampaignToIncentive(campaign: PointCampaign, program: PointProgram): Incentive | null {
-    const rewardedToken = getAaveToken(campaign.rewardedTokenAddress, campaign.chainId);
+  private mapCampaignToIncentive(
+    incentive: PointIncentive,
+    program: PointProgram,
+  ): Incentive | null {
+    const rewardedToken = getAaveToken(incentive.rewardedTokenAddress, incentive.chainId);
 
     if (!rewardedToken) {
-      console.warn(`Token ${campaign.rewardedTokenAddress} not found on chain ${campaign.chainId}`);
+      console.warn(
+        `Token ${incentive.rewardedTokenAddress} not found on chain ${incentive.chainId}`,
+      );
       return null;
     }
 
-    // No timestamps means LIVE indefinitely
-    const currentTimestamp = getCurrentTimestamp();
-    let status: Status = Status.LIVE;
-    if (campaign.startTimestamp && campaign.endTimestamp) {
-      if (currentTimestamp < campaign.startTimestamp) {
-        status = Status.UPCOMING;
-      } else if (currentTimestamp > campaign.endTimestamp) {
-        status = Status.PAST;
-      }
+    const campaigns = incentive.campaigns || [];
+
+    const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
+      this.getCampaignConfigs(campaigns);
+
+    let status: Status = Status.PAST;
+    let pointValue: number | undefined = undefined;
+    if (currentCampaignConfig) {
+      status = Status.LIVE;
+      pointValue = currentCampaignConfig.pointValue;
+    } else if (nextCampaignConfig) {
+      status = Status.UPCOMING;
     }
 
     const point: Point = {
@@ -82,7 +91,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
     const pointReward: PointReward = {
       type: RewardType.EXTERNAL_POINT,
       point,
-      pointValue: campaign.pointValue,
+      pointValue,
       pointValueUnit: program.pointValueUnit,
     };
 
@@ -90,20 +99,57 @@ export class ExternalPointsProvider implements IncentiveProvider {
       name: program.name,
       description: program.description,
       claimLink: program.externalLink,
-      chainId: campaign.chainId,
+      chainId: incentive.chainId,
       rewardedToken,
       reward: pointReward,
-      currentCampaignConfig:
-        campaign.startTimestamp && campaign.endTimestamp
-          ? {
-              startTimestamp: campaign.startTimestamp,
-              endTimestamp: campaign.endTimestamp,
-            }
-          : undefined,
+      currentCampaignConfig,
+      nextCampaignConfig,
+      allCampaignsConfigs,
       incentiveType: IncentiveType.EXTERNAL,
       status,
     };
   }
+
+  private getCampaignConfigs = (campaigns: PointCampaign[]) => {
+    let currentCampaignConfig: CampaignConfig | undefined;
+    let nextCampaignConfig: CampaignConfig | undefined;
+
+    const currentTimestamp = getCurrentTimestamp();
+    // Current: start <= now && (end is undefined OR end >= now)
+    const currentCampaign = campaigns
+      .sort((a, b) => Number(b.startTimestamp) - Number(a.startTimestamp))
+      .find((campaign) => {
+        const start = Number(campaign.startTimestamp);
+        const end = campaign.endTimestamp !== undefined ? Number(campaign.endTimestamp) : undefined;
+        return start <= currentTimestamp && (end === undefined || end >= currentTimestamp);
+      });
+    if (currentCampaign) {
+      currentCampaignConfig = this.getCampaignConfig(currentCampaign);
+    }
+
+    // Next: campaign with the smallest start > now, and not the current campaign
+    const nextCampaign = campaigns
+      .filter((campaign) => !currentCampaign || campaign !== currentCampaign)
+      .sort((a, b) => Number(a.startTimestamp) - Number(b.startTimestamp))
+      .find((campaign) => Number(campaign.startTimestamp) > currentTimestamp);
+    if (nextCampaign) {
+      nextCampaignConfig = this.getCampaignConfig(nextCampaign);
+    }
+
+    const allCampaignsConfigs = campaigns.map((campaign) => this.getCampaignConfig(campaign));
+
+    return { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs };
+  };
+
+  private getCampaignConfig = (campaign: PointCampaign) => {
+    const currentCampaignForOpportunity: CampaignConfig = {
+      startTimestamp: Number(campaign.startTimestamp),
+      endTimestamp: Number(campaign.endTimestamp),
+      pointValue: campaign.pointValue,
+    };
+
+    return currentCampaignForOpportunity;
+  };
 }
 
 // ===== EXAMPLE USAGE & BENEFITS =====

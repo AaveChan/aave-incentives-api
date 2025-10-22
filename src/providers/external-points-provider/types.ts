@@ -23,12 +23,15 @@ export interface PointProgram {
   additionalData?: Record<string, unknown>;
 }
 
-export interface PointCampaign {
+export interface PointIncentive {
   programId: PointProgramId;
   chainId: number;
   rewardedTokenAddress: Address;
-  pointValue?: number;
-  startTimestamp?: number;
-  endTimestamp?: number;
-  campaignSpecificData?: Record<string, unknown>;
+  campaigns?: PointCampaign[];
 }
+
+export type PointCampaign = {
+  startTimestamp: number;
+  endTimestamp?: number;
+  pointValue?: number;
+};

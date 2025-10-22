@@ -49,6 +49,7 @@ export type CampaignConfig = {
   endTimestamp: number; // (no timestamps if external points or GHO discount?)
   budget?: string; // (if token incentive)
   apr?: number; // (if token incentive)
+  pointValue?: number; // (if point incentive)
 };
 
 /* eslint-disable no-unused-vars */

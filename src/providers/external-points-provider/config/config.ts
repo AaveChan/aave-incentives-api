@@ -1,11 +1,11 @@
-import { PointCampaign } from '../types';
+import { PointIncentive } from '../types';
 import { pointCampaigns, pointPrograms } from './data';
 
 // Create a lookup map for O(1) access (memoized)
 export const pointProgramsMap = new Map(pointPrograms.map((program) => [program.id, program]));
 
 // ===== OPTIMIZATION: Create index by chainId for fast lookups =====
-export const campaignsByChainId = new Map<number, PointCampaign[]>();
+export const campaignsByChainId = new Map<number, PointIncentive[]>();
 
 for (const campaign of pointCampaigns) {
   if (!campaignsByChainId.has(campaign.chainId)) {
@@ -21,7 +21,7 @@ interface CampaignKey {
   asset: string;
 }
 
-function validateNoDuplicates(campaigns: PointCampaign[]): void {
+function validateNoDuplicates(campaigns: PointIncentive[]): void {
   const seen = new Set<string>();
   const duplicates: CampaignKey[] = [];
 

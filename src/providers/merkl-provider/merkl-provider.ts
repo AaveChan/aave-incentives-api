@@ -110,7 +110,7 @@ export class MerklProvider implements IncentiveProvider {
       };
 
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
-        await this.getCampaignConfigs(opportunity.campaigns);
+        this.getCampaignConfigs(opportunity.campaigns);
 
       const tokenReward: TokenReward = {
         type: RewardType.TOKEN,
@@ -176,7 +176,7 @@ export class MerklProvider implements IncentiveProvider {
     return allMerklOpportunities;
   }
 
-  private getCampaignConfigs = async (campaigns: Campaign[]) => {
+  private getCampaignConfigs = (campaigns: Campaign[]) => {
     let currentCampaignConfig: CampaignConfig | undefined;
     let nextCampaignConfig: CampaignConfig | undefined;
 
