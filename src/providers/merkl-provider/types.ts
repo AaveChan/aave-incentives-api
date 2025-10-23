@@ -115,7 +115,7 @@ export type Campaign = {
     creatorId: string;
   };
   params: {
-    distributionMethodParameters: {
+    distributionMethodParameters?: {
       distributionMethod: DistributionMethod;
       distributionSettings: {
         apr: string; // 2% => "0.02"

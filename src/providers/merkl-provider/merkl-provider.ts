@@ -162,9 +162,7 @@ export class MerklProvider implements IncentiveProvider {
       });
     }
 
-    allIncentives = allIncentives.filter((i) =>
-      fetchOptions?.chainId ? i.chainId === fetchOptions?.chainId : true,
-    );
+    allIncentives = allIncentives.filter((i) => (chainId ? i.chainId === chainId : true));
 
     console.log('Merkl incentives:', allIncentives.length);
 
@@ -235,14 +233,18 @@ export class MerklProvider implements IncentiveProvider {
   };
 
   private getCampaignConfig = (campaign: Campaign) => {
-    const aprSetup =
-      Number(campaign.params.distributionMethodParameters.distributionSettings.apr) * 100;
+    const aprSetup = campaign.params.distributionMethodParameters?.distributionSettings.apr;
+
+    let apr;
+    if (aprSetup) {
+      apr = Number(aprSetup) * 100;
+    }
 
     const currentCampaignForOpportunity: CampaignConfig = {
       startTimestamp: Number(campaign.startTimestamp),
       endTimestamp: Number(campaign.endTimestamp),
       budget: campaign.amount,
-      apr: aprSetup,
+      apr,
     };
 
     return currentCampaignForOpportunity;
