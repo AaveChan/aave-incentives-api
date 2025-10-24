@@ -82,7 +82,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       status = Status.LIVE;
       pointValue = currentCampaignConfig.pointValue;
     } else if (nextCampaignConfig) {
-      status = Status.UPCOMING;
+      status = Status.SOON;
     }
 
     const point: Point = {

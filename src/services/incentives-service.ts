@@ -43,7 +43,7 @@ export class IncentivesService {
   private sort(incentives: Incentive[]): Incentive[] {
     const statusOrder: Record<Status, number> = {
       [Status.LIVE]: 0,
-      [Status.UPCOMING]: 1,
+      [Status.SOON]: 1,
       [Status.PAST]: 2,
     };
 

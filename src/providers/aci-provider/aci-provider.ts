@@ -32,15 +32,12 @@ export class ACIProvider implements IncentiveProvider {
     // - ❌ switch from action.actionTokens to action.actionToken (no array)
     for (const [, action] of Object.entries(aciIncentives)) {
       const currentCampaignConfig = this.getCampaignConfigFromStatus(action.campaigns, Status.LIVE);
-      const nextCampaignConfig = this.getCampaignConfigFromStatus(
-        action.campaigns,
-        Status.UPCOMING,
-      );
+      const nextCampaignConfig = this.getCampaignConfigFromStatus(action.campaigns, Status.SOON);
       const allCampaignsConfigs = this.getAllCampaignsConfigs(action.campaigns);
 
       let status: Status = Status.PAST;
       if (nextCampaignConfig) {
-        status = Status.UPCOMING;
+        status = Status.SOON;
       }
       if (currentCampaignConfig) {
         status = Status.LIVE;
@@ -115,7 +112,7 @@ export class ACIProvider implements IncentiveProvider {
         (status == Status.LIVE &&
           currentTimestamp >= Number(campaign.startTimestamp) &&
           currentTimestamp <= Number(campaign.endTimestamp)) ||
-        (status == Status.UPCOMING && currentTimestamp < Number(campaign.startTimestamp))
+        (status == Status.SOON && currentTimestamp < Number(campaign.startTimestamp))
       );
     });
 

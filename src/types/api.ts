@@ -68,7 +68,7 @@ export enum RewardType {
 export enum Status {
   PAST = 'PAST',
   LIVE = 'LIVE',
-  UPCOMING = 'UPCOMING',
+  SOON = 'SOON',
 }
 
 export enum IncentiveSource {
