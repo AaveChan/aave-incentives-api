@@ -5,6 +5,7 @@ import {
   IncentiveProvider,
   MerklProvider,
 } from '@/providers';
+import { OnchainProvider } from '@/providers/onchain-provider/onchain-provider';
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {
@@ -12,6 +13,7 @@ export class IncentivesService {
     new ACIProvider(),
     new MerklProvider(),
     new ExternalPointsProvider(),
+    new OnchainProvider(),
   ];
 
   async getAllIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
