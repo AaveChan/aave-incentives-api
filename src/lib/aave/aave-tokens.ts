@@ -30,7 +30,7 @@ export type BookType = {
   id: number;
   UNDERLYING: Address;
   A_TOKEN: Address;
-  V_TOKEN: Address;
+  V_TOKEN?: Address;
   INTEREST_RATE_STRATEGY: Address;
   ORACLE: Address;
   STATIC_A_TOKEN?: Address;
@@ -54,49 +54,37 @@ export enum AaveInstanceType {
   HORIZON_RWA = 'Horizon RWA',
 }
 
-const AllAddressBooksAssets = {
-  AaveV3Ethereum: { ...AaveV3Ethereum.ASSETS },
-  AaveV3EthereumLido: { ...AaveV3EthereumLido.ASSETS },
-  AaveV3EthereumEtherFi: { ...AaveV3EthereumEtherFi.ASSETS },
-  AaveV3Optimism: { ...AaveV3Optimism.ASSETS },
-  AaveV3Base: { ...AaveV3Base.ASSETS },
-  AaveV3Avalanche: { ...AaveV3Avalanche.ASSETS },
-  AaveV3Gnosis: { ...AaveV3Gnosis.ASSETS },
-  AaveV3ZkSync: { ...AaveV3ZkSync.ASSETS },
-  AaveV3Scroll: { ...AaveV3Scroll.ASSETS },
-  AaveV3Arbitrum: { ...AaveV3Arbitrum.ASSETS },
-  AaveV3Polygon: { ...AaveV3Polygon.ASSETS },
-  AaveV3BNB: { ...AaveV3BNB.ASSETS },
-  AaveV3Metis: { ...AaveV3Metis.ASSETS },
-  AaveV3Sonic: { ...AaveV3Sonic.ASSETS },
-  AaveV3Linea: { ...AaveV3Linea.ASSETS },
-  AaveV3Celo: { ...AaveV3Celo.ASSETS },
-  AaveV3HorizonRWA: { ...AaveV3HorizonRWA.ASSETS },
-  AaveV3Plasma: { ...AaveV3Plasma.ASSETS },
-  AaveV3InkWhitelabel: { ...AaveV3InkWhitelabel.ASSETS },
-};
+export const AaveInstanceEntries = {
+  AaveV3Arbitrum: AaveV3Arbitrum,
+  AaveV3Avalanche: AaveV3Avalanche,
+  AaveV3Base: AaveV3Base,
+  AaveV3BNB: AaveV3BNB,
+  AaveV3Celo: AaveV3Celo,
+  AaveV3Ethereum: AaveV3Ethereum,
+  AaveV3EthereumEtherFi: AaveV3EthereumEtherFi,
+  AaveV3EthereumLido: AaveV3EthereumLido,
+  AaveV3Gnosis: AaveV3Gnosis,
+  AaveV3InkWhitelabel: AaveV3InkWhitelabel,
+  AaveV3Linea: AaveV3Linea,
+  AaveV3Metis: AaveV3Metis,
+  AaveV3Optimism: AaveV3Optimism,
+  AaveV3Plasma: AaveV3Plasma,
+  AaveV3Polygon: AaveV3Polygon,
+  AaveV3Scroll: AaveV3Scroll,
+  AaveV3Sonic: AaveV3Sonic,
+  AaveV3ZkSync: AaveV3ZkSync,
+  AaveV3HorizonRWA: AaveV3HorizonRWA,
+} as const;
 
-const AllAddressBooksChainIds: { [key: string]: number } = {
-  AaveV3Ethereum: AaveV3Ethereum.CHAIN_ID,
-  AaveV3EthereumLido: AaveV3EthereumLido.CHAIN_ID,
-  AaveV3EthereumEtherFi: AaveV3EthereumEtherFi.CHAIN_ID,
-  AaveV3Optimism: AaveV3Optimism.CHAIN_ID,
-  AaveV3Base: AaveV3Base.CHAIN_ID,
-  AaveV3Avalanche: AaveV3Avalanche.CHAIN_ID,
-  AaveV3Gnosis: AaveV3Gnosis.CHAIN_ID,
-  AaveV3ZkSync: AaveV3ZkSync.CHAIN_ID,
-  AaveV3Scroll: AaveV3Scroll.CHAIN_ID,
-  AaveV3Arbitrum: AaveV3Arbitrum.CHAIN_ID,
-  AaveV3Polygon: AaveV3Polygon.CHAIN_ID,
-  AaveV3BNB: AaveV3BNB.CHAIN_ID,
-  AaveV3Metis: AaveV3Metis.CHAIN_ID,
-  AaveV3Sonic: AaveV3Sonic.CHAIN_ID,
-  AaveV3Linea: AaveV3Linea.CHAIN_ID,
-  AaveV3Celo: AaveV3Celo.CHAIN_ID,
-  AaveV3HorizonRWA: AaveV3HorizonRWA.CHAIN_ID,
-  AaveV3Plasma: AaveV3Plasma.CHAIN_ID,
-  AaveV3InkWhitelabel: AaveV3InkWhitelabel.CHAIN_ID,
-};
+export type AaveInstanceBook = (typeof AaveInstanceEntries)[keyof typeof AaveInstanceEntries];
+
+const AllAddressBooksAssets = Object.fromEntries(
+  Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, { ...instance.ASSETS }]),
+);
+
+const AllAddressBooksChainIds = Object.fromEntries(
+  Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, instance.CHAIN_ID]),
+);
 
 const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
 const twentywstETHEightyAAVE = '0x3de27EFa2F1AA663Ae5D458857e731c129069F29';
@@ -120,10 +108,13 @@ export const getAaveToken = (tokenAddress: Address, chainId: number) => {
       name = getStataTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
       break;
     case AaveTokenType.STK:
-      name = tokenInfo.name;
       symbol = tokenInfo.name;
+      name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
       break;
     case AaveTokenType.UNDERLYING:
+      symbol = tokenInfo.name;
+      name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
+      break;
     case AaveTokenType.NOT_LISTED:
     default:
       return undefined;
