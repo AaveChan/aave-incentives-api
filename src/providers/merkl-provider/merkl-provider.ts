@@ -36,6 +36,11 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 // Default protocol for all other chains
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
+// TODO:
+// - do we make also a whitelist of supported tokens (even if Merkl already have a whitelist system) => nice but need to whitelist every provider. Maybe we can just trust Merkl on this.
+// - do we display the wrapper token or do we show the underlying (eg: for aEthPYUSDWrapped, do we show aEthPYUSD or the wrapped version)? => for now we just show the wrapper token (default)
+// - how can we differentiate a token point reward from a token reward
+
 export class MerklProvider implements IncentiveProvider {
   incentiveType = IncentiveType.OFFCHAIN;
   rewardType = RewardType.TOKEN;
