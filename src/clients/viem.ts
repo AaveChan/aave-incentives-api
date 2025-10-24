@@ -1,5 +1,4 @@
 import { getChain } from '@/lib/utils/chains';
-// import 'dotenv/config';
 
 import { Chain, createPublicClient, fallback, FallbackTransport, http } from 'viem';
 import {
@@ -17,6 +16,8 @@ import {
   linea,
   sonic,
   celo,
+  ink,
+  plasma,
 } from 'viem/chains';
 
 export const ETHEREUM_RPCS = ['https://ethereum-rpc.publicnode.com'];
@@ -33,6 +34,8 @@ export const BSC_RPCS = ['https://bsc-rpc.publicnode.com'];
 export const LINEA_RPCS = ['https://linea-rpc.publicnode.com'];
 export const SONIC_RPCS = ['https://rpc.soniclabs.com'];
 export const CELO_RPCS = ['wss://celo.drpc.org'];
+export const PLASMA_RPCS = ['https://plasma.drpc.org'];
+export const INK_RPCS = ['https://ink.drpc.org'];
 
 const getTransport = (chain: Chain): FallbackTransport => {
   switch (chain.id) {
@@ -64,6 +67,10 @@ const getTransport = (chain: Chain): FallbackTransport => {
       return fallback(SONIC_RPCS.map((rpc) => http(rpc)));
     case celo.id:
       return fallback(CELO_RPCS.map((rpc) => http(rpc)));
+    case plasma.id:
+      return fallback(PLASMA_RPCS.map((rpc) => http(rpc)));
+    case ink.id:
+      return fallback(INK_RPCS.map((rpc) => http(rpc)));
     default:
       throw new Error(`Chain ${chain.name} (${chain.id}) not supported`);
   }
@@ -110,6 +117,10 @@ const getAlchemyPrefix = (chain: Chain): string => {
       return 'linea-mainnet';
     case celo.id:
       return 'celo-mainnet';
+    case plasma.id:
+      return 'plasma-mainnet';
+    case ink.id:
+      return 'ink-mainnet';
     default:
       throw new Error(`Chain ${chain.name} (${chain.id}) not supported`);
   }
