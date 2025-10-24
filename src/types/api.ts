@@ -1,3 +1,5 @@
+import { Address } from 'viem';
+
 export interface Incentive {
   name: string; // (eg: Borrow USDC on Base)
   chainId: number;
@@ -31,7 +33,7 @@ export interface PointReward {
 export interface Token {
   name: string;
   symbol: string;
-  address: string;
+  address: Address;
   chainId: number;
   decimals: number;
   price?: number;

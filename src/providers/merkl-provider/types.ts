@@ -49,7 +49,7 @@ export type MerklOpportunity = {
         id: string;
         name: string;
         chainId: number;
-        address: string;
+        address: Address;
         decimals: number;
         symbol: string;
         displaySymbol: string;
