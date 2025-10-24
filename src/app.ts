@@ -7,7 +7,7 @@ const app: Application = express();
 app.use('/incentives', incentivesRoutes);
 
 app.use('/', (_req: Request, res: Response): void => {
-  res.json({ message: 'Not Found' });
+  res.status(400).send({ error: 'Not Found' });
 });
 
 export default app;
