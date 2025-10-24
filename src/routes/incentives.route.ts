@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
 import { IncentivesController } from '@/controllers/controller';
-import { GetIncentivesQuerySchema, validateQuery } from '@/validation/incentives.schema';
+import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
+import { validateQuery } from '@/validation/validation';
 
 const router = Router();
 const controller = new IncentivesController();

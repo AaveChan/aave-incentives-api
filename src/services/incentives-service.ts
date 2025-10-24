@@ -1,5 +1,10 @@
-import { ACIProvider, FetchOptions, IncentiveProvider, MerklProvider } from '@/providers';
-import { ExternalPointsProvider } from '@/providers/external-points-provider/external-points-provider';
+import {
+  ACIProvider,
+  ExternalPointsProvider,
+  FetchOptions,
+  IncentiveProvider,
+  MerklProvider,
+} from '@/providers';
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {
@@ -8,22 +13,27 @@ export class IncentivesService {
     new MerklProvider(),
     new ExternalPointsProvider(),
   ];
-  // private providers: IncentiveProvider[] = [new MerklProvider()];
-  // private providers: IncentiveProvider[] = [new ACIProvider()];
 
   async getAllIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
-      this.providers.map((provider) => provider.getIncentives(fetchOptions)),
+      this.providers
+        .filter(
+          (provider) =>
+            (!fetchOptions?.incentiveType ||
+              provider.incentiveType === fetchOptions.incentiveType) &&
+            (!fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType),
+        )
+        .map((provider) => provider.getIncentives(fetchOptions)),
     );
 
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);
       } else {
-        console.error(`Provider ${this.providers[index]?.getSource()} failed:`, result.reason);
+        console.error(`Provider ${this.providers[index]?.source} failed:`, result.reason);
       }
     });
 
@@ -44,7 +54,7 @@ export class IncentivesService {
   async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
     const healthChecks = await Promise.allSettled(
       this.providers.map(async (provider) => ({
-        source: provider.getSource(),
+        source: provider.source,
         healthy: await provider.isHealthy(),
       })),
     );

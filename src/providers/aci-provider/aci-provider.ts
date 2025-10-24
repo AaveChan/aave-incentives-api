@@ -13,6 +13,10 @@ import { FetchOptions, IncentiveProvider } from '..';
 import { Actions, Campaign, Token as AciInfraToken } from './types';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 export class ACIProvider implements IncentiveProvider {
+  source = IncentiveSource.ACI_ROUNDS;
+  incentiveType = IncentiveType.OFFCHAIN;
+  rewardType = RewardType.TOKEN;
+
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'http://localhost:3000/api/merit/all-actions-data';
 
@@ -142,9 +146,5 @@ export class ACIProvider implements IncentiveProvider {
     } catch {
       return false;
     }
-  }
-
-  getSource() {
-    return IncentiveSource.ACI_ROUNDS;
   }
 }

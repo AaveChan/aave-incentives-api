@@ -8,17 +8,12 @@ export class IncentivesController {
   private incentivesService = new IncentivesService();
 
   async getAllIncentives(req: Request, res: Response) {
-    console.log('req.query', req.query);
-    console.log('res.locals.validatedQuery', res.locals.validatedQuery);
-
     // the middlewear doenst' mutate the req.query, so we either need to store the validated query in res.locals (1st option) or re-parse it here (2nd option)
     // const query = res.locals.validatedQuery as z.infer<typeof GetIncentivesQuerySchema>; // 1st option (good but not super clean)
     const query = GetIncentivesQuerySchema.parse(req.query); // 2nd option (cleaner but we do the same validation twice)
 
     try {
-      const { chainId, status } = query;
-
-      const incentives = await this.incentivesService.getAllIncentives({ chainId });
+      const incentives = await this.incentivesService.getAllIncentives(query);
 
       const response: GetIncentivesResponse = {
         success: true,
@@ -43,7 +38,7 @@ export class IncentivesController {
     }
   }
 
-  async getHealthStatus(req: Request, res: Response) {
+  async getHealthStatus(_req: Request, res: Response) {
     try {
       const healthStatus = await this.incentivesService.getHealthStatus();
       res.json({

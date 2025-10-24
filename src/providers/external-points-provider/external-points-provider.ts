@@ -20,6 +20,10 @@ import { getAaveToken } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
 export class ExternalPointsProvider implements IncentiveProvider {
+  source = IncentiveSource.HARDCODED;
+  incentiveType = IncentiveType.EXTERNAL;
+  rewardType = RewardType.EXTERNAL_POINT;
+
   name = 'ExternalPoints';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
@@ -48,10 +52,6 @@ export class ExternalPointsProvider implements IncentiveProvider {
     }
 
     return incentives;
-  }
-
-  getSource(): IncentiveSource {
-    return IncentiveSource.HARDCODED;
   }
 
   async isHealthy(): Promise<boolean> {

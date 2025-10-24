@@ -17,6 +17,7 @@ import { ink } from 'viem/chains';
 type MerklApiOptions = {
   chainId?: number;
   mainProtocolId?: string;
+  status?: string;
 };
 
 export type MainProtocolId = (typeof MainProtocolId)[keyof typeof MainProtocolId];
@@ -36,10 +37,12 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 export class MerklProvider implements IncentiveProvider {
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
-  claimLink = 'https://app.merkl.xyz/';
   incentiveType = IncentiveType.OFFCHAIN;
   rewardType = RewardType.TOKEN;
+  source = IncentiveSource.MERKL_API;
+
+  apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
+  claimLink = 'https://app.merkl.xyz/';
   unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
@@ -162,7 +165,15 @@ export class MerklProvider implements IncentiveProvider {
       });
     }
 
+    console.log(`Total Merkl incentives before filtering: ${allIncentives.length}`);
+
+    console.log(fetchOptions);
+
+    // filtering again
     allIncentives = allIncentives.filter((i) => (chainId ? i.chainId === chainId : true));
+    allIncentives = allIncentives.filter((i) =>
+      fetchOptions?.status ? i.status === fetchOptions.status : true,
+    );
 
     console.log('Merkl incentives:', allIncentives.length);
 
@@ -177,6 +188,7 @@ export class MerklProvider implements IncentiveProvider {
 
     const merklApiOptions: MerklApiOptions = {
       chainId: fetchOptions?.chainId,
+      status: fetchOptions?.status,
       mainProtocolId: mainProtocolId,
     };
     for (const [key, value] of Object.entries(merklApiOptions)) {
@@ -249,10 +261,6 @@ export class MerklProvider implements IncentiveProvider {
 
     return currentCampaignForOpportunity;
   };
-
-  getSource(): IncentiveSource {
-    return IncentiveSource.MERKL_API;
-  }
 
   async isHealthy(): Promise<boolean> {
     try {
