@@ -203,7 +203,7 @@ export class OnchainProvider implements IncentiveProvider {
           console.log(rewardTokenInfo);
 
           allIncentives.push({
-            name: this.getIncentiveName(underlyingToken, type, aaveInstanceName),
+            name: this.getIncentiveName(underlyingToken, type),
             description: this.getIncentiveDescription(
               underlyingToken,
               rewardToken,
@@ -226,13 +226,9 @@ export class OnchainProvider implements IncentiveProvider {
     return allIncentives;
   };
 
-  private getIncentiveName = (
-    underlyingToken: Token,
-    type: AaveTokenType,
-    instanceName: string,
-  ) => {
+  private getIncentiveName = (underlyingToken: Token, type: AaveTokenType) => {
     const prefix = type === AaveTokenType.A ? 'Supply' : 'Borrow';
-    const incentiveName = `${prefix} ${underlyingToken.symbol} on ${instanceName}`;
+    const incentiveName = `${prefix} ${underlyingToken.symbol}`;
     return incentiveName;
   };
 
