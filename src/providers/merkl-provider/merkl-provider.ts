@@ -77,12 +77,6 @@ export class MerklProvider implements IncentiveProvider {
         continue;
       }
 
-      // Skip STATA tokens
-      const tokenInfo = getAaveTokenInfo(rewardedTokenAddress, opportunity.chainId);
-      if (tokenInfo?.type === AaveTokenType.STATA) {
-        continue;
-      }
-
       const rewardToken: Token = {
         name: rewardMerklToken.name,
         address: rewardMerklToken.address,
@@ -238,6 +232,19 @@ export class MerklProvider implements IncentiveProvider {
     allMerklOpportunities = allMerklOpportunities.filter(
       (opportunity) => opportunity.campaigns.length > 0,
     );
+
+    allMerklOpportunities = allMerklOpportunities.filter((opportunity) => {
+      const rewardedTokenAddress = opportunity.explorerAddress;
+      if (!rewardedTokenAddress) {
+        return false;
+      } else {
+        const tokenInfo = getAaveTokenInfo(rewardedTokenAddress, opportunity.chainId);
+        if (!tokenInfo?.type || tokenInfo.type === AaveTokenType.STATA) {
+          return false;
+        }
+      }
+      return true;
+    });
 
     return allMerklOpportunities;
   }
