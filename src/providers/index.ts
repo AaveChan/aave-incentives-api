@@ -1,4 +1,4 @@
-import { Incentive, IncentiveSource } from '@/types';
+import { Incentive, IncentiveSource, IncentiveType } from '@/types';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
 import z from 'zod';
 
@@ -8,7 +8,7 @@ export interface IncentiveProvider {
   getIncentives(options?: FetchOptions): Promise<Incentive[]>;
   isHealthy(): Promise<boolean>;
   source: IncentiveSource;
-  incentiveType: string;
+  incentiveType: IncentiveType;
 }
 
 export * from './aci-provider/aci-provider';

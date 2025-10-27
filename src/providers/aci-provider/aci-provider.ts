@@ -72,12 +72,6 @@ export class ACIProvider implements IncentiveProvider {
       });
     }
 
-    incentives = incentives.filter((i) =>
-      fetchOptions?.chainId ? i.chainId === fetchOptions?.chainId : true,
-    );
-
-    console.log('ACI incentives:', incentives.length);
-
     return incentives;
   }
 

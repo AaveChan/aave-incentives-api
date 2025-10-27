@@ -16,7 +16,17 @@ export class IncentivesService {
     new OnchainProvider(),
   ];
 
-  async getAllIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
+  async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
+    const allIncentives = await this.fetchIncentives();
+
+    const allIncentivesFiltered = this.applyFilters(allIncentives, filters);
+
+    const allIncentivesSorted = this.sort(allIncentivesFiltered);
+
+    return allIncentivesSorted;
+  }
+
+  async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
     // Fetch from all providers in parallel
@@ -25,7 +35,6 @@ export class IncentivesService {
         .filter(
           (provider) =>
             !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-          // (!fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType),
         )
         .map((provider) => provider.getIncentives(fetchOptions)),
     );
@@ -38,7 +47,43 @@ export class IncentivesService {
       }
     });
 
-    return this.sort(allIncentives);
+    return allIncentives;
+  }
+
+  private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
+    let incentivesFiltered = [...incentives];
+
+    // Chain ID filter
+    if (filters.chainId !== undefined) {
+      const chainIds = Array.isArray(filters.chainId) ? filters.chainId : [filters.chainId];
+      incentivesFiltered = incentivesFiltered.filter((i) => chainIds.includes(i.chainId));
+    }
+
+    // Status filter
+    if (filters.status !== undefined) {
+      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
+      incentivesFiltered = incentivesFiltered.filter((i) => statuses.includes(i.status));
+    }
+
+    // Incentive type filter
+    if (filters.incentiveType !== undefined) {
+      const types = Array.isArray(filters.incentiveType)
+        ? filters.incentiveType
+        : [filters.incentiveType];
+      incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.incentiveType));
+    }
+
+    // Reward type filter
+    if (filters.rewardType !== undefined) {
+      const rewardTypes = Array.isArray(filters.rewardType)
+        ? filters.rewardType
+        : [filters.rewardType];
+      incentivesFiltered = incentivesFiltered.filter((i) => {
+        return rewardTypes.includes(i.reward.type);
+      });
+    }
+
+    return incentivesFiltered;
   }
 
   private sort(incentives: Incentive[]): Incentive[] {

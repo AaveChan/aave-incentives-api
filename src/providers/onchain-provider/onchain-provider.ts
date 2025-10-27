@@ -145,14 +145,6 @@ export class OnchainProvider implements IncentiveProvider {
       );
     }
 
-    console.log({
-      underlying: underlyingToken.address,
-      underlyingName: underlyingToken.symbol,
-      address: rewardedTokenAddress,
-      // abi: aTokenAbi,
-      functionName: 'totalSupply',
-    });
-
     const currentTimestamp = getCurrentTimestamp();
 
     if (incentivesData.rewardsTokenInformation.length > 0) {
@@ -199,8 +191,6 @@ export class OnchainProvider implements IncentiveProvider {
             token: rewardToken,
             apr,
           };
-
-          console.log(rewardTokenInfo);
 
           allIncentives.push({
             name: this.getIncentiveName(underlyingToken, type),

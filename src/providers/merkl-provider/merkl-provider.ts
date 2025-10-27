@@ -142,18 +142,6 @@ export class MerklProvider implements IncentiveProvider {
       });
     }
 
-    console.log(`Total Merkl incentives before filtering: ${allIncentives.length}`);
-
-    console.log(fetchOptions);
-
-    // filtering again
-    allIncentives = allIncentives.filter((i) => (chainId ? i.chainId === chainId : true));
-    allIncentives = allIncentives.filter((i) =>
-      fetchOptions?.status ? i.status === fetchOptions.status : true,
-    );
-
-    console.log('Merkl incentives:', allIncentives.length);
-
     return allIncentives;
   }
 

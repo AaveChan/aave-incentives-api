@@ -13,7 +13,7 @@ export class IncentivesController {
     const query = GetIncentivesQuerySchema.parse(req.query); // 2nd option (cleaner but we do the same validation twice)
 
     try {
-      const incentives = await this.incentivesService.getAllIncentives(query);
+      const incentives = await this.incentivesService.getIncentives(query);
 
       const response: GetIncentivesResponse = {
         success: true,

@@ -2,16 +2,12 @@ import { z } from 'zod';
 import { Status, IncentiveType, RewardType } from '../types/api';
 
 export const GetIncentivesQuerySchema = z.object({
-  // chainId - doit être un nombre valide
   chainId: z.coerce.number().optional(),
 
-  // status - doit être une valeur de l'enum Status
   status: z.enum(Status).optional(),
 
-  // incentiveType - optionnel
   incentiveType: z.enum(IncentiveType).optional(),
 
-  // rewardType - optionnel
   rewardType: z.enum(RewardType).optional(),
 
   // // Pagination
