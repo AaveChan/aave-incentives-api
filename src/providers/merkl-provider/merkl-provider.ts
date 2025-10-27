@@ -42,13 +42,6 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
-
-// TODO:
-// - do we make also a whitelist of supported tokens (even if Merkl already have a whitelist system) => nice but need to whitelist every provider. Maybe we can just trust Merkl on this.
-// - do we display the wrapper token or do we show the underlying (eg: for aEthPYUSDWrapped, do we show aEthPYUSD or the wrapped version)? => for now we just show the wrapper token (default)
-// - how can we differentiate a token point reward from a token reward
-// - filter by instance too? (in addition to the chainId)
-
 export class MerklProvider implements IncentiveProvider {
   incentiveType = IncentiveType.OFFCHAIN;
   source = IncentiveSource.MERKL_API;
@@ -107,31 +100,6 @@ export class MerklProvider implements IncentiveProvider {
           console.warn(
             `Rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
           );
-          // fetch onchain => quite slow
-          // const client = getViemClient(opportunity.chainId);
-          // const data = await client.multicall({
-          //   contracts: [
-          //     {
-          //       address: rewardedTokenAddress,
-          //       abi: erc20Abi,
-          //       functionName: 'name',
-          //     },
-          //     {
-          //       address: rewardedTokenAddress,
-          //       abi: erc20Abi,
-          //       functionName: 'symbol',
-          //     },
-          //     {
-          //       address: rewardedTokenAddress,
-          //       abi: erc20Abi,
-          //       functionName: 'decimals',
-          //     },
-          //   ],
-          // });
-          // const [nameRes, symbolRes, decimalsRes] = data;
-          // rewardedTokenName = nameRes.result ?? 'UNKNOWN';
-          // rewardedTokenSymbol = symbolRes.result ?? 'UNKNOWN';
-          // rewardedTokenDecimals = decimalsRes.result ?? 18;
 
           rewardedTokenName = this.unknown;
           rewardedTokenSymbol = this.unknown;
