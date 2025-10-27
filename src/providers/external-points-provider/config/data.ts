@@ -152,6 +152,50 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_USDe_31JUL2025.A_TOKEN,
+        AaveV3Ethereum.ASSETS.PT_USDe_25SEP2025.A_TOKEN,
+        AaveV3Ethereum.ASSETS.PT_USDe_27NOV2025.A_TOKEN,
+      ],
+      campaigns: [
+        {
+          startTimestamp: BASE_TIMESTAMP,
+          pointValue: 2,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_sUSDE_31JUL2025.A_TOKEN,
+        AaveV3Ethereum.ASSETS.PT_sUSDE_25SEP2025.A_TOKEN,
+        AaveV3Ethereum.ASSETS.PT_sUSDE_27NOV2025.A_TOKEN,
+      ],
+      campaigns: [
+        {
+          startTimestamp: BASE_TIMESTAMP,
+          pointValue: 1,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_eUSDE_29MAY2025.A_TOKEN,
+        AaveV3Ethereum.ASSETS.PT_eUSDE_14AUG2025.A_TOKEN,
+      ],
+      campaigns: [
+        {
+          startTimestamp: BASE_TIMESTAMP,
+          pointValue: 2,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
       chainId: plasma.id,
       rewardedTokenAddresses: [AaveV3Plasma.ASSETS.USDe.A_TOKEN, AaveV3Plasma.ASSETS.sUSDe.A_TOKEN],
       campaigns: [
