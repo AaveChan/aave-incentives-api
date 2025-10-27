@@ -17,6 +17,7 @@ import {
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import { ink } from 'viem/chains';
+import { ACI_ADDRESSES } from '@/constants/aci-addresses';
 
 type MerklApiOptions = {
   chainId?: number;
@@ -39,6 +40,8 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 
 // Default protocol for all other chains
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
+
+const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 
 // TODO:
 // - do we make also a whitelist of supported tokens (even if Merkl already have a whitelist system) => nice but need to whitelist every provider. Maybe we can just trust Merkl on this.
@@ -209,7 +212,7 @@ export class MerklProvider implements IncentiveProvider {
       }
     }
 
-    const allMerklOpportunities: MerklOpportunityWithCampaign[] = [];
+    let allMerklOpportunities: MerklOpportunityWithCampaign[] = [];
 
     let merklOpportunities: MerklOpportunityWithCampaign[] = [];
     const itemsPerPage = 100;
@@ -224,6 +227,17 @@ export class MerklProvider implements IncentiveProvider {
       allMerklOpportunities.push(...merklOpportunities);
       page++;
     } while (merklOpportunities.length > 0);
+
+    // Filter campaigns to only include whitelisted creators
+    allMerklOpportunities.forEach(
+      (opportunity) =>
+        (opportunity.campaigns = opportunity.campaigns.filter((campaign) =>
+          WHITELISTED_CREATORS.includes(campaign.creatorAddress),
+        )),
+    );
+    allMerklOpportunities = allMerklOpportunities.filter(
+      (opportunity) => opportunity.campaigns.length > 0,
+    );
 
     return allMerklOpportunities;
   }
