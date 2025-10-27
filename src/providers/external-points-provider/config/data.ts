@@ -9,7 +9,7 @@ import {
   AaveV3Scroll,
   AaveV3Sonic,
 } from '@bgd-labs/aave-address-book';
-import { PointProgram, POINT_PROGRAM_IDS, PointIncentive, PointProgramId } from '../types';
+import { PointProgram, POINT_PROGRAM_IDS, PointIncentives, PointProgramId } from '../types';
 import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'viem/chains';
 import { BASE_TIMESTAMP } from '@/lib/utils/timestamp';
 
@@ -50,34 +50,16 @@ export const pointPrograms: Record<PointProgramId, PointProgram> = {
   },
 };
 
-export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
+export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
   [POINT_PROGRAM_IDS.ETHERFI]: [
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3Ethereum.ASSETS.weETH.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 3,
-        },
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.weETH.A_TOKEN,
+        AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN,
+        AaveV3Ethereum.ASSETS.eBTC.A_TOKEN,
       ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHERFI,
-      chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 3,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHERFI,
-      chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3Ethereum.ASSETS.eBTC.A_TOKEN,
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -88,7 +70,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: plasma.id,
-      rewardedTokenAddress: AaveV3Plasma.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Plasma.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -99,7 +81,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: base.id,
-      rewardedTokenAddress: AaveV3Base.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Base.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -110,7 +92,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: arbitrum.id,
-      rewardedTokenAddress: AaveV3Arbitrum.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -121,7 +103,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: linea.id,
-      rewardedTokenAddress: AaveV3Linea.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Linea.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -132,7 +114,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: scroll.id,
-      rewardedTokenAddress: AaveV3Scroll.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Scroll.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -143,7 +125,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: zksync.id,
-      rewardedTokenAddress: AaveV3Scroll.ASSETS.weETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Scroll.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -156,29 +138,11 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHENA,
       chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3Ethereum.ASSETS.USDe.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 5,
-        },
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.USDe.A_TOKEN,
+        AaveV3Ethereum.ASSETS.sUSDe.A_TOKEN,
+        AaveV3EthereumLido.ASSETS.sUSDe.A_TOKEN,
       ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3Ethereum.ASSETS.sUSDe.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 5,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3EthereumLido.ASSETS.sUSDe.A_TOKEN,
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -189,18 +153,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHENA,
       chainId: plasma.id,
-      rewardedTokenAddress: AaveV3Plasma.ASSETS.USDe.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 5,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: plasma.id,
-      rewardedTokenAddress: AaveV3Plasma.ASSETS.sUSDe.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Plasma.ASSETS.USDe.A_TOKEN, AaveV3Plasma.ASSETS.sUSDe.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -214,17 +167,10 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3Ethereum.ASSETS.rsETH.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-        },
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.rsETH.A_TOKEN,
+        AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN,
       ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.KELP,
-      chainId: mainnet.id,
-      rewardedTokenAddress: AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN,
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -234,7 +180,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: base.id,
-      rewardedTokenAddress: AaveV3Base.ASSETS.wrsETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Base.ASSETS.wrsETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -244,7 +190,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: arbitrum.id,
-      rewardedTokenAddress: AaveV3Base.ASSETS.wrsETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Base.ASSETS.wrsETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -256,7 +202,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.SONIC,
       chainId: sonic.id,
-      rewardedTokenAddress: AaveV3Sonic.ASSETS.wS.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Sonic.ASSETS.wS.A_TOKEN, AaveV3Sonic.ASSETS.stS.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -267,7 +213,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.SONIC,
       chainId: sonic.id,
-      rewardedTokenAddress: AaveV3Sonic.ASSETS.USDC.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Sonic.ASSETS.USDC.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -278,18 +224,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentive[]> = {
     {
       programId: POINT_PROGRAM_IDS.SONIC,
       chainId: sonic.id,
-      rewardedTokenAddress: AaveV3Sonic.ASSETS.stS.A_TOKEN,
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 12,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.SONIC,
-      chainId: sonic.id,
-      rewardedTokenAddress: AaveV3Sonic.ASSETS.WETH.A_TOKEN,
+      rewardedTokenAddresses: [AaveV3Sonic.ASSETS.WETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,

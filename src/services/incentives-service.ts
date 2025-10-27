@@ -24,9 +24,8 @@ export class IncentivesService {
       this.providers
         .filter(
           (provider) =>
-            (!fetchOptions?.incentiveType ||
-              provider.incentiveType === fetchOptions.incentiveType) &&
-            (!fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType),
+            !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
+          // (!fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType),
         )
         .map((provider) => provider.getIncentives(fetchOptions)),
     );

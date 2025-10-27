@@ -9,7 +9,11 @@ import {
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-import { Campaign, MerklOpportunityWithCampaign } from './types';
+import {
+  Campaign,
+  MerklOpportunityWithCampaign,
+  RewardTokenType as MerklRewardTokenType,
+} from './types';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import { ink } from 'viem/chains';
@@ -44,7 +48,6 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 export class MerklProvider implements IncentiveProvider {
   incentiveType = IncentiveType.OFFCHAIN;
-  rewardType = RewardType.TOKEN;
   source = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
@@ -139,6 +142,9 @@ export class MerklProvider implements IncentiveProvider {
         }
       }
 
+      const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
+      const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : RewardType.UNKNOWN;
+
       const rewardedToken: Token = {
         name: rewardedTokenName,
         address: rewardedTokenAddress,
@@ -151,7 +157,7 @@ export class MerklProvider implements IncentiveProvider {
         this.getCampaignConfigs(opportunity.campaigns);
 
       const tokenReward: TokenReward = {
-        type: RewardType.TOKEN,
+        type: rewardType,
         token: rewardToken,
         apr: opportunity.apr,
       };
@@ -267,6 +273,17 @@ export class MerklProvider implements IncentiveProvider {
 
     return currentCampaignForOpportunity;
   };
+
+  private mapRewardType(type: MerklRewardTokenType) {
+    switch (type) {
+      case MerklRewardTokenType.TOKEN:
+        return RewardType.TOKEN;
+      case MerklRewardTokenType.PRETGE:
+        return RewardType.POINTS;
+      default:
+        return RewardType.UNKNOWN;
+    }
+  }
 
   async isHealthy(): Promise<boolean> {
     try {

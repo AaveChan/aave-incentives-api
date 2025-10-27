@@ -9,7 +9,6 @@ export interface IncentiveProvider {
   isHealthy(): Promise<boolean>;
   source: IncentiveSource;
   incentiveType: string;
-  rewardType: string; // maybe define it directly in each campaign (eg: Merkl can have token and points (in the form of a token but still point))
 }
 
 export * from './aci-provider/aci-provider';

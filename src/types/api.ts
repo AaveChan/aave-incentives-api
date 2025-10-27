@@ -64,7 +64,7 @@ export enum IncentiveType {
 export enum RewardType {
   TOKEN = 'TOKEN',
   POINTS = 'POINTS',
-  EXTERNAL_POINT = 'EXTERNAL_POINT',
+  UNKNOWN = 'UNKNOWN',
 }
 
 export enum Status {

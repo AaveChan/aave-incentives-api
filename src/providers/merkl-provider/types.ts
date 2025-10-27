@@ -56,7 +56,7 @@ export type MerklOpportunity = {
         icon: string;
         verified: boolean;
         isTest: boolean;
-        type: string;
+        type: RewardTokenType;
         isNative: boolean;
         price: number;
       };
@@ -69,6 +69,11 @@ export type MerklOpportunity = {
     }[];
   };
 };
+
+export enum RewardTokenType {
+  TOKEN = 'TOKEN',
+  PRETGE = 'PRETGE',
+}
 
 export enum CampaignStatus {
   PROCESSING = 'PROCESSING',

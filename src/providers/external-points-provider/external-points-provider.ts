@@ -15,21 +15,19 @@ import {
   pointProgramsMap,
   pointCampaignsArray as pointCampaignsData,
 } from './config/config';
-import { PointCampaign, PointIncentive, PointProgram } from './types';
+import { PointCampaign, PointIncentives, PointProgram } from './types';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
 export class ExternalPointsProvider implements IncentiveProvider {
   source = IncentiveSource.HARDCODED;
   incentiveType = IncentiveType.EXTERNAL;
-  rewardType = RewardType.EXTERNAL_POINT;
-
-  name = 'ExternalPoints';
+  rewardType = RewardType.POINTS;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const incentives: Incentive[] = [];
+    const allIncentives: Incentive[] = [];
 
-    let pointCampaigns: PointIncentive[] = [];
+    let pointCampaigns: PointIncentives[] = [];
 
     if (fetchOptions?.chainId) {
       pointCampaigns = campaignsByChainId.get(fetchOptions.chainId) || [];
@@ -45,72 +43,78 @@ export class ExternalPointsProvider implements IncentiveProvider {
         continue;
       }
 
-      const incentive = this.mapCampaignToIncentive(campaign, program);
-      if (incentive) {
-        incentives.push(incentive);
+      const incentives = this.mapPointIncentiveToIncentives(campaign, program);
+
+      if (incentives) {
+        allIncentives.push(...incentives);
       }
     }
 
-    return incentives;
+    return allIncentives;
   }
 
   async isHealthy(): Promise<boolean> {
     return true;
   }
 
-  private mapCampaignToIncentive(
-    incentive: PointIncentive,
+  private mapPointIncentiveToIncentives(
+    pointIncentive: PointIncentives,
     program: PointProgram,
-  ): Incentive | null {
-    const rewardedToken = getAaveToken(incentive.rewardedTokenAddress, incentive.chainId);
+  ): Incentive[] {
+    const incentives: Incentive[] = [];
+    for (const rewardedTokenAddress of pointIncentive.rewardedTokenAddresses) {
+      const rewardedToken = getAaveToken(rewardedTokenAddress, pointIncentive.chainId);
 
-    if (!rewardedToken) {
-      console.warn(
-        `Token ${incentive.rewardedTokenAddress} not found on chain ${incentive.chainId}`,
-      );
-      return null;
+      if (!rewardedToken) {
+        console.warn(`Token ${rewardedTokenAddress} not found on chain ${pointIncentive.chainId}`);
+        return [];
+      }
+
+      const campaigns = pointIncentive.campaigns || [];
+
+      const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
+        this.getCampaignConfigs(campaigns);
+
+      let status: Status = Status.PAST;
+      let pointValue: number | undefined = undefined;
+      if (currentCampaignConfig) {
+        status = Status.LIVE;
+        pointValue = currentCampaignConfig.pointValue;
+      } else if (nextCampaignConfig) {
+        status = Status.SOON;
+      }
+
+      const point: Point = {
+        name: program.name,
+        protocol: program.protocol,
+        tgePrice: program.tgePrice,
+      };
+
+      const pointReward: PointReward = {
+        type: this.rewardType,
+        point,
+        pointValue,
+        pointValueUnit: program.pointValueUnit,
+      };
+
+      const incentive: Incentive = {
+        name: program.name,
+        description: program.description,
+        claimLink: program.externalLink,
+        chainId: pointIncentive.chainId,
+        rewardedToken,
+        reward: pointReward,
+        currentCampaignConfig,
+        nextCampaignConfig,
+        allCampaignsConfigs,
+        incentiveType: IncentiveType.EXTERNAL,
+        status,
+      };
+
+      incentives.push(incentive);
     }
 
-    const campaigns = incentive.campaigns || [];
-
-    const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
-      this.getCampaignConfigs(campaigns);
-
-    let status: Status = Status.PAST;
-    let pointValue: number | undefined = undefined;
-    if (currentCampaignConfig) {
-      status = Status.LIVE;
-      pointValue = currentCampaignConfig.pointValue;
-    } else if (nextCampaignConfig) {
-      status = Status.SOON;
-    }
-
-    const point: Point = {
-      name: program.name,
-      protocol: program.protocol,
-      tgePrice: program.tgePrice,
-    };
-
-    const pointReward: PointReward = {
-      type: RewardType.EXTERNAL_POINT,
-      point,
-      pointValue,
-      pointValueUnit: program.pointValueUnit,
-    };
-
-    return {
-      name: program.name,
-      description: program.description,
-      claimLink: program.externalLink,
-      chainId: incentive.chainId,
-      rewardedToken,
-      reward: pointReward,
-      currentCampaignConfig,
-      nextCampaignConfig,
-      allCampaignsConfigs,
-      incentiveType: IncentiveType.EXTERNAL,
-      status,
-    };
+    return incentives;
   }
 
   private getCampaignConfigs = (campaigns: PointCampaign[]) => {

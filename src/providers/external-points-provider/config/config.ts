@@ -1,4 +1,4 @@
-import { PointIncentive } from '../types';
+import { PointIncentives } from '../types';
 import { pointCampaigns, pointPrograms } from './data';
 
 // Export in flat
@@ -9,7 +9,7 @@ export const pointProgramsArray = Object.values(pointPrograms).flat();
 export const pointProgramsMap = new Map(pointProgramsArray.map((program) => [program.id, program]));
 
 // ===== OPTIMIZATION: Create index by chainId for fast lookups =====
-export const campaignsByChainId = new Map<number, PointIncentive[]>();
+export const campaignsByChainId = new Map<number, PointIncentives[]>();
 
 for (const campaign of pointCampaignsArray) {
   if (!campaignsByChainId.has(campaign.chainId)) {
@@ -25,22 +25,24 @@ interface CampaignKey {
   asset: string;
 }
 
-function validateNoDuplicates(campaigns: PointIncentive[]): void {
+function validateNoDuplicates(campaigns: PointIncentives[]): void {
   const seen = new Set<string>();
   const duplicates: CampaignKey[] = [];
 
   for (const campaign of campaigns) {
-    const chainId = campaign.chainId;
-    const key = `${campaign.programId}:${chainId}:${campaign.rewardedTokenAddress.toLowerCase()}`;
+    for (const rewardedTokenAddress of campaign.rewardedTokenAddresses) {
+      const chainId = campaign.chainId;
+      const key = `${campaign.programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
 
-    if (seen.has(key)) {
-      duplicates.push({
-        programId: campaign.programId,
-        chainId,
-        asset: campaign.rewardedTokenAddress,
-      });
+      if (seen.has(key)) {
+        duplicates.push({
+          programId: campaign.programId,
+          chainId,
+          asset: rewardedTokenAddress,
+        });
+      }
+      seen.add(key);
     }
-    seen.add(key);
   }
 
   if (duplicates.length > 0) {

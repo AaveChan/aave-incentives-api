@@ -20,10 +20,10 @@ export interface PointProgram {
   additionalData?: Record<string, unknown>;
 }
 
-export interface PointIncentive {
+export interface PointIncentives {
   programId: PointProgramId;
   chainId: number;
-  rewardedTokenAddress: Address;
+  rewardedTokenAddresses: Address[];
   campaigns?: PointCampaign[];
 }
 
