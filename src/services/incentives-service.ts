@@ -17,7 +17,7 @@ export class IncentivesService {
   ];
 
   async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
-    const allIncentives = await this.fetchIncentives();
+    const allIncentives = await this.fetchIncentives(filters);
 
     const allIncentivesFiltered = this.applyFilters(allIncentives, filters);
 
