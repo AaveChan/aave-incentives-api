@@ -78,9 +78,10 @@ const getTransport = (chain: Chain): FallbackTransport => {
   }
 };
 
-const getPublicClient = (chain: Chain) => {
+const getPublicClient = (chain: Chain, cacheTimeSec: number = 0) => {
   return createPublicClient({
-    cacheTime: 0,
+    cacheTime: cacheTimeSec * 1000,
+    pollingInterval: cacheTimeSec * 1000,
     batch: {
       multicall: true,
     },
@@ -128,9 +129,10 @@ const getAlchemyPrefix = (chain: Chain): string => {
   }
 };
 
-const getAlchemyClient = (prefix: string, chain: Chain) => {
+const getAlchemyClient = (prefix: string, chain: Chain, cacheTimeSec: number = 0) => {
   return createPublicClient({
-    cacheTime: 0,
+    cacheTime: cacheTimeSec * 1000,
+    pollingInterval: cacheTimeSec * 1000,
     batch: {
       multicall: true,
     },
@@ -139,15 +141,15 @@ const getAlchemyClient = (prefix: string, chain: Chain) => {
   });
 };
 
-export const getViemClient = (chainId: number = 1) => {
+export const getViemClient = (chainId: number = 1, cacheTimeSec: number = 0) => {
   const alchemyProjectId = process.env.ALCHEMY_PROJECT_ID;
 
   const chain = getChain(chainId);
 
   if (alchemyProjectId) {
     const prefix = getAlchemyPrefix(chain);
-    return getAlchemyClient(prefix, chain);
+    return getAlchemyClient(prefix, chain, cacheTimeSec);
   } else {
-    return getPublicClient(chain);
+    return getPublicClient(chain, cacheTimeSec);
   }
 };

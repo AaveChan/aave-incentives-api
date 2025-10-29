@@ -19,6 +19,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "express": "^5.1.0",
+    "node-cache": "^5.1.2",
     "viem": "^2.37.6",
     "winston": "^3.18.3",
     "zod": "^4.1.12"

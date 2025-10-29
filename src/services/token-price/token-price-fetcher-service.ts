@@ -1,9 +1,11 @@
 import { AaveSafetyModule } from '@bgd-labs/aave-address-book';
 import { Address } from 'viem';
 
+import { CACHE_TTLS } from '@/config/cache-ttls';
 import { createLogger } from '@/config/logger';
 import { GHO } from '@/constants/tokens';
 import { compareTokens, tokenToString } from '@/lib/token/token';
+import { withCache } from '@/lib/utils/cache';
 import { Token } from '@/types';
 
 import { AaveTokenPriceFetcher } from './fetchers/aave-fetcher';
@@ -27,6 +29,16 @@ export class TokenPriceFetcherService {
   hardcodedFetcher = new HardcodedTokenPriceFetcher();
 
   async getTokenPrice(params: { token: Token; blockNumber?: bigint }) {
+    return this.getTokenPriceCached(params);
+  }
+
+  private readonly getTokenPriceCached = withCache(
+    this._getTokenPrice.bind(this),
+    ({ token }) => `tokenPrice:${token.address.toLowerCase()}`,
+    CACHE_TTLS.TOKEN_PRICE,
+  );
+
+  async _getTokenPrice(params: { token: Token; blockNumber?: bigint }) {
     const tokenRequested = params.token;
     const proxyToken = proxyTokenMap.get(params.token.address);
     if (proxyToken) {
