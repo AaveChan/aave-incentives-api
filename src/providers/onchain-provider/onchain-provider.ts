@@ -46,7 +46,7 @@ export class OnchainProvider implements IncentiveProvider {
   incentiveType = IncentiveType.ONCHAIN;
   rewardType = RewardType.TOKEN;
   source = IncentiveSource.ONCHAIN_RPC;
-  claimLink = 'https://app.aave.com/?marketName=proto_mainnet_v3'; // TODO: remoe the end
+  claimLink = 'https://app.aave.com/';
 
   tokenPriceFetcherService = new TokenPriceFetcherService();
 
