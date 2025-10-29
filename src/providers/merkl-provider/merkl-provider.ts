@@ -103,8 +103,8 @@ export class MerklProvider implements IncentiveProvider {
           rewardedTokenSymbol = rewardedToken.symbol;
           rewardedTokenDecimals = rewardedToken.decimals;
         } else {
-          this.logger.warn(
-            `Rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
+          this.logger.error(
+            `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
           );
 
           rewardedTokenName = this.unknown;

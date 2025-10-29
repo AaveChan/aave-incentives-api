@@ -42,7 +42,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       const program = pointProgramsMap.get(campaign.programId);
 
       if (!program) {
-        this.logger.warn(`Point program ${campaign.programId} not found`);
+        this.logger.error(`Point program ${campaign.programId} not found`);
         continue;
       }
 

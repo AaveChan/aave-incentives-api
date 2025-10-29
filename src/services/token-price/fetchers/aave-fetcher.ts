@@ -1,7 +1,6 @@
 import { formatUnits } from 'viem';
 
 import { getViemClient } from '@/clients/viem';
-import { createLogger } from '@/config/logger';
 import { uiPoolDataProviderAbi } from '@/constants/abis';
 import { getAaveInstancesBookByChainId } from '@/lib/aave/aave-tokens';
 import { Token } from '@/types';
@@ -9,8 +8,6 @@ import { Token } from '@/types';
 import { TokenPriceFetcherBase } from '../token-price-fetcher-base';
 
 export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
-  private logger = createLogger('IncentiveService');
-
   constructor() {
     super('Aave');
   }
@@ -50,10 +47,6 @@ export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
           assetData.priceInMarketReferenceCurrency,
           marketData.networkBaseTokenPriceDecimals,
         ),
-      );
-
-      this.logger.info(
-        `Aave fetcher: Price found for token ${token.address} on chain ${token.chainId}: $${assetsPriceUSD}`,
       );
 
       return assetsPriceUSD;
