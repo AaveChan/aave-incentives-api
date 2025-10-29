@@ -280,7 +280,7 @@ export class OnchainProvider implements IncentiveProvider {
         const rewardPerYearFormatted = Number(formatUnits(rewardPerYear, rewardToken.decimals));
         const rewardPerYearUSD = rewardPerYearFormatted * rewardTokenPrice;
 
-        apr = rewardPerYearUSD / rewardedTokenSupplyUSD;
+        apr = (rewardPerYearUSD / rewardedTokenSupplyUSD) * 100;
       }
     }
 
