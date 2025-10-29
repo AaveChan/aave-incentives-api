@@ -15,9 +15,9 @@ import {
   aTokenInfo,
   vIncentivesData,
   vTokenInfo,
-} from '@/services/aave-ui-incentive-service';
-import { ERC20Service } from '@/services/erc20-service';
-import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher-service';
+} from '@/services/aave-ui-incentive.service';
+import { ERC20Service } from '@/services/erc20.service';
+import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service';
 import {
   CampaignConfig,
   Incentive,

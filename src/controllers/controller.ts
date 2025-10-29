@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 
 import { createLogger } from '@/config/logger';
-import { IncentivesService } from '@/services/incentives-service';
+import { IncentivesService } from '@/services/incentives.service';
 import { GetIncentivesResponse } from '@/types';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
 

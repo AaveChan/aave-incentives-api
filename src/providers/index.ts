@@ -12,7 +12,7 @@ export interface IncentiveProvider {
   incentiveType: IncentiveType;
 }
 
-export * from './aci-provider/aci-provider';
-export * from './external-points-provider/external-points-provider';
-export * from './merkl-provider/merkl-provider';
-export * from './onchain-provider/onchain-provider';
+export * from './aci-provider/aci.provider';
+export * from './external-points-provider/external-points.provider';
+export * from './merkl-provider/merkl.provider';
+export * from './onchain-provider/onchain.provider';
