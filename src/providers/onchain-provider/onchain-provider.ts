@@ -465,7 +465,7 @@ export class OnchainProvider implements IncentiveProvider {
     instanceName: string,
   ) => {
     const prefix = type === AaveTokenType.A ? 'Supply' : 'Borrow';
-    const incentiveName = `${prefix} your ${underlyingToken.symbol} on ${instanceName} to start earning ${rewardToken.symbol} rewards.`;
+    const incentiveName = `${prefix} ${underlyingToken.symbol} on ${instanceName} to start earning ${rewardToken.symbol} rewards.`;
     return incentiveName;
   };
 
