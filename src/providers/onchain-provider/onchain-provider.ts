@@ -7,7 +7,6 @@ import {
   AaveInstanceName,
   AaveTokenType,
   getAaveToken,
-  getAaveTokenAllData,
 } from '@/lib/aave/aave-tokens';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp';
 import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher-service';
@@ -87,6 +86,7 @@ export class OnchainProvider implements IncentiveProvider {
           const aIncentives = await this.mapLmIncentiveToApiIncentive({
             aaveInstanceName,
             incentivesData: incentiveData.aIncentiveData,
+            rewardedTokenAddress: incentiveData.aIncentiveData.tokenAddress,
             underlyingTokenAddress: incentiveData.underlyingAsset,
             type: AaveTokenType.A,
             chainId,
@@ -98,6 +98,7 @@ export class OnchainProvider implements IncentiveProvider {
           const vIncentives = await this.mapLmIncentiveToApiIncentive({
             aaveInstanceName,
             incentivesData: incentiveData.vIncentiveData,
+            rewardedTokenAddress: incentiveData.vIncentiveData.tokenAddress,
             underlyingTokenAddress: incentiveData.underlyingAsset,
             type: AaveTokenType.V,
             chainId,
@@ -114,51 +115,38 @@ export class OnchainProvider implements IncentiveProvider {
   mapLmIncentiveToApiIncentive = async ({
     aaveInstanceName,
     incentivesData,
-    underlyingTokenAddress, // maybe there is a way to use atoken address so we avvoid using the underlying address which can be shared between instances on the same chain
+    rewardedTokenAddress,
+    underlyingTokenAddress,
     type,
     chainId,
   }: {
     aaveInstanceName: AaveInstanceName;
     incentivesData: aIncentivesData | vIncentivesData;
+    rewardedTokenAddress: Address;
     underlyingTokenAddress: Address;
     type: AaveTokenType.A | AaveTokenType.V;
     chainId: number;
   }) => {
     const allIncentives: Incentive[] = [];
 
-    const tokenData = getAaveTokenAllData({
-      tokenAddress: underlyingTokenAddress,
-      chainId,
-      instanceName: aaveInstanceName,
-    });
-
-    if (!tokenData || !tokenData.token || !tokenData.aaveTokenInfo) {
-      throw new Error(
-        `Rewarded token address not found for underlying token ${underlyingTokenAddress} on chain ${chainId}`,
-      );
-    }
-
-    const { token: underlyingToken, aaveTokenInfo: underlyingTokenAaveInfo } = tokenData;
-
-    const rewardedTokenAddress =
-      type == AaveTokenType.A
-        ? underlyingTokenAaveInfo.book.A_TOKEN
-        : underlyingTokenAaveInfo.book.V_TOKEN;
-
-    if (!rewardedTokenAddress) {
-      return [];
-    }
-
     const rewardedToken = getAaveToken({
       tokenAddress: rewardedTokenAddress,
       chainId,
-      instanceName: aaveInstanceName,
     });
 
-    if (!rewardedToken) {
+    const underlyingToken = getAaveToken({
+      tokenAddress: underlyingTokenAddress,
+      chainId,
+    });
+
+    if (!rewardedToken || !underlyingToken) {
       throw new Error(
-        `Rewarded token not found for address ${rewardedTokenAddress} on chain ${chainId}`,
+        `Rewarded token address not found for token ${rewardedTokenAddress} on chain ${chainId}`,
       );
+    }
+
+    if (!rewardedTokenAddress) {
+      return [];
     }
 
     const currentTimestamp = getCurrentTimestamp();
