@@ -3,7 +3,7 @@ import { Address, formatUnits } from 'viem';
 import { getViemClient } from '@/clients/viem';
 import { uIPoolDataProviderABI } from '@/constants/abis';
 
-import { AaveInstanceBook } from './aave/aave-tokens';
+import { AaveInstanceBook } from '../aave/aave-tokens';
 
 // UI Pool Types
 export type UiPoolData = Awaited<ReturnType<typeof getUiPoolData>>;

@@ -3,7 +3,7 @@ import { Address } from 'viem';
 
 import { createLogger } from '@/config/logger';
 import { GHO } from '@/constants/tokens';
-import { compareTokens, tokenToString } from '@/lib/token';
+import { compareTokens, tokenToString } from '@/lib/token/token';
 import { Token } from '@/types';
 
 import { AaveTokenPriceFetcher } from './fetchers/aave-fetcher';
