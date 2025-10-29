@@ -14,7 +14,7 @@ export class IncentivesService {
 
   private providers: IncentiveProvider[] = [
     new ACIProvider(),
-    new MerklProvider(), // they do cache internally
+    new MerklProvider(),
     new ExternalPointsProvider(),
     new OnchainProvider(),
   ];

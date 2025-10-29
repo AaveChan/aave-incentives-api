@@ -207,7 +207,6 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
         },
       ],
     },
-    // all PTs
   ],
   [POINT_PROGRAM_IDS.KELP]: [
     {

@@ -30,7 +30,6 @@ import {
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
-// import { metis } from 'viem/chains';
 
 const INSTANCES_ENABLED: string[] = [
   'AaveV3Ethereum',

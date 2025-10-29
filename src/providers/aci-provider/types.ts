@@ -1,5 +1,6 @@
-import { AaveInstanceType, AaveTokenType, BookType } from '@/lib/aave/aave-tokens';
 import { Address } from 'viem';
+
+import { AaveInstanceType, AaveTokenType, BookType } from '@/lib/aave/aave-tokens';
 
 export type Actions = Record<ActionName, Action>;
 
@@ -48,7 +49,7 @@ enum Frequency {
   ANNUALLY = 'annually',
 }
 
-export type InfoData = {
+type InfoData = {
   actionsData: ActionData[];
   boostersData: BoosterData[];
   dilutersData: DiluterData[];
@@ -76,28 +77,3 @@ type ForumLink = {
   title: string;
   link: string;
 };
-
-// export type Campaign = {
-//   actionName: CampaignName;
-//   actionToken: Token;
-//   rewardToken: Token;
-//   chainId: number;
-//   displayName?: string;
-//   infosLink?: string;
-// };
-
-export type Round = {
-  startTimestamp: string;
-  endTimestamp: string;
-  budget?: string;
-  apr?: string;
-  maxBudget?: string;
-  campaignId?: string;
-};
-
-export enum CampaignName {
-  HoldSgho = 'ethereum-sgho',
-  AvalancheSupplySAvax = 'avalanche-supply-savax',
-}
-
-export type Rounds = Record<CampaignName, Round[]>;
