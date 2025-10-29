@@ -2,7 +2,6 @@ import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { getViemClient } from '@/clients/viem';
-import { createLogger } from '@/config/logger';
 import {
   AaveInstanceEntries,
   AaveInstanceName,
@@ -54,8 +53,6 @@ export class OnchainProvider implements IncentiveProvider {
   erc20Service = new ERC20Service();
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
-  private logger = createLogger('OnchainProvider');
-
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
 
@@ -74,21 +71,14 @@ export class OnchainProvider implements IncentiveProvider {
 
       if (fetchOptions?.chainId ? aaveInstanceBook.CHAIN_ID === fetchOptions?.chainId : true) {
         const chainId = aaveInstanceBook.CHAIN_ID;
-        console.time(`getUiIncentivesData-${chainId}`);
+        // console.time(`getUiIncentivesData-${chainId}`);
         const incentivesData = await this.aaveUIIncentiveService.getUiIncentivesData(
           aaveInstanceBook,
           chainId,
         );
-        console.timeEnd(`getUiIncentivesData-${chainId}`);
-
-        this.logger.info(`incentivesData`);
-        // console.log(incentivesData);
-        this.logger.info(
-          `Fetched incentivesData for ${aaveInstanceName}: ${incentivesData.length} items`,
-        );
+        // console.timeEnd(`getUiIncentivesData-${chainId}`);
 
         for (const incentiveData of incentivesData) {
-          // console.time(`${incentiveData.aIncentiveData.tokenAddress}--`);
           const aIncentives = await this.mapLmIncentiveToApiIncentive({
             aaveInstanceName,
             incentivesData: incentiveData.aIncentiveData,
@@ -97,7 +87,6 @@ export class OnchainProvider implements IncentiveProvider {
             type: AaveTokenType.A,
             chainId,
           });
-          // console.timeEnd(`${incentiveData.aIncentiveData.tokenAddress}--`);
 
           allIncentives.push(...aIncentives);
 
@@ -229,24 +218,24 @@ export class OnchainProvider implements IncentiveProvider {
   }> => {
     let apr: number | undefined;
     if (status === Status.LIVE) {
-      console.time(`2 getTokenPrice-${rewardedToken.address}-${rewardToken.address}`);
+      // console.time(`2-getTokenPrice-${rewardedToken.address}-${rewardToken.address}`);
       const rewardedTokenPrice = await this.tokenPriceFetcherService.getTokenPrice({
         token: rewardedToken,
       });
       const rewardTokenPrice = await this.tokenPriceFetcherService.getTokenPrice({
         token: rewardToken,
       });
-      console.timeEnd(`2 getTokenPrice-${rewardedToken.address}-${rewardToken.address}`);
+      // console.timeEnd(`2-getTokenPrice-${rewardedToken.address}-${rewardToken.address}`);
 
       if (!rewardedTokenPrice || !rewardTokenPrice) {
         apr = 0;
       } else {
-        console.time(`getTotalSupply-${rewardedToken.address}`);
+        // console.time(`getTotalSupply-${rewardedToken.address}`);
         const rewardedTokenSupply = await this.erc20Service.getTotalSupply({
           chainId,
           tokenAddress: rewardedToken.address,
         });
-        console.timeEnd(`getTotalSupply-${rewardedToken.address}`);
+        // console.timeEnd(`getTotalSupply-${rewardedToken.address}`);
 
         const rewardedTokenSupplyFormatted = Number(
           formatUnits(rewardedTokenSupply, rewardedToken.decimals),
