@@ -90,7 +90,10 @@ export class MerklProvider implements IncentiveProvider {
         rewardedTokenDecimals = rewardMerklToken.decimals;
         rewardedTokenName = rewardMerklToken.name;
       } else {
-        const rewardedToken = getAaveToken(rewardedTokenAddress, opportunity.chainId);
+        const rewardedToken = getAaveToken({
+          tokenAddress: rewardedTokenAddress,
+          chainId: opportunity.chainId,
+        });
 
         if (rewardedToken) {
           rewardedTokenName = rewardedToken.name;
@@ -194,8 +197,11 @@ export class MerklProvider implements IncentiveProvider {
       if (!rewardedTokenAddress) {
         return false;
       } else {
-        const tokenInfo = getAaveTokenInfo(rewardedTokenAddress, opportunity.chainId);
-        if (!tokenInfo?.type || tokenInfo.type === AaveTokenType.STATA) {
+        const aaveTokenInfo = getAaveTokenInfo({
+          tokenAddress: rewardedTokenAddress,
+          chainId: opportunity.chainId,
+        });
+        if (!aaveTokenInfo?.type || aaveTokenInfo.type === AaveTokenType.STATA) {
           return false;
         }
       }

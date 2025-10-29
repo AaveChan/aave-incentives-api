@@ -63,7 +63,10 @@ export class ExternalPointsProvider implements IncentiveProvider {
   ): Incentive[] {
     const incentives: Incentive[] = [];
     for (const rewardedTokenAddress of pointIncentive.rewardedTokenAddresses) {
-      const rewardedToken = getAaveToken(rewardedTokenAddress, pointIncentive.chainId);
+      const rewardedToken = getAaveToken({
+        tokenAddress: rewardedTokenAddress,
+        chainId: pointIncentive.chainId,
+      });
 
       if (!rewardedToken) {
         console.warn(`Token ${rewardedTokenAddress} not found on chain ${pointIncentive.chainId}`);

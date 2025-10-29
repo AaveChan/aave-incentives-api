@@ -23,7 +23,24 @@ import { AaveV3HorizonRWA } from './horizon-assets';
 import { Address, zeroAddress } from 'viem';
 import { getChain } from '../utils/chains';
 import { Token } from '@/types';
-import { ink } from 'viem/chains';
+import {
+  arbitrum,
+  avalanche,
+  base,
+  bsc,
+  celo,
+  gnosis,
+  ink,
+  linea,
+  mainnet,
+  metis,
+  optimism,
+  plasma,
+  polygon,
+  scroll,
+  sonic,
+  zksync,
+} from 'viem/chains';
 
 export type BookType = {
   decimals: number;
@@ -54,6 +71,68 @@ export enum AaveInstanceType {
   HORIZON_RWA = 'Horizon RWA',
 }
 
+export type AaveTokenInfo = Token & {
+  type: AaveTokenType;
+  book: BookType;
+  bookName: string;
+  instanceType: AaveInstanceType | null;
+  underlyingTokenAddress: Address;
+};
+
+// export const AaveInstanceEntriesByChainId = {
+//   [mainnet.id]: {
+//     AaveV3Ethereum: AaveV3Ethereum,
+//     AaveV3EthereumEtherFi: AaveV3EthereumEtherFi,
+//     AaveV3EthereumLido: AaveV3EthereumLido,
+//     AaveV3HorizonRWA: AaveV3HorizonRWA,
+//   },
+//   [arbitrum.id]: {
+//     AaveV3Arbitrum: AaveV3Arbitrum,
+//   },
+//   [avalanche.id]: {
+//     AaveV3Avalanche: AaveV3Avalanche,
+//   },
+//   [base.id]: {
+//     AaveV3Base: AaveV3Base,
+//   },
+//   [bsc.id]: {
+//     AaveV3BNB: AaveV3BNB,
+//   },
+//   [linea.id]: {
+//     AaveV3Linea: AaveV3Linea,
+//   },
+//   [polygon.id]: {
+//     AaveV3Polygon: AaveV3Polygon,
+//   },
+//   [optimism.id]: {
+//     AaveV3Optimism: AaveV3Optimism,
+//   },
+//   [zksync.id]: {
+//     AaveV3ZkSync: AaveV3ZkSync,
+//   },
+//   [scroll.id]: {
+//     AaveV3Scroll: AaveV3Scroll,
+//   },
+//   [gnosis.id]: {
+//     AaveV3Gnosis: AaveV3Gnosis,
+//   },
+//   [metis.id]: {
+//     AaveV3Metis: AaveV3Metis,
+//   },
+//   [celo.id]: {
+//     AaveV3Celo: AaveV3Celo,
+//   },
+//   [plasma.id]: {
+//     AaveV3Plasma: AaveV3Plasma,
+//   },
+//   [sonic.id]: {
+//     AaveV3Sonic: AaveV3Sonic,
+//   },
+//   [ink.id]: {
+//     AaveV3InkWhitelabel: AaveV3InkWhitelabel,
+//   },
+// } as const;
+
 export const AaveInstanceEntries = {
   AaveV3Arbitrum: AaveV3Arbitrum,
   AaveV3Avalanche: AaveV3Avalanche,
@@ -76,7 +155,20 @@ export const AaveInstanceEntries = {
   AaveV3HorizonRWA: AaveV3HorizonRWA,
 } as const;
 
-export type AaveInstanceBook = (typeof AaveInstanceEntries)[keyof typeof AaveInstanceEntries];
+const stkTokens: Address[] = [
+  AaveSafetyModule.STK_GHO,
+  AaveSafetyModule.STK_AAVE,
+  AaveSafetyModule.STK_ABPT,
+  AaveSafetyModule.STK_AAVE_WSTETH_BPTV2,
+];
+
+// export const AaveInstanceEntries = Object.fromEntries(
+//   Object.values(AaveInstanceEntriesByChainId).flatMap(Object.entries),
+// );
+
+export type AaveInstanceName = keyof typeof AaveInstanceEntries;
+
+export type AaveInstanceBook = (typeof AaveInstanceEntries)[AaveInstanceName];
 
 const AllAddressBooksAssets = Object.fromEntries(
   Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, { ...instance.ASSETS }]),
@@ -86,90 +178,150 @@ const AllAddressBooksChainIds = Object.fromEntries(
   Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, instance.CHAIN_ID]),
 );
 
+// do a record of AaveInstanceBook but classed by chainIds: Record<number,Record<AaveInstanceName, AaveInstanceBook>>
+
 const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
 const twentywstETHEightyAAVE = '0x3de27EFa2F1AA663Ae5D458857e731c129069F29';
 
-export const getAaveToken = (tokenAddress: Address, chainId: number) => {
-  const tokenInfo = getAaveTokenInfo(tokenAddress, chainId);
-  const chain = getChain(chainId);
-  let symbol: string | undefined;
-  let name: string | undefined;
-  switch (tokenInfo?.type) {
-    case AaveTokenType.A:
-      symbol = getATokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      name = getATokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      break;
-    case AaveTokenType.V:
-      symbol = getVTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      name = getVTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      break;
-    case AaveTokenType.STATA:
-      symbol = getStataTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      name = getStataTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
-      break;
-    case AaveTokenType.STK:
-      symbol = tokenInfo.name;
-      name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
-      break;
-    case AaveTokenType.UNDERLYING:
-      symbol = tokenInfo.name;
-      name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
-      break;
-    case AaveTokenType.NOT_LISTED:
-    default:
-      return undefined;
-  }
+// export const getAaveToken = (
+//   tokenAddress: Address,
+//   chainId: number,
+//   instanceName: AaveInstanceName,
+// ) => {
+//   const tokenInfo = getAaveTokenInfo(tokenAddress, chainId, instanceName);
+//   const chain = getChain(chainId);
+//   let symbol: string | undefined;
+//   let name: string | undefined;
+//   switch (tokenInfo?.type) {
+//     case AaveTokenType.A:
+//       symbol = getATokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getATokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.V:
+//       symbol = getVTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getVTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.STATA:
+//       symbol = getStataTokenSymbol(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       name = getStataTokenName(tokenInfo.name, chain.name, tokenInfo.instanceType);
+//       break;
+//     case AaveTokenType.STK:
+//       symbol = tokenInfo.name;
+//       name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
+//       break;
+//     case AaveTokenType.UNDERLYING:
+//       symbol = tokenInfo.name;
+//       name = tokenInfo.name; // tokenInfo.name is the symbol. So the name here is not really accurate.
+//       break;
+//     case AaveTokenType.NOT_LISTED:
+//     default:
+//       return undefined;
+//   }
 
-  if (symbol && name) {
-    const aaveToken: Token = {
-      address: tokenAddress,
-      symbol: symbol,
-      name: name,
-      decimals: tokenInfo.book.decimals,
-      chainId: chainId,
-    };
+//   if (symbol && name) {
+//     const aaveToken: Token = {
+//       address: tokenAddress,
+//       symbol: symbol,
+//       name: name,
+//       decimals: tokenInfo.book.decimals,
+//       chainId: chainId,
+//     };
 
-    return aaveToken;
-  }
+//     return aaveToken;
+//   }
+// };
+
+export const getAaveToken = ({
+  tokenAddress,
+  chainId,
+  instanceName,
+}: {
+  tokenAddress: Address;
+  chainId: number;
+  instanceName?: AaveInstanceName;
+}): Token | undefined => {
+  const tokenInfo = getAaveTokenAllData({
+    tokenAddress,
+    chainId,
+    instanceName,
+  });
+  return tokenInfo ? tokenInfo.token : undefined;
 };
 
-export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
-  let tokenType = AaveTokenType.NOT_LISTED;
-  let tokenBook: BookType | undefined;
+/**
+ * Get Aave token information.
+ * @param param0 - The parameters for fetching the token information.
+ * @param param0.tokenAddress - The address of the token.
+ * @param param0.chainId - The chain ID where the token is located.
+ * @param param0.instanceName - (Optional) The Aave instance name. Useful when fetching by the underlying token and if the token exists in multiple instances on the same chain.
+ * @returns The Aave token information or undefined if not found.
+ */
+export const getAaveTokenInfo = ({
+  tokenAddress,
+  chainId,
+  instanceName,
+}: {
+  tokenAddress: Address;
+  chainId: number;
+  instanceName?: AaveInstanceName;
+}): AaveTokenInfo | undefined => {
+  const tokenInfo = getAaveTokenAllData({
+    tokenAddress,
+    chainId,
+    instanceName,
+  });
+  return tokenInfo ? tokenInfo.aaveTokenInfo : undefined;
+};
+
+export const getAaveTokenAllData = ({
+  tokenAddress,
+  chainId,
+  instanceName,
+}: {
+  tokenAddress: Address;
+  chainId: number;
+  instanceName?: AaveInstanceName;
+}): {
+  token: Token;
+  aaveTokenInfo: AaveTokenInfo;
+} | null => {
+  let type = AaveTokenType.NOT_LISTED;
+  let book: BookType | undefined;
   let tokenBookName: string | undefined;
   let instanceType: AaveInstanceType | undefined;
+  let symbol: string | undefined;
+  let name: string | undefined;
+  let underlyingTokenAddress: Address | undefined;
 
-  const stkTokens: Address[] = [
-    AaveSafetyModule.STK_GHO,
-    AaveSafetyModule.STK_AAVE,
-    AaveSafetyModule.STK_ABPT,
-    AaveSafetyModule.STK_AAVE_WSTETH_BPTV2,
-  ];
+  const chain = getChain(chainId);
+
   if (stkTokens.includes(tokenAddress)) {
-    tokenType = AaveTokenType.STK;
+    type = AaveTokenType.STK;
 
-    let name: string | undefined;
-    let underlyingTokenAddress: Address | undefined;
     switch (tokenAddress) {
       case AaveSafetyModule.STK_GHO:
+        tokenBookName = 'STK_GHO';
         name = 'stkGHO';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.GHO.UNDERLYING;
         break;
       case AaveSafetyModule.STK_AAVE:
+        tokenBookName = 'STK_AAVE';
         name = 'stkAAVE';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.AAVE.UNDERLYING;
         break;
       case AaveSafetyModule.STK_ABPT:
+        tokenBookName = 'STK_ABPT';
         name = 'stkABPT';
         underlyingTokenAddress = abpt;
         break;
       case AaveSafetyModule.STK_AAVE_WSTETH_BPTV2:
+        tokenBookName = 'STK_AAVE_WSTETH_BPTV2';
         name = 'stkAAVEwstETHBPTv2';
         underlyingTokenAddress = twentywstETHEightyAAVE;
         break;
     }
 
-    if (name && underlyingTokenAddress) {
+    if (name && tokenBookName && symbol && underlyingTokenAddress) {
       const book: BookType = {
         decimals: 18,
         id: chainId,
@@ -182,62 +334,123 @@ export const getAaveTokenInfo = (tokenAddress: Address, chainId: number) => {
         STATA_TOKEN: zeroAddress,
         STK_TOKEN: tokenAddress,
       };
-      return {
-        type: tokenType,
+
+      const token: Token = {
+        name: name,
+        symbol: symbol,
+        address: tokenAddress,
+        chainId: chainId,
+        decimals: 18,
+      };
+
+      const aaveTokenInfo: AaveTokenInfo = {
+        ...token,
+        type: type,
         book,
-        name,
-        instanceType: AaveInstanceType.CORE,
+        bookName: tokenBookName,
+        instanceType: null,
+        underlyingTokenAddress,
+      };
+
+      return {
+        token,
+        aaveTokenInfo,
       };
     }
   }
 
   for (const [key, assets] of Object.entries(AllAddressBooksAssets)) {
     const chainIdOfBook = AllAddressBooksChainIds[key];
-    if (chainIdOfBook !== chainId) {
+
+    // If the chainId or instanceName don't match, skip this book
+    if (chainIdOfBook !== chainId || (instanceName && key !== instanceName)) {
       continue;
     }
 
     const entries: [string, BookType][] = Object.entries(assets);
 
-    for (const [name, asset] of entries) {
+    for (const [assetName, asset] of entries) {
       switch (tokenAddress) {
         case asset.A_TOKEN:
-          tokenType = AaveTokenType.A;
-          tokenBook = asset;
-          tokenBookName = name;
+          type = AaveTokenType.A;
+          book = asset;
+          tokenBookName = assetName;
           instanceType = getAaveInstanceFromInstanceFullName(key);
+          symbol = getATokenSymbol(assetName, chain.name, instanceType);
+          name = getATokenName(assetName, chain.name, instanceType);
+          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.V_TOKEN:
-          tokenType = AaveTokenType.V;
-          tokenBook = asset;
-          tokenBookName = name;
+          type = AaveTokenType.V;
+          book = asset;
+          tokenBookName = assetName;
           instanceType = getAaveInstanceFromInstanceFullName(key);
+          symbol = getVTokenSymbol(assetName, chain.name, instanceType);
+          name = getVTokenName(assetName, chain.name, instanceType);
+          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.STATA_TOKEN:
         case asset.STATIC_A_TOKEN:
-          tokenType = AaveTokenType.STATA;
-          tokenBook = asset;
-          tokenBookName = name;
+          type = AaveTokenType.STATA;
+          book = asset;
+          tokenBookName = assetName;
           instanceType = getAaveInstanceFromInstanceFullName(key);
+          symbol = getStataTokenSymbol(assetName, chain.name, instanceType);
+          name = getStataTokenName(assetName, chain.name, instanceType);
+          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.UNDERLYING:
-          tokenType = AaveTokenType.UNDERLYING;
-          tokenBook = asset;
-          tokenBookName = name;
+          type = AaveTokenType.UNDERLYING;
+          book = asset;
+          tokenBookName = assetName;
           instanceType = getAaveInstanceFromInstanceFullName(key);
+          symbol = assetName;
+          name = assetName; // tokenInfo.name is the symbol. So the name here is not really accurate.
+          underlyingTokenAddress = asset.UNDERLYING;
           break;
       }
     }
   }
 
-  if (tokenBook && tokenBookName) {
-    return {
-      type: tokenType,
-      book: tokenBook,
-      name: tokenBookName,
+  if (type && name && tokenBookName && symbol && book && instanceType && underlyingTokenAddress) {
+    const token: Token = {
+      name: name,
+      symbol: symbol,
+      address: tokenAddress,
+      chainId: chainId,
+      decimals: book.decimals,
+    };
+
+    const aaveTokenInfo: AaveTokenInfo = {
+      ...token,
+      type,
+      book,
+      bookName: tokenBookName,
       instanceType,
+      underlyingTokenAddress,
+    };
+
+    return {
+      token,
+      aaveTokenInfo,
     };
   }
+
+  return null;
+};
+
+export const getAaveInstanceBook = (aaveInstanceName: AaveInstanceName) => {
+  return AaveInstanceEntries[aaveInstanceName];
+};
+
+export const getAaveInstancesBookByChainId = (chainId: number) => {
+  const instances: AaveInstanceBook[] = [];
+  for (const instance of Object.values(AaveInstanceEntries)) {
+    if (instance.CHAIN_ID === chainId) {
+      instances.push(instance);
+    }
+  }
+  return instances;
 };
 
 const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
