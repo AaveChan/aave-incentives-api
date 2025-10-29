@@ -1,3 +1,4 @@
+import { createLogger } from '@/config/logger';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -9,9 +10,11 @@ import { OnchainProvider } from '@/providers/onchain-provider/onchain-provider';
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {
+  private logger = createLogger('IncentivesService');
+
   private providers: IncentiveProvider[] = [
     new ACIProvider(),
-    new MerklProvider(),
+    new MerklProvider(), // they do cache internally
     new ExternalPointsProvider(),
     new OnchainProvider(),
   ];
@@ -43,7 +46,7 @@ export class IncentivesService {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);
       } else {
-        console.error(`Provider ${this.providers[index]?.source} failed:`, result.reason);
+        this.logger.error(`Provider ${this.providers[index]?.source} failed:`, result.reason);
       }
     });
 

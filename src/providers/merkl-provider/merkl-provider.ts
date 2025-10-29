@@ -1,5 +1,6 @@
 import { ink } from 'viem/chains';
 
+import { createLogger } from '@/config/logger';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
@@ -44,6 +45,7 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider implements IncentiveProvider {
+  private logger = createLogger('MerklProvider');
   incentiveType = IncentiveType.OFFCHAIN;
   source = IncentiveSource.MERKL_API;
 
@@ -101,7 +103,7 @@ export class MerklProvider implements IncentiveProvider {
           rewardedTokenSymbol = rewardedToken.symbol;
           rewardedTokenDecimals = rewardedToken.decimals;
         } else {
-          console.warn(
+          this.logger.warn(
             `Rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
           );
 

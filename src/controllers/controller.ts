@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 
+import { createLogger } from '@/config/logger';
 import { IncentivesService } from '@/services/incentives-service';
 import { GetIncentivesResponse } from '@/types';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
 
 export class IncentivesController {
+  private logger = createLogger('IncentivesController');
   private incentivesService = new IncentivesService();
 
   async getAllIncentives(req: Request, res: Response) {
@@ -24,9 +26,9 @@ export class IncentivesController {
         },
       };
 
-      console.log('Response:', response);
+      this.logger.debug('Response:', response);
       res.json(response);
-      console.log('Response sent successfully');
+      this.logger.debug('Response sent successfully');
     } catch {
       res.status(500).json({
         success: false,

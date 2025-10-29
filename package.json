@@ -20,6 +20,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "express": "^5.1.0",
     "viem": "^2.37.6",
+    "winston": "^3.18.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {

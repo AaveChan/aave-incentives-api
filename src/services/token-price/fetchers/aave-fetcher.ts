@@ -1,6 +1,7 @@
 import { formatUnits } from 'viem';
 
 import { getViemClient } from '@/clients/viem';
+import { createLogger } from '@/config/logger';
 import { uiPoolDataProviderAbi } from '@/constants/abis';
 import { getAaveInstancesBookByChainId } from '@/lib/aave/aave-tokens';
 import { Token } from '@/types';
@@ -8,6 +9,8 @@ import { Token } from '@/types';
 import { TokenPriceFetcherBase } from '../token-price-fetcher-base';
 
 export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
+  private logger = createLogger('IncentiveService');
+
   constructor() {
     super('Aave');
   }
@@ -16,10 +19,6 @@ export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
     const client = getViemClient(token.chainId);
 
     const aaveInstances = getAaveInstancesBookByChainId(token.chainId);
-
-    console.log(
-      `Aave fetcher: found ${aaveInstances.length} instances for chainId ${token.chainId}`,
-    );
 
     for (const aaveInstance of aaveInstances) {
       const poolDataProvider = aaveInstance.UI_POOL_DATA_PROVIDER;
@@ -34,10 +33,6 @@ export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
       });
       const assetsData = uiPoolData[0];
       const marketData = uiPoolData[1];
-
-      console.log(
-        `Aave fetcher checking instance ${aaveInstance.CHAIN_ID} for token ${token.address} on chain ${token.chainId}`,
-      );
 
       const assetData = assetsData.find(
         (data) =>
@@ -57,8 +52,8 @@ export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
         ),
       );
 
-      console.log(
-        `Aave fetcher: Price found for token ${token.address} on chain ${token.chainId} in instance ${aaveInstance.CHAIN_ID}: $${assetsPriceUSD}`,
+      this.logger.info(
+        `Aave fetcher: Price found for token ${token.address} on chain ${token.chainId}: $${assetsPriceUSD}`,
       );
 
       return assetsPriceUSD;

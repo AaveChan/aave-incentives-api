@@ -1,6 +1,7 @@
 import { Address, formatUnits } from 'viem';
 
 import { getViemClient } from '@/clients/viem';
+import { createLogger } from '@/config/logger';
 import { aTokenAbi } from '@/constants/abis';
 import {
   AaveInstanceEntries,
@@ -47,11 +48,9 @@ export class OnchainProvider implements IncentiveProvider {
   source = IncentiveSource.ONCHAIN_RPC;
   claimLink = 'https://app.aave.com/?marketName=proto_mainnet_v3'; // TODO: remoe the end
 
-  tokenPriceFetcherService: TokenPriceFetcherService;
+  tokenPriceFetcherService = new TokenPriceFetcherService();
 
-  constructor() {
-    this.tokenPriceFetcherService = new TokenPriceFetcherService();
-  }
+  private logger = createLogger('OnchainProvider');
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
@@ -75,9 +74,11 @@ export class OnchainProvider implements IncentiveProvider {
         const incentivesData = await getUiIncentivesData(aaveInstanceBook, chainId);
         console.timeEnd(`test-${chainId}`);
 
-        console.log('incentivesData');
+        this.logger.info(`incentivesData`);
         // console.log(incentivesData);
-        console.log(incentivesData.length);
+        this.logger.info(
+          `Fetched incentivesData for ${aaveInstanceName}: ${incentivesData.length} items`,
+        );
 
         // const uiPoolData = await getUiPoolData(aaveInstanceBook, chainId);
 
@@ -257,26 +258,30 @@ export class OnchainProvider implements IncentiveProvider {
         token: rewardToken,
       });
 
-      // console.time(`test-total-supply-${chainId}`);
-      console.time(`${rewardedToken.address}`);
-      const rewardedTokenSupply = await client.readContract({
-        address: rewardedToken.address,
-        abi: aTokenAbi,
-        functionName: 'totalSupply',
-      });
-      console.timeEnd(`${rewardedToken.address}`);
-      // console.timeEnd(`test-total-supply-${chainId}`);
+      if (!rewardedTokenPrice || !rewardTokenPrice) {
+        apr = 0;
+      } else {
+        // console.time(`test-total-supply-${chainId}`);
+        console.time(`${rewardedToken.address}`);
+        const rewardedTokenSupply = await client.readContract({
+          address: rewardedToken.address,
+          abi: aTokenAbi,
+          functionName: 'totalSupply',
+        });
+        console.timeEnd(`${rewardedToken.address}`);
+        // console.timeEnd(`test-total-supply-${chainId}`);
 
-      const rewardedTokenSupplyFormatted = Number(
-        formatUnits(rewardedTokenSupply, rewardedToken.decimals),
-      );
-      const rewardedTokenSupplyUSD = rewardedTokenSupplyFormatted * rewardedTokenPrice;
+        const rewardedTokenSupplyFormatted = Number(
+          formatUnits(rewardedTokenSupply, rewardedToken.decimals),
+        );
+        const rewardedTokenSupplyUSD = rewardedTokenSupplyFormatted * rewardedTokenPrice;
 
-      const rewardPerYear = rewardTokenInfo.emissionPerSecond * 365n * 24n * 60n * 60n;
-      const rewardPerYearFormatted = Number(formatUnits(rewardPerYear, rewardToken.decimals));
-      const rewardPerYearUSD = rewardPerYearFormatted * rewardTokenPrice;
+        const rewardPerYear = rewardTokenInfo.emissionPerSecond * 365n * 24n * 60n * 60n;
+        const rewardPerYearFormatted = Number(formatUnits(rewardPerYear, rewardToken.decimals));
+        const rewardPerYearUSD = rewardPerYearFormatted * rewardTokenPrice;
 
-      apr = rewardPerYearUSD / rewardedTokenSupplyUSD;
+        apr = rewardPerYearUSD / rewardedTokenSupplyUSD;
+      }
     }
 
     const currentCampaignConfig: CampaignConfig = {

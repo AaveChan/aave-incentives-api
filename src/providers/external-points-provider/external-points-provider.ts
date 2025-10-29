@@ -1,3 +1,4 @@
+import { createLogger } from '@/config/logger';
 import { getAaveToken } from '@/lib/aave/aave-tokens';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
@@ -20,6 +21,8 @@ import {
 import { PointCampaign, PointIncentives, PointProgram } from './types';
 
 export class ExternalPointsProvider implements IncentiveProvider {
+  private logger = createLogger('ExternalPointsProvider');
+
   source = IncentiveSource.HARDCODED;
   incentiveType = IncentiveType.EXTERNAL;
   rewardType = RewardType.POINTS;
@@ -39,7 +42,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       const program = pointProgramsMap.get(campaign.programId);
 
       if (!program) {
-        // console.warn(`Point program ${campaign.programId} not found`);
+        this.logger.warn(`Point program ${campaign.programId} not found`);
         continue;
       }
 
@@ -69,7 +72,6 @@ export class ExternalPointsProvider implements IncentiveProvider {
       });
 
       if (!rewardedToken) {
-        // console.warn(`Token ${rewardedTokenAddress} not found on chain ${pointIncentive.chainId}`);
         return [];
       }
 

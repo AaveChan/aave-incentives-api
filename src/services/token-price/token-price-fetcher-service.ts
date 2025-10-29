@@ -1,6 +1,7 @@
 import { AaveSafetyModule } from '@bgd-labs/aave-address-book';
 import { Address } from 'viem';
 
+import { createLogger } from '@/config/logger';
 import { GHO } from '@/constants/tokens';
 import { compareTokens, tokenToString } from '@/lib/token';
 import { Token } from '@/types';
@@ -18,6 +19,8 @@ const fetchersByTokenAddress = new Map<Address, TokenPriceFetcherBase>([
 const proxyTokenMap = new Map<Address, Token>([[AaveSafetyModule.STK_GHO, GHO]]);
 
 export class TokenPriceFetcherService {
+  private logger = createLogger('IncentiveService');
+
   aaveFetcher = new AaveTokenPriceFetcher();
   chainlinkFetcher = new ChainlinkTokenPriceFetcher();
   coingeckoFetcher = new CoingeckoTokenPriceFetcher();
@@ -36,7 +39,7 @@ export class TokenPriceFetcherService {
       if (price) {
         return price;
       } else {
-        console.log(
+        this.logger.warn(
           `A fetcher is setup for ${getTokenFullInfo(
             params.token,
             tokenRequested,
@@ -55,7 +58,7 @@ export class TokenPriceFetcherService {
     for (const fetcher of priceFetchers) {
       const price = await fetcher.getTokenPrice(params);
       if (price) {
-        console.log(
+        this.logger.verbose(
           `${fetcher.fetcherName} fetcher: Price found for ${getTokenFullInfo(
             params.token,
             tokenRequested,
@@ -65,7 +68,9 @@ export class TokenPriceFetcherService {
       }
     }
 
-    throw new Error(`No price found for ${getTokenFullInfo(params.token, tokenRequested)}`);
+    // throw new Error(`No price found for ${getTokenFullInfo(params.token, tokenRequested)}`);
+    this.logger.warn(`No price found for ${getTokenFullInfo(params.token, tokenRequested)}`);
+    return null;
   }
 }
 

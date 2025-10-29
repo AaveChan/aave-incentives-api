@@ -22,6 +22,7 @@ import {
 import { Address, zeroAddress } from 'viem';
 import { ink } from 'viem/chains';
 
+import { createLogger } from '@/config/logger';
 import { Token } from '@/types';
 
 import { getChain } from '../utils/chains';
@@ -310,6 +311,13 @@ export const getAaveTokenAllData = ({
       aaveTokenInfo,
     };
   }
+
+  const logger = createLogger('getAaveTokenAllData');
+  logger.warn(
+    `Token ${tokenAddress} not found on chain ${chainId} ${
+      instanceName ? `for instance ${instanceName}` : ''
+    }`,
+  );
 
   return null;
 };

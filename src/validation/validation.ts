@@ -1,17 +1,12 @@
+import { NextFunction, Request, Response } from 'express';
 import z from 'zod';
-import { Request, Response, NextFunction } from 'express';
 
 export function validateQuery<S extends z.ZodSchema>(schema: S) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log('Validating query parameters:', req.params);
-      console.log('Query parameters validated successfully:', req.query);
       const queryValidated = schema.parse(req.query);
 
-      // (req as any).validatedQuery = queryValidated;
       res.locals.validatedQuery = queryValidated;
-
-      console.log('queryValidated', queryValidated);
 
       next();
     } catch (error) {
