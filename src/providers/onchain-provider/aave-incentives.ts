@@ -5,11 +5,11 @@ import { AaveInstanceBook, AaveInstanceEntries } from '@/lib/aave/aave-tokens';
 // UI Incentives Types
 type IncentivesData = Awaited<ReturnType<typeof getUiIncentivesData>>;
 export type aIncentivesData = IncentivesData[number]['aIncentiveData'];
-// type aTokenInfo = aIncentivesData['rewardsTokenInformation'][number];
+export type aTokenInfo = aIncentivesData['rewardsTokenInformation'][number];
 export type vIncentivesData = Awaited<
   ReturnType<typeof getUiIncentivesData>
 >[number]['vIncentiveData'];
-// type vTokenInfo = vIncentivesData['rewardsTokenInformation'][number];
+export type vTokenInfo = vIncentivesData['rewardsTokenInformation'][number];
 
 // UI Pool Types
 // type AssetsData = Awaited<ReturnType<typeof getUiPoolData>>[0];

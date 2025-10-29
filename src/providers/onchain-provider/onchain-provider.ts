@@ -114,7 +114,7 @@ export class OnchainProvider implements IncentiveProvider {
   mapLmIncentiveToApiIncentive = async ({
     aaveInstanceName,
     incentivesData,
-    underlyingTokenAddress,
+    underlyingTokenAddress, // maybe there is a way to use atoken address so we avvoid using the underlying address which can be shared between instances on the same chain
     type,
     chainId,
   }: {

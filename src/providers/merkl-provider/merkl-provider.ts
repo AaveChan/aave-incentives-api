@@ -1,3 +1,8 @@
+import { ink } from 'viem/chains';
+
+import { ACI_ADDRESSES } from '@/constants/aci-addresses';
+import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
   Incentive,
@@ -14,10 +19,6 @@ import {
   MerklOpportunityWithCampaign,
   RewardTokenType as MerklRewardTokenType,
 } from './types';
-import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp';
-import { ink } from 'viem/chains';
-import { ACI_ADDRESSES } from '@/constants/aci-addresses';
 
 type MerklApiOptions = {
   chainId?: number;
@@ -51,7 +52,7 @@ export class MerklProvider implements IncentiveProvider {
   unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    let allIncentives: Incentive[] = [];
+    const allIncentives: Incentive[] = [];
 
     const chainId = fetchOptions?.chainId;
 

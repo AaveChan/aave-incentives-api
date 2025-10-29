@@ -9,9 +9,11 @@ import {
   AaveV3Scroll,
   AaveV3Sonic,
 } from '@bgd-labs/aave-address-book';
-import { PointProgram, POINT_PROGRAM_IDS, PointIncentives, PointProgramId } from '../types';
 import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'viem/chains';
+
 import { BASE_TIMESTAMP } from '@/lib/utils/timestamp';
+
+import { POINT_PROGRAM_IDS, PointIncentives, PointProgram, PointProgramId } from '../types';
 
 export const pointPrograms: Record<PointProgramId, PointProgram> = {
   [POINT_PROGRAM_IDS.ETHERFI]: {

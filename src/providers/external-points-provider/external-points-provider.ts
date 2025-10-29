@@ -1,3 +1,5 @@
+import { getAaveToken } from '@/lib/aave/aave-tokens';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
   Incentive,
@@ -12,12 +14,10 @@ import {
 import { FetchOptions, IncentiveProvider } from '..';
 import {
   campaignsByChainId,
-  pointProgramsMap,
   pointCampaignsArray as pointCampaignsData,
+  pointProgramsMap,
 } from './config/config';
 import { PointCampaign, PointIncentives, PointProgram } from './types';
-import { getAaveToken } from '@/lib/aave/aave-tokens';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 
 export class ExternalPointsProvider implements IncentiveProvider {
   source = IncentiveSource.HARDCODED;
@@ -39,7 +39,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       const program = pointProgramsMap.get(campaign.programId);
 
       if (!program) {
-        console.warn(`Point program ${campaign.programId} not found`);
+        // console.warn(`Point program ${campaign.programId} not found`);
         continue;
       }
 
@@ -69,7 +69,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       });
 
       if (!rewardedToken) {
-        console.warn(`Token ${rewardedTokenAddress} not found on chain ${pointIncentive.chainId}`);
+        // console.warn(`Token ${rewardedTokenAddress} not found on chain ${pointIncentive.chainId}`);
         return [];
       }
 

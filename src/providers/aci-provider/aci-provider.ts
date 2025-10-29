@@ -1,3 +1,4 @@
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
   Incentive,
@@ -11,7 +12,7 @@ import {
 
 import { FetchOptions, IncentiveProvider } from '..';
 import { Actions, Campaign, Token as AciInfraToken } from './types';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp';
+
 export class ACIProvider implements IncentiveProvider {
   source = IncentiveSource.ACI_ROUNDS;
   incentiveType = IncentiveType.OFFCHAIN;
@@ -20,12 +21,12 @@ export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'http://localhost:3000/api/merit/all-actions-data';
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const aciIncentives = await this.fetchIncentives(fetchOptions);
+  async getIncentives(_fetchOptions?: FetchOptions): Promise<Incentive[]> {
+    const aciIncentives = await this.fetchIncentives();
 
-    let incentives: Incentive[] = [];
+    const incentives: Incentive[] = [];
 
-    // 2 things to fix
+    // things to fix
     // - ✅ provide rounds with timestamp instead of blockNumber through ACI API
     // - ✅ setupAction data not in an array, or create a function to gather all data from the array in 1 string
     // - ✅ make the name of ACIInfraToken type defined
@@ -87,7 +88,7 @@ export class ACIProvider implements IncentiveProvider {
     return token;
   };
 
-  private async fetchIncentives(_fetchOptions?: FetchOptions): Promise<Actions> {
+  private async fetchIncentives(): Promise<Actions> {
     const url = new URL(this.apiUrl);
 
     let allAciIncentives: Actions = {};

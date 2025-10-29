@@ -1,24 +1,26 @@
-import { getChain } from '@/lib/utils/chains';
+import 'dotenv/config';
 
 import { Chain, createPublicClient, fallback, FallbackTransport, http } from 'viem';
 import {
   arbitrum,
   avalanche,
   base,
+  bsc,
+  celo,
   gnosis,
+  ink,
+  linea,
   mainnet,
   metis,
   optimism,
-  polygon,
-  zksync,
-  scroll,
-  bsc,
-  linea,
-  sonic,
-  celo,
-  ink,
   plasma,
+  polygon,
+  scroll,
+  sonic,
+  zksync,
 } from 'viem/chains';
+
+import { getChain } from '@/lib/utils/chains';
 
 export const ETHEREUM_RPCS = ['https://ethereum-rpc.publicnode.com'];
 export const BASE_RPCS = ['https://base-rpc.publicnode.com'];
