@@ -5,8 +5,8 @@ import {
   FetchOptions,
   IncentiveProvider,
   MerklProvider,
+  OnchainProvider,
 } from '@/providers';
-import { OnchainProvider } from '@/providers/onchain-provider/onchain-provider';
 import { Incentive, IncentiveSource, Status } from '@/types';
 
 export class IncentivesService {

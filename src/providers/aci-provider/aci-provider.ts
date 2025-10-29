@@ -10,7 +10,7 @@ import {
   TokenReward,
 } from '@/types';
 
-import { FetchOptions, IncentiveProvider } from '..';
+import { IncentiveProvider } from '..';
 import { Actions, Campaign, Token as AciInfraToken } from './types';
 
 export class ACIProvider implements IncentiveProvider {
@@ -21,7 +21,7 @@ export class ACIProvider implements IncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'http://localhost:3000/api/merit/all-actions-data';
 
-  async getIncentives(_fetchOptions?: FetchOptions): Promise<Incentive[]> {
+  async getIncentives(): Promise<Incentive[]> {
     const aciIncentives = await this.fetchIncentives();
 
     const incentives: Incentive[] = [];
