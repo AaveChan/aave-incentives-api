@@ -137,16 +137,16 @@ const getAlchemyClient = (prefix: string, chain: Chain, cacheTimeSec: number = 0
       multicall: true,
     },
     chain: chain,
-    transport: http(`https://${prefix}.g.alchemy.com/v2/` + process.env.ALCHEMY_PROJECT_ID),
+    transport: http(`https://${prefix}.g.alchemy.com/v2/` + process.env.ALCHEMY_API_KEY),
   });
 };
 
 export const getViemClient = (chainId: number = 1, cacheTimeSec: number = 0) => {
-  const alchemyProjectId = process.env.ALCHEMY_PROJECT_ID;
+  const alchemyApiKey = process.env.ALCHEMY_API_KEY;
 
   const chain = getChain(chainId);
 
-  if (alchemyProjectId) {
+  if (alchemyApiKey) {
     const prefix = getAlchemyPrefix(chain);
     return getAlchemyClient(prefix, chain, cacheTimeSec);
   } else {
