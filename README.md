@@ -43,7 +43,7 @@ Parameters:
 - Fetch incentives across multiple sources:
   - ACI infra incentives
   - Merkl infra incentives
-  - On-chain incentives
+  - Onchain incentives
   - External Points incentives
 - Support all Aave V3 instances.
 
