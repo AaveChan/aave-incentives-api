@@ -39,6 +39,10 @@ export class IncentivesService {
           (provider) =>
             !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
         )
+        .filter(
+          (provider) =>
+            !fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType,
+        )
         .map((provider) => provider.getIncentives(fetchOptions)),
     );
 
