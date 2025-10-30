@@ -1,5 +1,5 @@
-import app from './app';
-import { createLogger } from './config/logger';
+import app from '@/app';
+import { createLogger } from '@/config/logger';
 
 const PORT: number = 5050;
 
