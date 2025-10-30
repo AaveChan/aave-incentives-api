@@ -382,7 +382,7 @@ const getATokenSymbol = (
   instanceType?: AaveInstanceType,
 ) => {
   const prefix = getSymbolPrefix(chainName, instanceType);
-  return `a${prefix}${underlyingSymbol}`;
+  return `a${prefix}${underlyingSymbol.toUpperCase()}`;
 };
 
 const getStataTokenSymbol = (
@@ -400,7 +400,7 @@ const getATokenName = (
   instanceType?: AaveInstanceType,
 ) => {
   const namePrefix = getNamePrefix(chainName, instanceType);
-  return `Aave ${namePrefix} ${underlyingSymbol}`;
+  return `Aave ${namePrefix} ${underlyingSymbol.toUpperCase()}`;
 };
 
 const getStataTokenName = (
@@ -418,7 +418,7 @@ const getVTokenSymbol = (
   instanceType?: AaveInstanceType,
 ) => {
   const prefix = getSymbolPrefix(chainName, instanceType);
-  return `variableDebt${prefix}${underlyingSymbol}`;
+  return `variableDebt${prefix}${underlyingSymbol.toUpperCase()}`;
 };
 
 const getVTokenName = (
@@ -427,5 +427,5 @@ const getVTokenName = (
   instanceType?: AaveInstanceType,
 ) => {
   const namePrefix = getNamePrefix(chainName, instanceType);
-  return `Aave ${namePrefix} Variable Debt ${underlyingSymbol}`;
+  return `Aave ${namePrefix} Variable Debt ${underlyingSymbol.toUpperCase()}`;
 };
