@@ -8,6 +8,7 @@ import {
   AaveV3Plasma,
   AaveV3Scroll,
   AaveV3Sonic,
+  AaveV3ZkSync,
 } from '@bgd-labs/aave-address-book';
 import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'viem/chains';
 
@@ -127,7 +128,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: zksync.id,
-      rewardedTokenAddresses: [AaveV3Scroll.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [AaveV3ZkSync.ASSETS.weETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
@@ -235,7 +236,7 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: arbitrum.id,
-      rewardedTokenAddresses: [AaveV3Base.ASSETS.wrsETH.A_TOKEN],
+      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.rsETH.A_TOKEN],
       campaigns: [
         {
           startTimestamp: BASE_TIMESTAMP,
