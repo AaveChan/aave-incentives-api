@@ -15,6 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "@bgd-labs/aave-address-book": "^4.34.1",
+    "@types/cors": "^2.8.19",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
