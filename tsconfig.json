@@ -8,7 +8,7 @@
     "target": "es2024",
     "module": "nodenext",
     "lib": ["ES2024"],
-    "rootDir": "./src",
+    "rootDir": "./",
     "moduleResolution": "nodenext",
     "checkJs": true,
     "outDir": "./dist",
