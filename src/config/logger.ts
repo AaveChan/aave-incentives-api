@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import winston from 'winston';
 
 const customFormat = winston.format.combine(
