@@ -1,8 +1,11 @@
+import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 
 import { router as incentivesRoutes } from './routes/incentives.route';
 
 const app: Application = express();
+
+app.use(cors());
 
 app.use('/incentives', incentivesRoutes);
 
