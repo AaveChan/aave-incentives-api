@@ -156,7 +156,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
   private getCampaignConfig = (campaign: PointCampaign) => {
     const currentCampaignForOpportunity: CampaignConfig = {
       startTimestamp: Number(campaign.startTimestamp),
-      endTimestamp: Number(campaign.endTimestamp),
+      endTimestamp: campaign.endTimestamp ? Number(campaign.endTimestamp) : undefined,
       pointValue: campaign.pointValue,
     };
 
