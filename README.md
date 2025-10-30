@@ -43,10 +43,10 @@ Parameters:
 - Fetch incentives across multiple sources:
   - ACI infra incentives
   - Merkl infra incentives
-  - On-chain incentives
+  - Onchain incentives
   - External Points incentives
 - Support all Aave V3 instances.
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the GPLv3 License. See the [LICENSE](LICENSE) file for details.
