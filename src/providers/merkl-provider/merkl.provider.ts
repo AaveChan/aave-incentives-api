@@ -265,7 +265,7 @@ export class MerklProvider implements IncentiveProvider {
       case MerklRewardTokenType.TOKEN:
         return RewardType.TOKEN;
       case MerklRewardTokenType.PRETGE:
-        return RewardType.POINTS;
+        return RewardType.POINT;
       default:
         return RewardType.UNKNOWN;
     }
