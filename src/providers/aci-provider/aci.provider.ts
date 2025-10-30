@@ -19,8 +19,7 @@ export class ACIProvider implements IncentiveProvider {
   rewardType = RewardType.TOKEN;
 
   claimLink = 'https://apps.aavechan.com/merit';
-  apiUrl =
-    'https://aci-mini-apps-git-feat-showcase-data-api-my-team-ff3e11ae.vercel.app/api/merit/all-actions-data';
+  apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
 
   async getIncentives(): Promise<Incentive[]> {
     const aciIncentives = await this.fetchIncentives();
