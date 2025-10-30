@@ -1,9 +1,9 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 
-import { createLogger } from '../src/config/logger';
-import { router as incentivesRoutes } from '../src/routes/incentives.route';
-import { router as pingRoute } from '../src/routes/ping.route';
+import { createLogger } from './config/logger';
+import { router as incentivesRoutes } from './routes/incentives.route';
+import { router as pingRoute } from './routes/ping.route';
 
 const PORT: number = 5050;
 
