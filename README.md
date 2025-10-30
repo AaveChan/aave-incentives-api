@@ -29,6 +29,12 @@ The API will be available at `http://localhost:3000`.
 
 ```
 GET /incentives
+
+Parameters:
+- chainId (optional): number
+- status (optional): PAST, LIVE, SOON
+- incentiveType (optional): ONCHAIN, OFFCHAIN, EXTERNAL
+- rewardType (optional): TOKEN, POINTS
 ```
 
 ## Features
