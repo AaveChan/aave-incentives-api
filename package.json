@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest --coverage",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register ./src/server.ts",
-    "build": "tsc",
+    "start": "ts-node -r tsconfig-paths/register ./src/server.ts",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix"
   },
