@@ -26,8 +26,10 @@ export class IncentivesController {
         },
       };
 
-      this.logger.debug('Response:', response);
+      this.logger.silly('Response:', response);
+
       res.json(response);
+
       this.logger.debug('Response sent successfully');
     } catch {
       res.status(500).json({
