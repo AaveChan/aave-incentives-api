@@ -1,4 +1,5 @@
 import { createLogger } from '@/config/logger';
+import { tokenWrapperMapping } from '@/constants/wrapper-address';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -7,7 +8,7 @@ import {
   MerklProvider,
   OnchainProvider,
 } from '@/providers';
-import { Incentive, IncentiveSource, Status } from '@/types';
+import { Incentive, IncentiveSource, RewardType, Status, Token } from '@/types';
 
 export class IncentivesService {
   private logger = createLogger('IncentivesService');
@@ -20,13 +21,31 @@ export class IncentivesService {
   ];
 
   async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
-    const allIncentives = await this.fetchIncentives(filters);
+    let allIncentives = await this.fetchIncentives(filters);
 
-    const allIncentivesFiltered = this.applyFilters(allIncentives, filters);
+    this.enrichedTokens(allIncentives);
 
-    const allIncentivesSorted = this.sort(allIncentivesFiltered);
+    allIncentives = this.applyFilters(allIncentives, filters);
 
-    return allIncentivesSorted;
+    allIncentives = this.sort(allIncentives);
+
+    // display the number of token that have a price undefined
+    // const undefinedPrices = allIncentivesSorted.filter((incentive) => {
+    //   return incentive.reward.type === 'TOKEN' && incentive.reward.token?.price === undefined;
+    // });
+    const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
+      return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceOracle;
+    });
+    // this.logger.warn(
+    //   `There are ${undefinedPrices.length} incentives out of ${allIncentivesSorted.length} with undefined reward token price.`,
+    // );
+    this.logger.warn(
+      `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceOracle.`,
+    );
+
+    this.logger.info(undefinedPricesFeedOracle.map((i) => i.reward));
+
+    return allIncentives;
   }
 
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
@@ -105,6 +124,27 @@ export class IncentivesService {
 
     // Sort: LIVE first, then by APR descending
     return incentives.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+  }
+
+  private enrichedTokens(incentives: Incentive[]) {
+    incentives.forEach((incentive) => {
+      incentive.rewardedToken = this.enrichedToken(incentive.rewardedToken);
+      if (incentive.reward.type === RewardType.TOKEN) {
+        incentive.reward.token = this.enrichedToken(incentive.reward.token);
+      }
+    });
+  }
+
+  private enrichedToken(token: Token): Token {
+    // If the token is a wrapper, enrich it with the priceOracle of the underlying token
+    const wrapperToken = tokenWrapperMapping[token.address];
+    if (wrapperToken) {
+      token = {
+        ...token,
+        priceOracle: wrapperToken.ORACLE,
+      };
+    }
+    return token;
   }
 
   async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
