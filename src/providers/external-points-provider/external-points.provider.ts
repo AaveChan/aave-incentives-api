@@ -25,7 +25,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
 
   source = IncentiveSource.HARDCODED;
   incentiveType = IncentiveType.EXTERNAL;
-  rewardType = RewardType.POINT;
+  rewardType = RewardType.POINT as const;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];

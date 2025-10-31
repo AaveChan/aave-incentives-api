@@ -3,15 +3,16 @@ import { ink } from 'viem/chains';
 import { createLogger } from '@/config/logger';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
+import { tokenToString } from '@/lib/token/token';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
+  Reward,
   RewardType,
   Token,
-  TokenReward,
 } from '@/types';
 
 import { FetchOptions, IncentiveProvider } from '..';
@@ -114,24 +115,38 @@ export class MerklProvider implements IncentiveProvider {
       }
 
       const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
-      const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : RewardType.UNKNOWN;
+      const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
 
-      const rewardedToken: Token = {
-        name: rewardedTokenName,
-        address: rewardedTokenAddress,
-        symbol: rewardedTokenSymbol,
-        decimals: rewardedTokenDecimals,
-        chainId: opportunity.chainId,
-      };
+      if (!rewardType) {
+        this.logger.error(`Unknown reward type for token ${tokenToString(rewardToken)}`);
+        continue;
+      }
 
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
-      const tokenReward: TokenReward = {
+      let tokenReward: Reward | undefined;
+      if (rewardType == RewardType.POINT) {
+        tokenReward = {
+          type: rewardType,
+          point: {
+            name: rewardedToken.name,
+            protocol: protocolId,
+          },
+        };
+      }
+      if (rewardType == RewardType.TOKEN) {
+        tokenReward = {
         type: rewardType,
         token: rewardToken,
         apr: opportunity.apr,
       };
+      }
+
+      if (!tokenReward) {
+        this.logger.error(`Failed to map reward for opportunity ${opportunity.name}`);
+        continue;
+      }
 
       allIncentives.push({
         name: opportunity.name,
@@ -266,8 +281,6 @@ export class MerklProvider implements IncentiveProvider {
         return RewardType.TOKEN;
       case MerklRewardTokenType.PRETGE:
         return RewardType.POINT;
-      default:
-        return RewardType.UNKNOWN;
     }
   }
 

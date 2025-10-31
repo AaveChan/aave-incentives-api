@@ -44,7 +44,7 @@ const INSTANCES_ENABLED: string[] = [
 
 export class OnchainProvider implements IncentiveProvider {
   incentiveType = IncentiveType.ONCHAIN;
-  rewardType = RewardType.TOKEN;
+  rewardType = RewardType.TOKEN as const;
   source = IncentiveSource.ONCHAIN_RPC;
   claimLink = 'https://app.aave.com/';
 
@@ -169,7 +169,7 @@ export class OnchainProvider implements IncentiveProvider {
           );
 
           const reward: TokenReward = {
-            type: RewardType.TOKEN,
+            type: this.rewardType,
             token: rewardToken,
             apr,
           };

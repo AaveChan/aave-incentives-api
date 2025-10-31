@@ -16,7 +16,7 @@ import { Actions, Campaign, Token as AciInfraToken } from './types';
 export class ACIProvider implements IncentiveProvider {
   source = IncentiveSource.ACI_ROUNDS;
   incentiveType = IncentiveType.OFFCHAIN;
-  rewardType = RewardType.TOKEN;
+  rewardType = RewardType.TOKEN as const;
 
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
@@ -52,7 +52,7 @@ export class ACIProvider implements IncentiveProvider {
       const rewardToken = this.convertAciInfraTokenToIncentiveToken(action.rewardToken);
 
       const tokenReward: TokenReward = {
-        type: RewardType.TOKEN,
+        type: this.rewardType,
         token: rewardToken,
         apr: action.apr,
       };

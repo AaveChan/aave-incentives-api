@@ -38,7 +38,10 @@ export class IncentivesService {
           !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
       )
       .filter(
-        (provider) => !fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType,
+        (provider) =>
+          !fetchOptions?.rewardType ||
+          !provider.rewardType ||
+          provider.rewardType === fetchOptions.rewardType,
       );
 
     // Fetch from all providers in parallel
