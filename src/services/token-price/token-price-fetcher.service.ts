@@ -34,7 +34,7 @@ export class TokenPriceFetcherService {
 
   private readonly getTokenPriceCached = withCache(
     this._getTokenPrice.bind(this),
-    ({ token }) => `tokenPrice:${token.address.toLowerCase()}`,
+    ({ token }) => `tokenPrice:${token.chainId}:${token.address.toLowerCase()}`, // we could also just use symbol (but address + chainId is safer/more accurate)
     CACHE_TTLS.TOKEN_PRICE,
   );
 
