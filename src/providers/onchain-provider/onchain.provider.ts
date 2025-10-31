@@ -150,12 +150,18 @@ export class OnchainProvider implements IncentiveProvider {
           const status =
             rewardTokenInfo.emissionEndTimestamp > currentTimestamp ? Status.LIVE : Status.PAST;
 
+          const priceFormatted = Number(
+            formatUnits(rewardTokenInfo.rewardPriceFeed, rewardTokenInfo.priceFeedDecimals),
+          );
+
           const rewardToken: Token = {
             name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
             symbol: rewardTokenInfo.rewardTokenSymbol,
             address: rewardTokenInfo.rewardTokenAddress,
             chainId,
             decimals: rewardTokenInfo.rewardTokenDecimals,
+            priceOracle: rewardTokenInfo.rewardOracleAddress,
+            price: priceFormatted,
           };
 
           const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs(

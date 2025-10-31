@@ -37,6 +37,7 @@ export interface Token {
   chainId: number;
   decimals: number;
   price?: number;
+  priceOracle?: Address;
 }
 
 export interface Point {

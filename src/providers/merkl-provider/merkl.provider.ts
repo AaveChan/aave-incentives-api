@@ -82,36 +82,47 @@ export class MerklProvider implements IncentiveProvider {
         chainId: opportunity.chainId,
       };
 
-      let rewardedTokenName: string | undefined;
-      let rewardedTokenSymbol: string | undefined;
-      let rewardedTokenDecimals: number | undefined;
+      let rewardedToken: Token | undefined;
+
+      const rewardedTokenFetched = getAaveToken({
+        tokenAddress: rewardedTokenAddress,
+        chainId: opportunity.chainId,
+      });
 
       if (
         rewardMerklToken.address.toLowerCase() === rewardedTokenAddress.toLowerCase() &&
         rewardMerklToken.chainId === opportunity.chainId
       ) {
-        rewardedTokenSymbol = rewardMerklToken.symbol;
-        rewardedTokenDecimals = rewardMerklToken.decimals;
-        rewardedTokenName = rewardMerklToken.name;
-      } else {
-        const rewardedToken = getAaveToken({
-          tokenAddress: rewardedTokenAddress,
+        rewardedToken = {
+          name: rewardMerklToken.name,
+          address: rewardMerklToken.address,
+          symbol: rewardMerklToken.symbol,
+          decimals: rewardMerklToken.decimals,
           chainId: opportunity.chainId,
-        });
-
-        if (rewardedToken) {
-          rewardedTokenName = rewardedToken.name;
-          rewardedTokenSymbol = rewardedToken.symbol;
-          rewardedTokenDecimals = rewardedToken.decimals;
-        } else {
-          this.logger.error(
-            `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
-          );
-
-          rewardedTokenName = this.unknown;
-          rewardedTokenSymbol = this.unknown;
-          rewardedTokenDecimals = 18;
-        }
+          priceOracle: rewardedTokenFetched?.priceOracle,
+          price: rewardMerklToken.price,
+        };
+      } else if (rewardedTokenFetched) {
+        rewardedToken = {
+          name: rewardedTokenFetched.name,
+          address: rewardedTokenFetched.address,
+          symbol: rewardedTokenFetched.symbol,
+          decimals: rewardedTokenFetched.decimals,
+          chainId: opportunity.chainId,
+          priceOracle: rewardedTokenFetched?.priceOracle,
+          price: rewardedTokenFetched?.price,
+        };
+      } else {
+        this.logger.error(
+          `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
+        );
+        rewardedToken = {
+          name: this.unknown,
+          address: rewardedTokenAddress,
+          symbol: this.unknown,
+          decimals: 18,
+          chainId: opportunity.chainId,
+        };
       }
 
       const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
@@ -137,10 +148,10 @@ export class MerklProvider implements IncentiveProvider {
       }
       if (rewardType == RewardType.TOKEN) {
         tokenReward = {
-        type: rewardType,
-        token: rewardToken,
-        apr: opportunity.apr,
-      };
+          type: rewardType,
+          token: rewardToken,
+          apr: opportunity.apr,
+        };
       }
 
       if (!tokenReward) {

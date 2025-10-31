@@ -83,6 +83,7 @@ export class ACIProvider implements IncentiveProvider {
       address: aciInfraToken.address,
       chainId: aciInfraToken.chainId,
       decimals: aciInfraToken.decimals,
+      priceOracle: aciInfraToken.book?.ORACLE,
     };
 
     return token;
