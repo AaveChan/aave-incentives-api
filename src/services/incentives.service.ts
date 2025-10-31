@@ -32,25 +32,25 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
+    const providersFiltered = this.providers
+      .filter(
+        (provider) =>
+          !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
+      )
+      .filter(
+        (provider) => !fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType,
+      );
+
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
-      this.providers
-        .filter(
-          (provider) =>
-            !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-        )
-        .filter(
-          (provider) =>
-            !fetchOptions?.rewardType || provider.rewardType === fetchOptions.rewardType,
-        )
-        .map((provider) => provider.getIncentives(fetchOptions)),
+      providersFiltered.map((provider) => provider.getIncentives(fetchOptions)),
     );
 
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);
       } else {
-        this.logger.error(`Provider ${this.providers[index]?.source} failed:`, result.reason);
+        this.logger.error(`Provider ${providersFiltered[index]?.source} failed:`, result.reason);
       }
     });
 
