@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 
-export const PRICE_FEEDS: Record<Address, Address> = {
+export const PRICE_FEED_ORACLES: Record<Address, Address> = {
   // '0x30D20208d987713f46DFD34EF128Bb16C404D10f': '0x000000000000000000000000000000000000000000', // SD => null
   // '0xFe0c30065B384F05761f15d0CC899D4F9F9Cc0eB': '0x000000000000000000000000000000000000000001', // ETHFI
 } as const;

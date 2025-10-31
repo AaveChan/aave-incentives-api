@@ -1,4 +1,5 @@
 import { createLogger } from '@/config/logger';
+import PRICE_FEED_ORACLES from '@/constants/price-feeds';
 import { tokenWrapperMapping } from '@/constants/wrapper-address';
 import {
   ACIProvider,
@@ -43,7 +44,7 @@ export class IncentivesService {
       `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceOracle.`,
     );
 
-    this.logger.info(undefinedPricesFeedOracle.map((i) => i.reward));
+    console.log(undefinedPricesFeedOracle.map((i) => i.reward));
 
     return allIncentives;
   }
@@ -136,7 +137,7 @@ export class IncentivesService {
   }
 
   private enrichedToken(token: Token): Token {
-    // If the token is a wrapper, enrich it with the priceOracle of the underlying token
+    // Wrapper tokens
     const wrapperToken = tokenWrapperMapping[token.address];
     if (wrapperToken) {
       token = {
@@ -144,6 +145,19 @@ export class IncentivesService {
         priceOracle: wrapperToken.ORACLE,
       };
     }
+
+    // hardcoded price feed oracles
+    const priceFeedChain = PRICE_FEED_ORACLES[token.chainId];
+    if (priceFeedChain) {
+      const priceFeedAddress = priceFeedChain[token.address];
+      if (priceFeedAddress) {
+        token = {
+          ...token,
+          priceOracle: priceFeedAddress,
+        };
+      }
+    }
+
     return token;
   }
 
