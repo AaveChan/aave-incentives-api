@@ -109,8 +109,8 @@ export class MerklProvider implements IncentiveProvider {
           symbol: rewardedTokenFetched.symbol,
           decimals: rewardedTokenFetched.decimals,
           chainId: opportunity.chainId,
-          priceOracle: rewardedTokenFetched?.priceOracle,
-          price: rewardedTokenFetched?.price,
+          priceOracle: rewardedTokenFetched.priceOracle,
+          price: rewardedTokenFetched.price,
         };
       } else {
         this.logger.error(
