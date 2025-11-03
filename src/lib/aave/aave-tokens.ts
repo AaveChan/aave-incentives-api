@@ -7,6 +7,7 @@ import {
   AaveV3Celo,
   AaveV3Ethereum,
   AaveV3EthereumEtherFi,
+  AaveV3EthereumHorizon,
   AaveV3EthereumLido,
   AaveV3Gnosis,
   AaveV3InkWhitelabel,
@@ -26,7 +27,6 @@ import { createLogger } from '@/config/logger';
 import { Token } from '@/types';
 
 import { getChain } from '../utils/chains';
-import { AaveV3HorizonRWA } from './horizon-assets';
 
 export type BookType = {
   decimals: number;
@@ -84,7 +84,7 @@ export const AaveInstanceEntries = {
   AaveV3Scroll: AaveV3Scroll,
   AaveV3Sonic: AaveV3Sonic,
   AaveV3ZkSync: AaveV3ZkSync,
-  AaveV3HorizonRWA: AaveV3HorizonRWA,
+  AaveV3EthereumHorizon: AaveV3EthereumHorizon,
 } as const;
 
 const safetyModuleTokens: Address[] = [
