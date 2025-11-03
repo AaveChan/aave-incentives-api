@@ -31,19 +31,13 @@ export class IncentivesService {
 
     allIncentives = this.sort(allIncentives);
 
-    // display the number of token that have a price undefined
-    // const undefinedPrices = allIncentivesSorted.filter((incentive) => {
-    //   return incentive.reward.type === 'TOKEN' && incentive.reward.token?.price === undefined;
+    // // display the number of token that have a priceFeed undefined
+    // const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
+    //   return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceFeed;
     // });
-    const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
-      return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceFeed;
-    });
-    // this.logger.warn(
-    //   `There are ${undefinedPrices.length} incentives out of ${allIncentivesSorted.length} with undefined reward token price.`,
+    // this.logger.verbose(
+    //   `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceFeed.`,
     // );
-    this.logger.warn(
-      `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceFeed.`,
-    );
 
     return allIncentives;
   }
