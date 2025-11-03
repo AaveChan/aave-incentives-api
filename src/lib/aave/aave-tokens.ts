@@ -174,15 +174,15 @@ export const getAaveTokenAllData = ({
     switch (tokenAddress) {
       case AaveSafetyModule.STK_GHO:
         tokenBookName = 'STK_GHO';
-        symbol = 'Saving GHO';
-        name = 'sGHO';
+        name = 'Saving GHO';
+        symbol = 'sGHO';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.GHO.UNDERLYING;
         priceFeed = AaveV3Ethereum.ASSETS.GHO.ORACLE; // use GHO price feed for stkGHO
         break;
       case AaveSafetyModule.STK_AAVE:
         tokenBookName = 'STK_AAVE';
-        symbol = 'Staked Aave';
-        name = 'stkAAVE';
+        name = 'Staked Aave';
+        symbol = 'stkAAVE';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.AAVE.UNDERLYING;
         priceFeed = AaveV3Ethereum.ASSETS.AAVE.ORACLE; // use AAVE price feed for stkAAVE
         break;
@@ -191,26 +191,28 @@ export const getAaveTokenAllData = ({
         symbol = 'stkABPT';
         name = 'Staked Aave Balance Pool Token';
         underlyingTokenAddress = abpt;
+        priceFeed = AaveSafetyModule.STK_ABPT_ORACLE;
         break;
       case AaveSafetyModule.STK_AAVE_WSTETH_BPTV2:
         tokenBookName = 'STK_AAVE_WSTETH_BPTV2';
         symbol = 'stkAAVEwstETHBPTv2';
         name = 'stk AAVE/wstETH BPTv2';
         underlyingTokenAddress = twentywstETHEightyAAVE;
+        priceFeed = AaveSafetyModule.STK_AAVE_WSTETH_BPTV2_ORACLE;
         break;
     }
 
-    if (name && tokenBookName && symbol && underlyingTokenAddress) {
+    if (name && tokenBookName && symbol && underlyingTokenAddress && priceFeed) {
       const book: BookType = {
         decimals: 18,
         id: chainId,
         UNDERLYING: underlyingTokenAddress,
         A_TOKEN: zeroAddress,
-        V_TOKEN: zeroAddress,
+        V_TOKEN: undefined,
         INTEREST_RATE_STRATEGY: zeroAddress,
-        ORACLE: zeroAddress,
-        STATIC_A_TOKEN: zeroAddress,
-        STATA_TOKEN: zeroAddress,
+        ORACLE: priceFeed,
+        STATIC_A_TOKEN: undefined,
+        STATA_TOKEN: undefined,
         STK_TOKEN: tokenAddress,
       };
 
