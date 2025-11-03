@@ -79,7 +79,7 @@ export class MerklProvider implements IncentiveProvider {
         address: rewardMerklToken.address,
         symbol: rewardMerklToken.symbol,
         decimals: rewardMerklToken.decimals,
-        chainId: opportunity.chainId,
+        chainId: rewardMerklToken.chainId,
       };
 
       let rewardedToken: Token | undefined;
@@ -94,24 +94,11 @@ export class MerklProvider implements IncentiveProvider {
         rewardMerklToken.chainId === opportunity.chainId
       ) {
         rewardedToken = {
-          name: rewardMerklToken.name,
-          address: rewardMerklToken.address,
-          symbol: rewardMerklToken.symbol,
-          decimals: rewardMerklToken.decimals,
-          chainId: opportunity.chainId,
+          ...rewardMerklToken,
           priceFeed: rewardedTokenFetched?.priceFeed,
-          price: rewardMerklToken.price,
         };
       } else if (rewardedTokenFetched) {
-        rewardedToken = {
-          name: rewardedTokenFetched.name,
-          address: rewardedTokenFetched.address,
-          symbol: rewardedTokenFetched.symbol,
-          decimals: rewardedTokenFetched.decimals,
-          chainId: opportunity.chainId,
-          priceFeed: rewardedTokenFetched.priceFeed,
-          price: rewardedTokenFetched.price,
-        };
+        rewardedToken = rewardedTokenFetched;
       } else {
         this.logger.error(
           `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
