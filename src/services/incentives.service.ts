@@ -1,6 +1,7 @@
 import { createLogger } from '@/config/logger';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds';
 import { tokenWrapperMapping } from '@/constants/wrapper-address';
+import { getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -137,13 +138,31 @@ export class IncentivesService {
   }
 
   private enrichedToken(token: Token): Token {
-    // Wrapper tokens
-    const wrapperToken = tokenWrapperMapping[token.address];
-    if (wrapperToken) {
+    // check only if priceOracle is undefined
+    if (token.priceOracle) {
+      return token;
+    }
+
+    const aaveToken = getAaveTokenInfo({
+      tokenAddress: token.address,
+      chainId: token.chainId,
+    });
+    if (aaveToken) {
       token = {
         ...token,
-        priceOracle: wrapperToken.ORACLE,
+        priceOracle: aaveToken.book.ORACLE,
       };
+      return token;
+    }
+
+    // Wrapper tokens
+    const tokenBook = tokenWrapperMapping[token.address];
+    if (tokenBook) {
+      token = {
+        ...token,
+        priceOracle: tokenBook.ORACLE,
+      };
+      return token;
     }
 
     // hardcoded price feed oracles
@@ -156,6 +175,7 @@ export class IncentivesService {
           priceOracle: priceFeedAddress,
         };
       }
+      return token;
     }
 
     return token;
