@@ -9,5 +9,5 @@ export const GHO: Token = {
   chainId: mainnet.id,
   address: AaveV3Ethereum.ASSETS.GHO.UNDERLYING,
   decimals: AaveV3Ethereum.ASSETS.GHO.decimals,
-  priceOracle: AaveV3Ethereum.ASSETS.GHO.ORACLE,
+  priceFeed: AaveV3Ethereum.ASSETS.GHO.ORACLE,
 };

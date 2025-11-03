@@ -99,7 +99,7 @@ export class MerklProvider implements IncentiveProvider {
           symbol: rewardMerklToken.symbol,
           decimals: rewardMerklToken.decimals,
           chainId: opportunity.chainId,
-          priceOracle: rewardedTokenFetched?.priceOracle,
+          priceFeed: rewardedTokenFetched?.priceFeed,
           price: rewardMerklToken.price,
         };
       } else if (rewardedTokenFetched) {
@@ -109,7 +109,7 @@ export class MerklProvider implements IncentiveProvider {
           symbol: rewardedTokenFetched.symbol,
           decimals: rewardedTokenFetched.decimals,
           chainId: opportunity.chainId,
-          priceOracle: rewardedTokenFetched.priceOracle,
+          priceFeed: rewardedTokenFetched.priceFeed,
           price: rewardedTokenFetched.price,
         };
       } else {

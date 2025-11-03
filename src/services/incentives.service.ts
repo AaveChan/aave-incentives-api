@@ -36,16 +36,14 @@ export class IncentivesService {
     //   return incentive.reward.type === 'TOKEN' && incentive.reward.token?.price === undefined;
     // });
     const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
-      return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceOracle;
+      return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceFeed;
     });
     // this.logger.warn(
     //   `There are ${undefinedPrices.length} incentives out of ${allIncentivesSorted.length} with undefined reward token price.`,
     // );
     this.logger.warn(
-      `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceOracle.`,
+      `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceFeed.`,
     );
-
-    console.log(undefinedPricesFeedOracle.map((i) => i.reward));
 
     return allIncentives;
   }
@@ -138,8 +136,8 @@ export class IncentivesService {
   }
 
   private enrichedToken(token: Token): Token {
-    // check only if priceOracle is undefined
-    if (token.priceOracle) {
+    // check only if priceFeed is undefined
+    if (token.priceFeed) {
       return token;
     }
 
@@ -150,7 +148,7 @@ export class IncentivesService {
     if (aaveToken) {
       token = {
         ...token,
-        priceOracle: aaveToken.book.ORACLE,
+        priceFeed: aaveToken.book.ORACLE,
       };
       return token;
     }
@@ -160,7 +158,7 @@ export class IncentivesService {
     if (tokenBook) {
       token = {
         ...token,
-        priceOracle: tokenBook.ORACLE,
+        priceFeed: tokenBook.ORACLE,
       };
       return token;
     }
@@ -172,7 +170,7 @@ export class IncentivesService {
       if (priceFeedAddress) {
         token = {
           ...token,
-          priceOracle: priceFeedAddress,
+          priceFeed: priceFeedAddress,
         };
       }
       return token;

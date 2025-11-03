@@ -222,7 +222,7 @@ export const getAaveTokenAllData = ({
         address: tokenAddress,
         chainId: chainId,
         decimals: 18,
-        priceOracle: priceFeed,
+        priceFeed: priceFeed,
       };
 
       const aaveTokenInfo: AaveTokenInfo = {
@@ -299,7 +299,7 @@ export const getAaveTokenAllData = ({
           address: tokenAddress,
           chainId: chainId,
           decimals: book.decimals,
-          priceOracle: priceFeedOracle,
+          priceFeed: priceFeedOracle,
         };
 
         const aaveTokenInfo: AaveTokenInfo = {
@@ -318,28 +318,6 @@ export const getAaveTokenAllData = ({
       }
     }
   }
-
-  // // check oracle address if the token is a wrapper token
-  // const aTokenBook = tokenWrapperMapping[tokenAddress];
-  // if (aTokenBook) {
-  //   const token: Token = {
-  //     name: aTokenBook.name,
-  //     symbol: aTokenBook.symbol,
-  //     address: tokenAddress,
-  //     chainId: chainId,
-  //     decimals: aTokenBook.decimals,
-  //     priceOracle: aTokenBook.priceOracle,
-  //   };
-
-  //   const aaveTokenInfo: AaveTokenInfo = {
-  //     ...token,
-  //     type: AaveTokenType.A,
-  //     book: aTokenBook.book,
-  //     bookName: aTokenBook.bookName,
-  //     instanceType: aTokenBook.instanceType,
-  //     underlyingTokenAddress: aTokenBook.underlyingTokenAddress,
-  //   };
-  // }
 
   const logger = createLogger('getAaveTokenAllData');
   logger.warn(

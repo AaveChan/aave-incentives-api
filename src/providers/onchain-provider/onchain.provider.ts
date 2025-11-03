@@ -160,7 +160,7 @@ export class OnchainProvider implements IncentiveProvider {
             address: rewardTokenInfo.rewardTokenAddress,
             chainId,
             decimals: rewardTokenInfo.rewardTokenDecimals,
-            priceOracle: rewardTokenInfo.rewardOracleAddress,
+            priceFeed: rewardTokenInfo.rewardOracleAddress,
             price: priceFormatted,
           };
 
