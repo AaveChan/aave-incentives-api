@@ -44,7 +44,7 @@ const INSTANCES_ENABLED: string[] = [
 
 export class OnchainProvider implements IncentiveProvider {
   incentiveType = IncentiveType.ONCHAIN;
-  rewardType = RewardType.TOKEN;
+  rewardType = RewardType.TOKEN as const;
   source = IncentiveSource.ONCHAIN_RPC;
   claimLink = 'https://app.aave.com/';
 
@@ -150,12 +150,18 @@ export class OnchainProvider implements IncentiveProvider {
           const status =
             rewardTokenInfo.emissionEndTimestamp > currentTimestamp ? Status.LIVE : Status.PAST;
 
+          const priceFormatted = Number(
+            formatUnits(rewardTokenInfo.rewardPriceFeed, rewardTokenInfo.priceFeedDecimals),
+          );
+
           const rewardToken: Token = {
             name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
             symbol: rewardTokenInfo.rewardTokenSymbol,
             address: rewardTokenInfo.rewardTokenAddress,
             chainId,
             decimals: rewardTokenInfo.rewardTokenDecimals,
+            priceFeed: rewardTokenInfo.rewardOracleAddress,
+            price: priceFormatted,
           };
 
           const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs(
@@ -169,7 +175,7 @@ export class OnchainProvider implements IncentiveProvider {
           );
 
           const reward: TokenReward = {
-            type: RewardType.TOKEN,
+            type: this.rewardType,
             token: rewardToken,
             apr,
           };

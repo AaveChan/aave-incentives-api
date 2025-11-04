@@ -7,6 +7,7 @@ import {
   AaveV3Celo,
   AaveV3Ethereum,
   AaveV3EthereumEtherFi,
+  AaveV3EthereumHorizon,
   AaveV3EthereumLido,
   AaveV3Gnosis,
   AaveV3InkWhitelabel,
@@ -26,7 +27,6 @@ import { createLogger } from '@/config/logger';
 import { Token } from '@/types';
 
 import { getChain } from '../utils/chains';
-import { AaveV3HorizonRWA } from './horizon-assets';
 
 export type BookType = {
   decimals: number;
@@ -84,7 +84,7 @@ export const AaveInstanceEntries = {
   AaveV3Scroll: AaveV3Scroll,
   AaveV3Sonic: AaveV3Sonic,
   AaveV3ZkSync: AaveV3ZkSync,
-  AaveV3HorizonRWA: AaveV3HorizonRWA,
+  AaveV3EthereumHorizon: AaveV3EthereumHorizon,
 } as const;
 
 const safetyModuleTokens: Address[] = [
@@ -161,53 +161,58 @@ export const getAaveTokenAllData = ({
   token: Token;
   aaveTokenInfo: AaveTokenInfo;
 } | null => {
-  let type = AaveTokenType.NOT_LISTED;
-  let book: BookType | undefined;
-  let tokenBookName: string | undefined;
-  let instanceType: AaveInstanceType | undefined;
-  let symbol: string | undefined;
-  let name: string | undefined;
-  let underlyingTokenAddress: Address | undefined;
-
   const chain = getChain(chainId);
 
   if (safetyModuleTokens.includes(tokenAddress)) {
-    type = AaveTokenType.STK;
+    const type = AaveTokenType.STK;
+    let tokenBookName: string | undefined;
+    let symbol: string | undefined;
+    let name: string | undefined;
+    let underlyingTokenAddress: Address | undefined;
+    let priceFeed: Address | undefined;
 
     switch (tokenAddress) {
       case AaveSafetyModule.STK_GHO:
         tokenBookName = 'STK_GHO';
-        name = 'stkGHO';
+        name = 'Saving GHO';
+        symbol = 'sGHO';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.GHO.UNDERLYING;
+        priceFeed = AaveV3Ethereum.ASSETS.GHO.ORACLE; // use GHO price feed for stkGHO
         break;
       case AaveSafetyModule.STK_AAVE:
         tokenBookName = 'STK_AAVE';
-        name = 'stkAAVE';
+        name = 'Staked Aave';
+        symbol = 'stkAAVE';
         underlyingTokenAddress = AaveV3Ethereum.ASSETS.AAVE.UNDERLYING;
+        priceFeed = AaveV3Ethereum.ASSETS.AAVE.ORACLE; // use AAVE price feed for stkAAVE
         break;
       case AaveSafetyModule.STK_ABPT:
         tokenBookName = 'STK_ABPT';
-        name = 'stkABPT';
+        symbol = 'stkABPT';
+        name = 'Staked Aave Balance Pool Token';
         underlyingTokenAddress = abpt;
+        priceFeed = AaveSafetyModule.STK_ABPT_ORACLE;
         break;
       case AaveSafetyModule.STK_AAVE_WSTETH_BPTV2:
         tokenBookName = 'STK_AAVE_WSTETH_BPTV2';
-        name = 'stkAAVEwstETHBPTv2';
+        symbol = 'stkAAVEwstETHBPTv2';
+        name = 'stk AAVE/wstETH BPTv2';
         underlyingTokenAddress = twentywstETHEightyAAVE;
+        priceFeed = AaveSafetyModule.STK_AAVE_WSTETH_BPTV2_ORACLE;
         break;
     }
 
-    if (name && tokenBookName && symbol && underlyingTokenAddress) {
+    if (name && tokenBookName && symbol && underlyingTokenAddress && priceFeed) {
       const book: BookType = {
         decimals: 18,
         id: chainId,
         UNDERLYING: underlyingTokenAddress,
         A_TOKEN: zeroAddress,
-        V_TOKEN: zeroAddress,
+        V_TOKEN: undefined,
         INTEREST_RATE_STRATEGY: zeroAddress,
-        ORACLE: zeroAddress,
-        STATIC_A_TOKEN: zeroAddress,
-        STATA_TOKEN: zeroAddress,
+        ORACLE: priceFeed,
+        STATIC_A_TOKEN: undefined,
+        STATA_TOKEN: undefined,
         STK_TOKEN: tokenAddress,
       };
 
@@ -217,6 +222,7 @@ export const getAaveTokenAllData = ({
         address: tokenAddress,
         chainId: chainId,
         decimals: 18,
+        priceFeed: priceFeed,
       };
 
       const aaveTokenInfo: AaveTokenInfo = {
@@ -235,85 +241,86 @@ export const getAaveTokenAllData = ({
     }
   }
 
-  for (const [key, assets] of Object.entries(AllAddressBooksAssets)) {
-    const chainIdOfBook = AllAddressBooksChainIds[key];
+  for (const [addressBookKey, assets] of Object.entries(AllAddressBooksAssets)) {
+    const chainIdOfBook = AllAddressBooksChainIds[addressBookKey];
 
     // If the chainId or instanceName don't match, skip this book
-    if (chainIdOfBook !== chainId || (instanceName && key !== instanceName)) {
+    if (chainIdOfBook !== chainId || (instanceName && addressBookKey !== instanceName)) {
       continue;
     }
+
+    let type: AaveTokenType | undefined;
+    let book: BookType | undefined;
+    let tokenBookName: string | undefined;
+    let instanceType: AaveInstanceType | undefined;
+    let symbol: string | undefined;
+    let name: string | undefined;
+    let underlyingTokenAddress: Address | undefined;
+    let priceFeedOracle: Address | undefined;
 
     const entries: [string, BookType][] = Object.entries(assets);
 
     for (const [assetName, asset] of entries) {
+      book = asset;
+      tokenBookName = assetName;
+      underlyingTokenAddress = asset.UNDERLYING;
+      priceFeedOracle = asset.ORACLE;
+      instanceType = getAaveInstanceFromInstanceFullName(addressBookKey);
+
       switch (tokenAddress) {
         case asset.A_TOKEN:
           type = AaveTokenType.A;
           book = asset;
-          tokenBookName = assetName;
-          instanceType = getAaveInstanceFromInstanceFullName(key);
           symbol = getATokenSymbol(assetName, chain.name, instanceType);
           name = getATokenName(assetName, chain.name, instanceType);
-          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.V_TOKEN:
           type = AaveTokenType.V;
-          book = asset;
-          tokenBookName = assetName;
-          instanceType = getAaveInstanceFromInstanceFullName(key);
           symbol = getVTokenSymbol(assetName, chain.name, instanceType);
           name = getVTokenName(assetName, chain.name, instanceType);
-          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.STATA_TOKEN:
         case asset.STATIC_A_TOKEN:
           type = AaveTokenType.STATA;
-          book = asset;
-          tokenBookName = assetName;
-          instanceType = getAaveInstanceFromInstanceFullName(key);
           symbol = getStataTokenSymbol(assetName, chain.name, instanceType);
           name = getStataTokenName(assetName, chain.name, instanceType);
-          underlyingTokenAddress = asset.UNDERLYING;
           break;
         case asset.UNDERLYING:
           type = AaveTokenType.UNDERLYING;
-          book = asset;
-          tokenBookName = assetName;
-          instanceType = getAaveInstanceFromInstanceFullName(key);
           symbol = assetName;
           name = assetName; // tokenInfo.name is the symbol. So the name here is not really accurate.
-          underlyingTokenAddress = asset.UNDERLYING;
           break;
+      }
+
+      if (type && name && symbol) {
+        const token: Token = {
+          name: name,
+          symbol: symbol,
+          address: tokenAddress,
+          chainId: chainId,
+          decimals: book.decimals,
+          priceFeed: priceFeedOracle,
+        };
+
+        const aaveTokenInfo: AaveTokenInfo = {
+          ...token,
+          type,
+          book,
+          bookName: tokenBookName,
+          instanceType,
+          underlyingTokenAddress,
+        };
+
+        return {
+          token,
+          aaveTokenInfo,
+        };
       }
     }
   }
 
-  if (type && name && tokenBookName && symbol && book && instanceType && underlyingTokenAddress) {
-    const token: Token = {
-      name: name,
-      symbol: symbol,
-      address: tokenAddress,
-      chainId: chainId,
-      decimals: book.decimals,
-    };
-
-    const aaveTokenInfo: AaveTokenInfo = {
-      ...token,
-      type,
-      book,
-      bookName: tokenBookName,
-      instanceType,
-      underlyingTokenAddress,
-    };
-
-    return {
-      token,
-      aaveTokenInfo,
-    };
-  }
-
   const logger = createLogger('getAaveTokenAllData');
-  logger.warn(
+  logger.verbose(
     `Token ${tokenAddress} not found on chain ${chainId} ${
       instanceName ? `for instance ${instanceName}` : ''
     }`,
@@ -382,7 +389,7 @@ const getATokenSymbol = (
   instanceType?: AaveInstanceType,
 ) => {
   const prefix = getSymbolPrefix(chainName, instanceType);
-  return `a${prefix}${underlyingSymbol.toUpperCase()}`;
+  return `a${prefix}${underlyingSymbol}`;
 };
 
 const getStataTokenSymbol = (
@@ -400,7 +407,7 @@ const getATokenName = (
   instanceType?: AaveInstanceType,
 ) => {
   const namePrefix = getNamePrefix(chainName, instanceType);
-  return `Aave ${namePrefix} ${underlyingSymbol.toUpperCase()}`;
+  return `Aave ${namePrefix} ${underlyingSymbol}`;
 };
 
 const getStataTokenName = (
@@ -418,7 +425,7 @@ const getVTokenSymbol = (
   instanceType?: AaveInstanceType,
 ) => {
   const prefix = getSymbolPrefix(chainName, instanceType);
-  return `variableDebt${prefix}${underlyingSymbol.toUpperCase()}`;
+  return `variableDebt${prefix}${underlyingSymbol}`;
 };
 
 const getVTokenName = (
@@ -427,5 +434,5 @@ const getVTokenName = (
   instanceType?: AaveInstanceType,
 ) => {
   const namePrefix = getNamePrefix(chainName, instanceType);
-  return `Aave ${namePrefix} Variable Debt ${underlyingSymbol.toUpperCase()}`;
+  return `Aave ${namePrefix} Variable Debt ${underlyingSymbol}`;
 };

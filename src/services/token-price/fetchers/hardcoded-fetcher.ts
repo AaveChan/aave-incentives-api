@@ -10,7 +10,7 @@ export class HardcodedTokenPriceFetcher extends TokenPriceFetcherBase {
   async getTokenPrice(params: { token: Token; blockNumber?: bigint }) {
     switch (params.token.symbol) {
       case 'GHO':
-      case 'stkGHO':
+      case 'sGHO':
         return 1;
       default:
         return null;

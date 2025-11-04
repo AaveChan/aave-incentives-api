@@ -18,13 +18,13 @@ export interface Incentive {
 
 export type Reward = TokenReward | PointReward;
 export interface TokenReward {
-  type: RewardType;
+  type: RewardType.TOKEN;
   token: Token;
   apr?: number;
 }
 
 export interface PointReward {
-  type: RewardType;
+  type: RewardType.POINT;
   point: Point;
   pointValue?: number;
   pointValueUnit?: string;
@@ -37,6 +37,7 @@ export interface Token {
   chainId: number;
   decimals: number;
   price?: number;
+  priceFeed?: Address;
 }
 
 export interface Point {
@@ -63,7 +64,6 @@ export enum IncentiveType {
 export enum RewardType {
   TOKEN = 'TOKEN',
   POINT = 'POINT',
-  UNKNOWN = 'UNKNOWN',
 }
 
 export enum Status {

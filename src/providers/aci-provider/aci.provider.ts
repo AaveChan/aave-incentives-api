@@ -1,3 +1,4 @@
+import { createLogger } from '@/config/logger';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
@@ -16,7 +17,9 @@ import { Actions, Campaign, Token as AciInfraToken } from './types';
 export class ACIProvider implements IncentiveProvider {
   source = IncentiveSource.ACI_ROUNDS;
   incentiveType = IncentiveType.OFFCHAIN;
-  rewardType = RewardType.TOKEN;
+  rewardType = RewardType.TOKEN as const;
+
+  logger = createLogger('ACIProvider');
 
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
@@ -46,13 +49,20 @@ export class ACIProvider implements IncentiveProvider {
 
       const description = action.info.wholeDescriptionString;
 
-      const actionToken = action.actionTokens[0] as AciInfraToken; // ensure it's defined (not clean but do the job)
+      const actionToken = action.actionTokens[0];
+
+      if (!actionToken) {
+        this.logger.warn(
+          `No action token defined for action ${action.displayName}, skipping incentive creation.`,
+        );
+        continue;
+      }
 
       const rewardedToken = this.convertAciInfraTokenToIncentiveToken(actionToken);
       const rewardToken = this.convertAciInfraTokenToIncentiveToken(action.rewardToken);
 
       const tokenReward: TokenReward = {
-        type: RewardType.TOKEN,
+        type: this.rewardType,
         token: rewardToken,
         apr: action.apr,
       };
@@ -83,6 +93,7 @@ export class ACIProvider implements IncentiveProvider {
       address: aciInfraToken.address,
       chainId: aciInfraToken.chainId,
       decimals: aciInfraToken.decimals,
+      priceFeed: aciInfraToken.book?.ORACLE,
     };
 
     return token;
