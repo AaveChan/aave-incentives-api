@@ -40,15 +40,13 @@ paths:
       tags:
         - Incentives
       description: |
-        Fetches all available incentives with optional filtering, sorting, and pagination.
-
-        Results are cached for 5 minutes for optimal performance.
+        Fetches all available incentives with optional filtering.
       operationId: getIncentives
       parameters:
-        - $ref: '#/components/parameters/ChainIdParam'
-        - $ref: '#/components/parameters/StatusParam'
-        - $ref: '#/components/parameters/IncentiveTypeParam'
-        - $ref: '#/components/parameters/RewardTypeParam'
+        - $ref: '#/components/parameters/ChainId'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/IncentiveType'
+        - $ref: '#/components/parameters/RewardType'
       responses:
         '200':
           description: Successfully retrieved incentives
@@ -98,7 +96,7 @@ paths:
                           Onchain: true
 components:
   parameters:
-    ChainIdParam:
+    ChainId:
       name: chainId
       in: query
       description: Filter by chain ID(s). Supports single value or comma-separated list.
@@ -111,35 +109,33 @@ components:
         single:
           value: 1
           summary: Single chain (Ethereum)
-        multiple:
-          value: '1,137,42161'
-          summary: Multiple chains (Ethereum, Polygon, Arbitrum)
+        # multiple:
+        #   value: '1,137,42161'
+        #   summary: Multiple chains (Ethereum, Polygon, Arbitrum)
 
-    StatusParam:
+    Status:
       name: status
       in: query
-      description: Filter by campaign status. Supports single value or comma-separated list.
+      description: Filter by campaign status. Supports single value.
       schema:
         oneOf:
           - $ref: '#/components/schemas/Status'
-          - type: string
-            pattern: '^(LIVE|PAST|UPCOMING)(,(LIVE|PAST|UPCOMING))*$'
       examples:
         single:
           value: LIVE
           summary: Only live campaigns
-        multiple:
-          value: 'LIVE,UPCOMING'
-          summary: Live and upcoming campaigns
+        # multiple:
+        #   value: 'LIVE,UPCOMING'
+        #   summary: Live and upcoming campaigns
 
-    IncentiveTypeParam:
+    IncentiveType:
       name: incentiveType
       in: query
       description: Filter by incentive type
       schema:
         $ref: '#/components/schemas/IncentiveType'
 
-    RewardTypeParam:
+    RewardType:
       name: rewardType
       in: query
       description: Filter by reward type
@@ -161,9 +157,6 @@ components:
           required:
             - incentives
             - totalCount
-            - filteredCount
-            - pagination
-            - filters
             - lastUpdated
           properties:
             incentives:
@@ -172,17 +165,8 @@ components:
                 $ref: '#/components/schemas/Incentive'
             totalCount:
               type: integer
-              description: Total number of incentives (before filtering)
-              example: 150
-            filteredCount:
-              type: integer
-              description: Number of incentives after filtering
-              example: 42
-            pagination:
-              $ref: '#/components/schemas/Pagination'
-            filters:
-              type: object
-              description: Applied filters
+              description: Total number of incentives
+              example: 30
             lastUpdated:
               type: string
               format: date-time
@@ -216,13 +200,16 @@ components:
           oneOf:
             - $ref: '#/components/schemas/TokenReward'
             - $ref: '#/components/schemas/PointReward'
-            - $ref: '#/components/schemas/ExternalPointReward'
           discriminator:
             propertyName: type
         currentCampaignConfig:
           $ref: '#/components/schemas/CampaignConfig'
         nextCampaignConfig:
           $ref: '#/components/schemas/CampaignConfig'
+        allCampaignsConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignConfig'
         incentiveType:
           $ref: '#/components/schemas/IncentiveType'
         status:
@@ -230,11 +217,11 @@ components:
         claimLink:
           type: string
           format: uri
-          example: 'https://www.ether.fi/app/portfolio'
+          example: 'https://app.merkl.xyz/'
         infosLink:
           type: string
           format: uri
-          example: 'https://governance.aave.com/t/arfc-...'
+          example: 'https://governance.aave.com/t/arfc-sts-loop-incentive-program/22368'
         additionalData:
           type: object
           additionalProperties: true
@@ -267,7 +254,10 @@ components:
         price:
           type: number
           format: float
-          example: 2543.21
+          example: 4250.75
+        priceFeed:
+          type: string
+          example: '0x5424384B256154046E9667dDFaaa5e550145215e'
 
     Point:
       type: object
@@ -291,11 +281,10 @@ components:
       required:
         - type
         - token
-        - apr
       properties:
         type:
           type: string
-          enum: [token]
+          enum: [token, point]
         token:
           $ref: '#/components/schemas/Token'
         apr:
@@ -312,7 +301,7 @@ components:
       properties:
         type:
           type: string
-          enum: [point]
+          enum: [token, point]
         point:
           $ref: '#/components/schemas/Point'
         pointValue:
@@ -321,20 +310,7 @@ components:
           example: 3
         pointValueUnit:
           type: string
-          enum: [per_dollar, per_token, per_day, multiplier]
-          example: 'per_token'
-
-    ExternalPointReward:
-      type: object
-      required:
-        - type
-        - point
-      properties:
-        type:
-          type: string
-          enum: [external_point]
-        point:
-          $ref: '#/components/schemas/Point'
+          example: 'x'
 
     CampaignConfig:
       type: object
@@ -344,51 +320,24 @@ components:
       properties:
         startTimestamp:
           type: integer
-          format: int64
           example: 1735700400
           description: Unix timestamp
         endTimestamp:
           type: integer
-          format: int64
           example: 1767236400
           description: Unix timestamp
-        budgetSpent:
+        budget:
           type: number
           format: float
-          example: 700000
-        budgetRemaining:
+          example: 200000
+        apr:
           type: number
           format: float
-          example: 300000
-
-    Pagination:
-      type: object
-      required:
-        - page
-        - limit
-        - offset
-        - totalPages
-        - hasNextPage
-        - hasPreviousPage
-      properties:
-        page:
-          type: integer
-          example: 1
-        limit:
-          type: integer
-          example: 20
-        offset:
-          type: integer
-          example: 0
-        totalPages:
-          type: integer
+          example: 8.5
+        pointValue:
+          type: number
+          format: float
           example: 3
-        hasNextPage:
-          type: boolean
-          example: true
-        hasPreviousPage:
-          type: boolean
-          example: false
 
     IncentiveType:
       type: string
@@ -408,11 +357,11 @@ components:
 
     Status:
       type: string
-      enum: [LIVE, PAST, UPCOMING]
+      enum: [LIVE, PAST, SOON]
       description: |
         - LIVE: Campaign is currently active
         - PAST: Campaign has ended
-        - UPCOMING: Campaign will start in the future
+        - SOON: Campaign will start in the future
 
     ValidationError:
       type: object
