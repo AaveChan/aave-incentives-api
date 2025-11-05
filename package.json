@@ -17,6 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "@bgd-labs/aave-address-book": "^4.34.1",
+    "@scalar/express-api-reference": "^0.8.23",
     "@types/cors": "^2.8.19",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
