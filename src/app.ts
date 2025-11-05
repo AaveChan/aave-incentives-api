@@ -16,6 +16,7 @@ const app: Application = express();
 
 app.use(cors());
 
+// Serve static files from the 'public' directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.resolve(__dirname, '../public')));
@@ -29,7 +30,7 @@ app.use('/ping', pingRoute);
 // });
 
 app.use(
-  '/reference',
+  '/docs',
   apiReference({
     url: '/openapi.yaml',
   }),
