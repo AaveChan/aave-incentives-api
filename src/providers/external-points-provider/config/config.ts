@@ -1,5 +1,5 @@
-import { PointIncentives } from '../types';
-import { pointCampaigns, pointPrograms } from './data';
+import { PointIncentives } from '../types.js';
+import { pointCampaigns, pointPrograms } from './data.js';
 
 // Export in flat
 export const pointCampaignsArray = Object.values(pointCampaigns).flat();

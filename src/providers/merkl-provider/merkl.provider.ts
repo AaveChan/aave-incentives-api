@@ -1,10 +1,10 @@
 import { ink } from 'viem/chains';
 
-import { createLogger } from '@/config/logger';
-import { ACI_ADDRESSES } from '@/constants/aci-addresses';
-import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
-import { tokenToString } from '@/lib/token/token';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp';
+import { createLogger } from '@/config/logger.js';
+import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
+import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { tokenToString } from '@/lib/token/token.js';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   CampaignConfig,
   Incentive,
@@ -13,14 +13,14 @@ import {
   Reward,
   RewardType,
   Token,
-} from '@/types';
+} from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '..';
+import { FetchOptions, IncentiveProvider } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
   RewardTokenType as MerklRewardTokenType,
-} from './types';
+} from './types.js';
 
 type MerklApiOptions = {
   chainId?: number;
@@ -82,7 +82,13 @@ export class MerklProvider implements IncentiveProvider {
         chainId: rewardMerklToken.chainId,
       };
 
-      let rewardedToken: Token | undefined;
+      let rewardedToken: Token = {
+        name: this.unknown,
+        address: rewardedTokenAddress,
+        symbol: this.unknown,
+        decimals: 18,
+        chainId: opportunity.chainId,
+      };
 
       const rewardedTokenFetched = getAaveToken({
         tokenAddress: rewardedTokenAddress,
@@ -103,13 +109,6 @@ export class MerklProvider implements IncentiveProvider {
         this.logger.error(
           `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
         );
-        rewardedToken = {
-          name: this.unknown,
-          address: rewardedTokenAddress,
-          symbol: this.unknown,
-          decimals: 18,
-          chainId: opportunity.chainId,
-        };
       }
 
       const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;

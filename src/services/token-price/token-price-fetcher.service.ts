@@ -1,18 +1,18 @@
 import { AaveSafetyModule } from '@bgd-labs/aave-address-book';
 import { Address } from 'viem';
 
-import { CACHE_TTLS } from '@/config/cache-ttls';
-import { createLogger } from '@/config/logger';
-import { GHO } from '@/constants/tokens';
-import { compareTokens, tokenToString } from '@/lib/token/token';
-import { withCache } from '@/lib/utils/cache';
-import { Token } from '@/types';
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
+import { createLogger } from '@/config/logger.js';
+import { GHO } from '@/constants/tokens/index.js';
+import { compareTokens, tokenToString } from '@/lib/token/token.js';
+import { withCache } from '@/lib/utils/cache.js';
+import { Token } from '@/types/index.js';
 
-import { AaveTokenPriceFetcher } from './fetchers/aave-fetcher';
-import { ChainlinkTokenPriceFetcher } from './fetchers/chainlink-fetcher/chainlink-fetcher';
-import { CoingeckoTokenPriceFetcher } from './fetchers/coingecko-fetcher';
-import { HardcodedTokenPriceFetcher } from './fetchers/hardcoded-fetcher';
-import { TokenPriceFetcherBase } from './token-price-fetcher-base';
+import { AaveTokenPriceFetcher } from './fetchers/aave-fetcher.js';
+import { ChainlinkTokenPriceFetcher } from './fetchers/chainlink-fetcher/chainlink-fetcher.js';
+import { CoingeckoTokenPriceFetcher } from './fetchers/coingecko-fetcher.js';
+import { HardcodedTokenPriceFetcher } from './fetchers/hardcoded-fetcher.js';
+import { TokenPriceFetcherBase } from './token-price-fetcher-base.js';
 
 const fetchersByTokenAddress = new Map<Address, TokenPriceFetcherBase>([
   // [stkGHO.address, new AaveTokenPriceFetcher()],

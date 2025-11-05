@@ -20,7 +20,7 @@ import {
   zksync,
 } from 'viem/chains';
 
-import { getChain } from '@/lib/utils/chains';
+import { getChain } from '@/lib/utils/chains.js';
 
 export const ETHEREUM_RPCS = ['https://ethereum-rpc.publicnode.com'];
 export const BASE_RPCS = ['https://base-rpc.publicnode.com'];

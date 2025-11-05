@@ -1,6 +1,6 @@
-import { createLogger } from '@/config/logger';
-import { getAaveToken } from '@/lib/aave/aave-tokens';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp';
+import { createLogger } from '@/config/logger.js';
+import { getAaveToken } from '@/lib/aave/aave-tokens.js';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   CampaignConfig,
   Incentive,
@@ -10,15 +10,15 @@ import {
   PointReward,
   RewardType,
   Status,
-} from '@/types';
+} from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '..';
+import { FetchOptions, IncentiveProvider } from '../index.js';
 import {
   campaignsByChainId,
   pointCampaignsArray as pointCampaignsData,
   pointProgramsMap,
-} from './config/config';
-import { PointCampaign, PointIncentives, PointProgram } from './types';
+} from './config/config.js';
+import { PointCampaign, PointIncentives, PointProgram } from './types.js';
 
 export class ExternalPointsProvider implements IncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');

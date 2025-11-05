@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { IncentivesController } from '@/controllers/controller';
-import { HttpCacheMiddleware } from '@/middlewares/cache.middleware';
-import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
-import { validateQuery } from '@/validation/validation.middleware';
+import { IncentivesController } from '@/controllers/controller.js';
+import { HttpCacheMiddleware } from '@/middlewares/cache.middleware.js';
+import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
+import { validateQuery } from '@/validation/validation.middleware.js';
 
 const router = Router();
 

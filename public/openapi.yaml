@@ -1,0 +1,441 @@
+openapi: 3.0.3
+info:
+  title: Aave Incentives API
+  description: |
+    API to fetch all incentives available on the Aave V3 protocol across multiple chains.
+
+    This API aggregates incentives from multiple sources:
+    - ACI infra incentives
+    - Merkl infra incentives
+    - Onchain incentives
+    - External Points incentives
+
+    ## Features
+    - Multi-chain support (Ethereum, Base, Arbitrum, Polygon, etc.)
+    - Real-time APR calculations
+    - Point-based rewards tracking
+    - Campaign status tracking (LIVE, PAST, UPCOMING)
+    - Comprehensive filtering and sorting
+
+  version: 1.0.0
+  contact:
+    name: ACI
+    url: https://www.aavechan.com/
+  license:
+    name: MIT
+
+servers:
+  - url: https://aave-incentives-api.vercel.app/
+    description: Production server
+  - url: http://localhost:5050
+    description: Local development
+
+tags:
+  - name: Incentives
+    description: Endpoints for fetching and filtering incentives
+
+paths:
+  /api/incentives:
+    get:
+      tags:
+        - Incentives
+      description: |
+        Fetches all available incentives with optional filtering.
+      operationId: getIncentives
+      parameters:
+        - $ref: '#/components/parameters/ChainId'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/IncentiveType'
+        - $ref: '#/components/parameters/RewardType'
+      responses:
+        '200':
+          description: Successfully retrieved incentives
+          headers:
+            X-Cache:
+              description: Indicates if response was served from cache
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIncentivesResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/incentives/health:
+    get:
+      tags:
+        - Health
+      description: Returns health status of all data providers
+      operationId: getHealthStatus
+      responses:
+        '200':
+          description: Health status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      providers:
+                        type: object
+                        additionalProperties:
+                          type: boolean
+                        example:
+                          ACI: true
+                          Merkl: true
+                          ExternalPoints: true
+                          Onchain: true
+components:
+  parameters:
+    ChainId:
+      name: chainId
+      in: query
+      description: Filter by chain ID(s). Supports single value or comma-separated list.
+      schema:
+        oneOf:
+          - type: integer
+          - type: string
+            pattern: '^\d+(,\d+)*$'
+      examples:
+        single:
+          value: 1
+          summary: Single chain (Ethereum)
+        # multiple:
+        #   value: '1,137,42161'
+        #   summary: Multiple chains (Ethereum, Polygon, Arbitrum)
+
+    Status:
+      name: status
+      in: query
+      description: Filter by campaign status. Supports single value.
+      schema:
+        oneOf:
+          - $ref: '#/components/schemas/Status'
+      examples:
+        single:
+          value: LIVE
+          summary: Only live campaigns
+        # multiple:
+        #   value: 'LIVE,UPCOMING'
+        #   summary: Live and upcoming campaigns
+
+    IncentiveType:
+      name: incentiveType
+      in: query
+      description: Filter by incentive type
+      schema:
+        $ref: '#/components/schemas/IncentiveType'
+
+    RewardType:
+      name: rewardType
+      in: query
+      description: Filter by reward type
+      schema:
+        $ref: '#/components/schemas/RewardType'
+
+  schemas:
+    GetIncentivesResponse:
+      type: object
+      required:
+        - success
+        - data
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          required:
+            - incentives
+            - totalCount
+            - lastUpdated
+          properties:
+            incentives:
+              type: array
+              items:
+                $ref: '#/components/schemas/Incentive'
+            totalCount:
+              type: integer
+              description: Total number of incentives
+              example: 30
+            lastUpdated:
+              type: string
+              format: date-time
+              description: Timestamp of when data was last fetched
+              example: '2025-01-15T10:30:00Z'
+
+    Incentive:
+      type: object
+      required:
+        - name
+        - description
+        - chainId
+        - rewardedToken
+        - reward
+        - incentiveType
+        - status
+        - claimLink
+      properties:
+        name:
+          type: string
+          example: 'Etherfi Points - Supply weETH on Ethereum'
+        description:
+          type: string
+          example: 'Earn Etherfi loyalty points by supplying weETH on Aave Ethereum'
+        chainId:
+          type: integer
+          example: 1
+        rewardedToken:
+          $ref: '#/components/schemas/Token'
+        reward:
+          oneOf:
+            - $ref: '#/components/schemas/TokenReward'
+            - $ref: '#/components/schemas/PointReward'
+          discriminator:
+            propertyName: type
+        currentCampaignConfig:
+          $ref: '#/components/schemas/CampaignConfig'
+        nextCampaignConfig:
+          $ref: '#/components/schemas/CampaignConfig'
+        allCampaignsConfigs:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignConfig'
+        incentiveType:
+          $ref: '#/components/schemas/IncentiveType'
+        status:
+          $ref: '#/components/schemas/Status'
+        claimLink:
+          type: string
+          format: uri
+          example: 'https://app.merkl.xyz/'
+        infosLink:
+          type: string
+          format: uri
+          example: 'https://governance.aave.com/t/arfc-sts-loop-incentive-program/22368'
+        additionalData:
+          type: object
+          additionalProperties: true
+
+    Token:
+      type: object
+      required:
+        - name
+        - symbol
+        - address
+        - chainId
+        - decimals
+      properties:
+        name:
+          type: string
+          example: 'Wrapped Ether'
+        symbol:
+          type: string
+          example: 'WETH'
+        address:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
+          example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+        chainId:
+          type: integer
+          example: 1
+        decimals:
+          type: integer
+          example: 18
+        price:
+          type: number
+          format: float
+          example: 4250.75
+        priceFeed:
+          type: string
+          example: '0x5424384B256154046E9667dDFaaa5e550145215e'
+
+    Point:
+      type: object
+      required:
+        - name
+        - protocol
+      properties:
+        name:
+          type: string
+          example: 'Etherfi Loyalty Points'
+        protocol:
+          type: string
+          example: 'Etherfi'
+        tgePrice:
+          type: number
+          format: float
+          example: 0.5
+
+    TokenReward:
+      type: object
+      required:
+        - type
+        - token
+      properties:
+        type:
+          type: string
+          enum: [token, point]
+        token:
+          $ref: '#/components/schemas/Token'
+        apr:
+          type: number
+          format: float
+          example: 8.5
+          description: Annual Percentage Rate
+
+    PointReward:
+      type: object
+      required:
+        - type
+        - point
+      properties:
+        type:
+          type: string
+          enum: [token, point]
+        point:
+          $ref: '#/components/schemas/Point'
+        pointValue:
+          type: number
+          format: float
+          example: 3
+        pointValueUnit:
+          type: string
+          example: 'x'
+
+    CampaignConfig:
+      type: object
+      required:
+        - startTimestamp
+        - endTimestamp
+      properties:
+        startTimestamp:
+          type: integer
+          example: 1735700400
+          description: Unix timestamp
+        endTimestamp:
+          type: integer
+          example: 1767236400
+          description: Unix timestamp
+        budget:
+          type: number
+          format: float
+          example: 200000
+        apr:
+          type: number
+          format: float
+          example: 8.5
+        pointValue:
+          type: number
+          format: float
+          example: 3
+
+    IncentiveType:
+      type: string
+      enum: [MASIV, ONCHAIN, EXTERNAL]
+      description: |
+        - MASIV: ACI-run campaigns (regardless of infrastructure)
+        - ONCHAIN: stkAAVE, stkBPT, GHO Discount Program
+        - EXTERNAL: External token incentives or points
+
+    RewardType:
+      type: string
+      enum: [token, point, external_point]
+      description: |
+        - token: Rewards paid in tokens (has APR)
+        - point: Protocol-native points (may have value)
+        - external_point: External ecosystem points
+
+    Status:
+      type: string
+      enum: [LIVE, PAST, SOON]
+      description: |
+        - LIVE: Campaign is currently active
+        - PAST: Campaign has ended
+        - SOON: Campaign will start in the future
+
+    ValidationError:
+      type: object
+      required:
+        - name
+        - message
+        - info
+      properties:
+        name:
+          type: string
+          example: 'ValidationError'
+        message:
+          type: string
+          example: 'Validation failed'
+        info:
+          type: object
+          properties:
+            type:
+              type: string
+              example: 'validation'
+            on:
+              type: string
+              example: 'query'
+            found:
+              type: object
+              description: The actual query parameters received
+            errors:
+              type: array
+              items:
+                type: object
+                properties:
+                  path:
+                    type: string
+                    example: 'chainId'
+                  message:
+                    type: string
+                    example: 'chainId must be a valid number'
+                  code:
+                    type: string
+                    example: 'invalid_type'
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required:
+            - message
+            - code
+          properties:
+            message:
+              type: string
+              example: 'Failed to fetch incentives'
+            code:
+              type: string
+              example: 'INTERNAL_ERROR'
+
+  responses:
+    ValidationError:
+      description: Validation error - Invalid query parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

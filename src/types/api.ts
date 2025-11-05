@@ -43,7 +43,6 @@ export interface Token {
 export interface Point {
   name: string;
   protocol: string;
-  unit?: string;
   tgePrice?: number;
 }
 

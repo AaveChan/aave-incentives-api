@@ -1,23 +1,23 @@
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import { getViemClient } from '@/clients/viem';
+import { getViemClient } from '@/clients/viem.js';
 import {
   AaveInstanceEntries,
   AaveInstanceName,
   AaveTokenType,
   getAaveToken,
-} from '@/lib/aave/aave-tokens';
-import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp';
+} from '@/lib/aave/aave-tokens.js';
+import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   AaveUiIncentiveService,
   aIncentivesData,
   aTokenInfo,
   vIncentivesData,
   vTokenInfo,
-} from '@/services/aave-ui-incentive.service';
-import { ERC20Service } from '@/services/erc20.service';
-import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service';
+} from '@/services/aave-ui-incentive.service.js';
+import { ERC20Service } from '@/services/erc20.service.js';
+import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
 import {
   CampaignConfig,
   Incentive,
@@ -27,9 +27,9 @@ import {
   Status,
   Token,
   TokenReward,
-} from '@/types';
+} from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '..';
+import { FetchOptions, IncentiveProvider } from '../index.js';
 
 const INSTANCES_ENABLED: string[] = [
   'AaveV3Ethereum',

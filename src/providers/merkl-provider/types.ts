@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 
-import { Status } from '@/types';
+import { Status } from '@/types/index.js';
 
 enum OpportunityAction {
   LEND = 'LEND',
