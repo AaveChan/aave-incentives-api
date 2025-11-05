@@ -33,6 +33,9 @@ app.use(
   '/docs',
   apiReference({
     url: '/openapi.yaml',
+    hideModels: true,
+    theme: 'deepSpace',
+    showToolbar: 'localhost',
   }),
 );
 
