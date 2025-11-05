@@ -21,6 +21,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.resolve(__dirname, '../public')));
 
+// Not mandatory (cause index.html is served by default), but explicit route for clarity or if needed later
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 app.use('/incentives', incentivesRoutes);
 app.use('/ping', pingRoute);
 
