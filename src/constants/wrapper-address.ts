@@ -10,7 +10,7 @@ import {
 } from '@bgd-labs/aave-address-book';
 import { Address } from 'viem';
 
-import { BookType } from '@/lib/aave/aave-tokens';
+import { BookType } from '@/lib/aave/aave-tokens.js';
 
 const aEthUSDtbWrapper: Address = '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0';
 

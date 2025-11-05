@@ -2,8 +2,8 @@ import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import NodeCache from 'node-cache';
 
-import { CACHE_TTLS } from '@/config/cache-ttls';
-import { createLogger } from '@/config/logger';
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
+import { createLogger } from '@/config/logger.js';
 
 interface CachedResponse {
   statusCode: number;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IncentiveType, RewardType, Status } from '../types/api';
+import { IncentiveType, RewardType, Status } from '@/types/index.js';
 
 export const GetIncentivesQuerySchema = z.object({
   chainId: z.coerce.number().optional(),

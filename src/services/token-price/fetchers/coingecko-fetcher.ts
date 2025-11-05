@@ -1,9 +1,9 @@
 import { Address } from 'viem';
 import { arbitrum, avalanche, base, mainnet, polygon, sonic } from 'viem/chains';
 
-import { Token } from '@/types';
+import { Token } from '@/types/index.js';
 
-import { TokenPriceFetcherBase } from '../token-price-fetcher-base';
+import { TokenPriceFetcherBase } from '../token-price-fetcher-base.js';
 
 type CoingeckoTokenPrice = {
   [address: Address]: {

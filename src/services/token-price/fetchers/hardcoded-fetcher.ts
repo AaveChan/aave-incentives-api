@@ -1,6 +1,6 @@
-import { Token } from '@/types';
+import { Token } from '@/types/index.js';
 
-import { TokenPriceFetcherBase } from '../token-price-fetcher-base';
+import { TokenPriceFetcherBase } from '../token-price-fetcher-base.js';
 
 export class HardcodedTokenPriceFetcher extends TokenPriceFetcherBase {
   constructor() {

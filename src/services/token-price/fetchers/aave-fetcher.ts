@@ -1,11 +1,11 @@
 import { formatUnits } from 'viem';
 
-import { getViemClient } from '@/clients/viem';
-import { uiPoolDataProviderAbi } from '@/constants/abis';
-import { getAaveInstancesBookByChainId } from '@/lib/aave/aave-tokens';
-import { Token } from '@/types';
+import { getViemClient } from '@/clients/viem.js';
+import { uiPoolDataProviderAbi } from '@/constants/abis/index.js';
+import { getAaveInstancesBookByChainId } from '@/lib/aave/aave-tokens.js';
+import { Token } from '@/types/index.js';
 
-import { TokenPriceFetcherBase } from '../token-price-fetcher-base';
+import { TokenPriceFetcherBase } from '../token-price-fetcher-base.js';
 
 export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
   constructor() {

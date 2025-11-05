@@ -1,11 +1,11 @@
 import { Address, formatUnits } from 'viem';
 
-import { getViemClient } from '@/clients/viem';
-import { chainLinkPriceFeedAbi } from '@/constants/abis';
-import { Token } from '@/types';
+import { getViemClient } from '@/clients/viem.js';
+import { chainLinkPriceFeedAbi } from '@/constants/abis/index.js';
+import { Token } from '@/types/index.js';
 
-import { TokenPriceFetcherBase } from '../../token-price-fetcher-base';
-import { priceFeeds } from './price-feeds';
+import { TokenPriceFetcherBase } from '../../token-price-fetcher-base.js';
+import { priceFeeds } from './price-feeds.js';
 
 export class ChainlinkTokenPriceFetcher extends TokenPriceFetcherBase {
   constructor() {

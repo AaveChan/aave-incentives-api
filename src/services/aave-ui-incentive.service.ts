@@ -1,8 +1,8 @@
-import { getViemClient } from '@/clients/viem';
-import { CACHE_TTLS } from '@/config/cache-ttls';
-import { uiIncentiveDataProviderAbi, uiPoolDataProviderAbi } from '@/constants/abis';
-import { AaveInstanceBook, AaveInstanceEntries } from '@/lib/aave/aave-tokens';
-import { withCache } from '@/lib/utils/cache';
+import { getViemClient } from '@/clients/viem.js';
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
+import { uiIncentiveDataProviderAbi, uiPoolDataProviderAbi } from '@/constants/abis/index.js';
+import { AaveInstanceBook, AaveInstanceEntries } from '@/lib/aave/aave-tokens.js';
+import { withCache } from '@/lib/utils/cache.js';
 
 // UI Incentives Types
 type IncentivesData = Awaited<ReturnType<AaveUiIncentiveService['getUiIncentivesData']>>;

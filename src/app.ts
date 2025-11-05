@@ -4,9 +4,9 @@ import express, { Application, Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { createLogger } from './config/logger';
-import { router as incentivesRoutes } from './routes/incentives.route';
-import { router as pingRoute } from './routes/ping.route';
+import { createLogger } from './config/logger.js';
+import { router as incentivesRoutes } from './routes/incentives.route.js';
+import { router as pingRoute } from './routes/ping.route.js';
 
 const PORT: number = 5050;
 
