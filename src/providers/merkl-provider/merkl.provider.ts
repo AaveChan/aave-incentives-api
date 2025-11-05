@@ -2,7 +2,7 @@ import { ink } from 'viem/chains';
 
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
-import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
@@ -19,6 +19,7 @@ import { FetchOptions, IncentiveProvider } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
+  MerklToken,
   RewardTokenType as MerklRewardTokenType,
 } from './types.js';
 
@@ -67,49 +68,15 @@ export class MerklProvider implements IncentiveProvider {
 
     for (const opportunity of merklOpportunities) {
       const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
-
-      const rewardedTokenAddress = opportunity.explorerAddress;
-
-      if (!rewardMerklToken || !rewardedTokenAddress) {
+      if (!rewardMerklToken) {
+        this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
         continue;
       }
+      const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
 
-      const rewardToken: Token = {
-        name: rewardMerklToken.name,
-        address: rewardMerklToken.address,
-        symbol: rewardMerklToken.symbol,
-        decimals: rewardMerklToken.decimals,
-        chainId: rewardMerklToken.chainId,
-      };
-
-      let rewardedToken: Token = {
-        name: this.unknown,
-        address: rewardedTokenAddress,
-        symbol: this.unknown,
-        decimals: 18,
-        chainId: opportunity.chainId,
-      };
-
-      const rewardedTokenFetched = getAaveToken({
-        tokenAddress: rewardedTokenAddress,
-        chainId: opportunity.chainId,
-      });
-
-      if (
-        rewardMerklToken.address.toLowerCase() === rewardedTokenAddress.toLowerCase() &&
-        rewardMerklToken.chainId === opportunity.chainId
-      ) {
-        rewardedToken = {
-          ...rewardMerklToken,
-          priceFeed: rewardedTokenFetched?.priceFeed,
-        };
-      } else if (rewardedTokenFetched) {
-        rewardedToken = rewardedTokenFetched;
-      } else {
-        this.logger.error(
-          `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
-        );
-      }
+      const rewardedMerklTokens = opportunity.tokens;
+      const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
+      const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
 
       const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
       const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
@@ -127,7 +94,7 @@ export class MerklProvider implements IncentiveProvider {
         tokenReward = {
           type: rewardType,
           point: {
-            name: rewardedToken.name,
+            name: rewardToken.name,
             protocol: protocolId,
           },
         };
@@ -150,7 +117,7 @@ export class MerklProvider implements IncentiveProvider {
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
-        rewardedToken,
+        rewardedTokens,
         reward: tokenReward,
         currentCampaignConfig,
         nextCampaignConfig,
@@ -280,6 +247,33 @@ export class MerklProvider implements IncentiveProvider {
         return RewardType.POINT;
     }
   }
+
+  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken): Token => {
+    const token: Token = {
+      name: merklToken.name,
+      address: merklToken.address,
+      symbol: merklToken.symbol,
+      decimals: merklToken.decimals,
+      chainId: merklToken.chainId,
+    };
+    return token;
+  };
+
+  private filterMerklTokens = (tokens: MerklToken[]): MerklToken[] =>
+    tokens.filter((token) => {
+      const aaveTokenInfo = getAaveTokenInfo({
+        tokenAddress: token.address,
+        chainId: token.chainId,
+      });
+      if (
+        !aaveTokenInfo?.type ||
+        aaveTokenInfo.type === AaveTokenType.STATA ||
+        aaveTokenInfo.type === AaveTokenType.UNDERLYING
+      ) {
+        return false;
+      }
+      return true;
+    });
 
   async isHealthy(): Promise<boolean> {
     try {

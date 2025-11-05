@@ -107,7 +107,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
-        rewardedToken,
+        rewardedTokens: [rewardedToken],
         reward: pointReward,
         currentCampaignConfig,
         nextCampaignConfig,

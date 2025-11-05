@@ -31,7 +31,8 @@ export class IncentivesController {
       res.json(response);
 
       this.logger.debug('Response sent successfully');
-    } catch {
+    } catch (e: unknown) {
+      this.logger.error('Error fetching incentives:', e);
       res.status(500).json({
         success: false,
         error: {

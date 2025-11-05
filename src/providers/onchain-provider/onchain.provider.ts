@@ -190,7 +190,7 @@ export class OnchainProvider implements IncentiveProvider {
             ),
             claimLink: this.claimLink,
             chainId,
-            rewardedToken,
+            rewardedTokens: [rewardedToken],
             reward,
             currentCampaignConfig,
             allCampaignsConfigs,

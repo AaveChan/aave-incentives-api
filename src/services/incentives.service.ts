@@ -122,7 +122,7 @@ export class IncentivesService {
 
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
-      incentive.rewardedToken = this.enrichedToken(incentive.rewardedToken);
+      incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
       if (incentive.reward.type === RewardType.TOKEN) {
         incentive.reward.token = this.enrichedToken(incentive.reward.token);
       }

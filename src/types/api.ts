@@ -3,7 +3,7 @@ import { Address } from 'viem';
 export interface Incentive {
   name: string;
   chainId: number;
-  rewardedToken: Token;
+  rewardedTokens: Token[];
   reward: Reward;
   incentiveType: IncentiveType;
   status: Status;

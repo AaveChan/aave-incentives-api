@@ -49,17 +49,8 @@ export class ACIProvider implements IncentiveProvider {
 
       const description = action.info.wholeDescriptionString;
 
-      const actionToken = action.actionTokens[0];
-
-      if (!actionToken) {
-        this.logger.warn(
-          `No action token defined for action ${action.displayName}, skipping incentive creation.`,
-        );
-        continue;
-      }
-
-      const rewardedToken = this.convertAciInfraTokenToIncentiveToken(actionToken);
-      const rewardToken = this.convertAciInfraTokenToIncentiveToken(action.rewardToken);
+      const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
+      const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
       const tokenReward: TokenReward = {
         type: this.rewardType,
@@ -72,7 +63,7 @@ export class ACIProvider implements IncentiveProvider {
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,
-        rewardedToken,
+        rewardedTokens,
         reward: tokenReward,
         currentCampaignConfig,
         nextCampaignConfig,
@@ -86,7 +77,7 @@ export class ACIProvider implements IncentiveProvider {
     return incentives;
   }
 
-  private convertAciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
+  private aciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
     const token: Token = {
       name: aciInfraToken.name,
       symbol: aciInfraToken.symbol,
