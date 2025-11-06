@@ -59,7 +59,7 @@ export class ACIProvider implements IncentiveProvider {
         source: this.incentiveSource,
         rewardedTokens,
         rewardToken: rewardToken,
-        currentApr: action.apr || 0,
+        currentApr: action.apr,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,

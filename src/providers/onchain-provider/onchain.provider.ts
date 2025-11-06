@@ -186,7 +186,7 @@ export class OnchainProvider implements IncentiveProvider {
             type: this.incentiveType,
             rewardedTokens: [rewardedToken],
             rewardToken,
-            currentApr: apr || 0,
+            currentApr: apr,
             currentCampaignConfig,
             allCampaignsConfigs,
             status,

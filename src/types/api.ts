@@ -20,7 +20,7 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
 
 export type TokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
   rewardToken: Token;
-  currentApr: number;
+  currentApr?: number;
 };
 
 export type PointIncentive = BaseIncentive<IncentiveType.POINT> & {
