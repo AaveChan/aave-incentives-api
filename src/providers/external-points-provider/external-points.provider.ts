@@ -2,13 +2,14 @@ import { createLogger } from '@/config/logger.js';
 import { getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
+  BaseIncentive,
   CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
   Point,
-  PointReward,
-  RewardType,
+  PointIncentive,
+  PointWithoutValueIncentive,
   Status,
 } from '@/types/index.js';
 
@@ -23,9 +24,7 @@ import { PointCampaign, PointIncentives, PointProgram } from './types.js';
 export class ExternalPointsProvider implements IncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
-  source = IncentiveSource.HARDCODED;
-  incentiveType = IncentiveType.EXTERNAL;
-  rewardType = RewardType.POINT as const;
+  incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
@@ -95,28 +94,36 @@ export class ExternalPointsProvider implements IncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const pointReward: PointReward = {
-        type: this.rewardType,
-        point,
-        pointValue,
-        pointValueUnit: program.pointValueUnit,
-      };
-
-      const incentive: Incentive = {
+      const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: program.name,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
-        rewardedToken,
-        reward: pointReward,
+        rewardedTokens: [rewardedToken],
+        source: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
-        incentiveType: IncentiveType.EXTERNAL,
         status,
       };
 
-      incentives.push(incentive);
+      if (pointValue) {
+        const incentive: PointIncentive = {
+          ...baseIncentive,
+          type: IncentiveType.POINT,
+          point,
+          pointValue,
+          pointValueUnit: program.pointValueUnit,
+        };
+        incentives.push(incentive);
+      } else {
+        const incentive: PointWithoutValueIncentive = {
+          ...baseIncentive,
+          type: IncentiveType.POINT_WITHOUT_VALUE,
+          point,
+        };
+        incentives.push(incentive);
+      }
     }
 
     return incentives;

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { createLogger } from './config/logger.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
+import { ApiErrorResponse } from './types/index.js';
 
 const PORT: number = 5050;
 
@@ -29,11 +30,6 @@ app.get('/', (_req, res) => {
 app.use('/incentives', incentivesRoutes);
 app.use('/ping', pingRoute);
 
-// app.use('/openapi', (_req: Request, res: Response): void => {
-//   console.log('Serving OpenAPI specification');
-//   res.status(200).json(OpenApiSpecification);
-// });
-
 app.use(
   '/docs',
   apiReference({
@@ -44,8 +40,16 @@ app.use(
   }),
 );
 
+const apiErrorResponse: ApiErrorResponse = {
+  success: false,
+  error: {
+    message: 'Not Found',
+    code: 'NOT_FOUND',
+  },
+};
+
 app.use('/', (_req: Request, res: Response): void => {
-  res.status(400).send({ error: 'Not Found' });
+  res.status(404).send(apiErrorResponse);
 });
 
 app.listen(PORT, (): void => {

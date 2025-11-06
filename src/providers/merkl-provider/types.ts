@@ -28,38 +28,13 @@ export type MerklOpportunity = {
   tags: [];
   id: string;
   explorerAddress?: Address;
-  tokens: {
-    id: string;
-    name: string;
-    chainId: number;
-    address: Address;
-    decimals: number;
-    icon: string;
-    verified: boolean;
-    isTest: boolean;
-    price: number;
-    symbol: string;
-  }[];
+  tokens: MerklToken[];
   rewardsRecord: {
     id: string;
     total: number;
     timestamp: string;
     breakdowns: {
-      token: {
-        id: string;
-        name: string;
-        chainId: number;
-        address: Address;
-        decimals: number;
-        symbol: string;
-        displaySymbol: string;
-        icon: string;
-        verified: boolean;
-        isTest: boolean;
-        type: RewardTokenType;
-        isNative: boolean;
-        price: number;
-      };
+      token: MerklToken;
       amount: string;
       value: number;
       distributionType: string;
@@ -87,18 +62,21 @@ export enum DistributionMethod {
 }
 
 export type MerklToken = {
-  id: string;
-  name: string;
+  address: Address;
   chainId: number;
-  address: string;
   decimals: number;
   icon: string;
-  verified: boolean;
+  id: string;
   isNative: boolean;
   isTest: boolean;
-  price: number;
+  name: string;
   symbol: string;
-  type: string;
+  type: RewardTokenType;
+  verified: boolean;
+  displaySymbol?: string;
+  price?: number;
+  priceSource?: string;
+  updatedAt?: number;
 };
 
 export type Campaign = {

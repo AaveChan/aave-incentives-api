@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import z from 'zod';
 
+import { ApiErrorResponse } from '@/types/api.js';
+
 export function validateQuery<S extends z.ZodSchema>(schema: S) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -11,7 +13,7 @@ export function validateQuery<S extends z.ZodSchema>(schema: S) {
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({
+        const errResponse: ApiErrorResponse = {
           success: false,
           error: {
             message: 'Invalid query parameters',
@@ -21,7 +23,8 @@ export function validateQuery<S extends z.ZodSchema>(schema: S) {
               message: err.message,
             })),
           },
-        });
+        };
+        return res.status(400).json(errResponse);
       }
 
       next(error);

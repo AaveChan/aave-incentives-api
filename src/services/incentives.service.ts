@@ -10,7 +10,7 @@ import {
   MerklProvider,
   OnchainProvider,
 } from '@/providers/index.js';
-import { Incentive, IncentiveSource, RewardType, Status, Token } from '@/types/index.js';
+import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/types/index.js';
 
 export class IncentivesService {
   private logger = createLogger('IncentivesService');
@@ -45,17 +45,9 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
-    const providersFiltered = this.providers
-      .filter(
-        (provider) =>
-          !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-      )
-      .filter(
-        (provider) =>
-          !fetchOptions?.rewardType ||
-          !provider.rewardType ||
-          provider.rewardType === fetchOptions.rewardType,
-      );
+    const providersFiltered = this.providers.filter(
+      (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
+    );
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -66,7 +58,10 @@ export class IncentivesService {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);
       } else {
-        this.logger.error(`Provider ${providersFiltered[index]?.source} failed:`, result.reason);
+        this.logger.error(
+          `Provider ${providersFiltered[index]?.incentiveSource} failed:`,
+          result.reason,
+        );
       }
     });
 
@@ -88,22 +83,16 @@ export class IncentivesService {
       incentivesFiltered = incentivesFiltered.filter((i) => statuses.includes(i.status));
     }
 
-    // Incentive type filter
-    if (filters.incentiveType !== undefined) {
-      const types = Array.isArray(filters.incentiveType)
-        ? filters.incentiveType
-        : [filters.incentiveType];
-      incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.incentiveType));
+    // Incentive source filter
+    if (filters.source !== undefined) {
+      const sources = Array.isArray(filters.source) ? filters.source : [filters.source];
+      incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.source));
     }
 
-    // Reward type filter
-    if (filters.rewardType !== undefined) {
-      const rewardTypes = Array.isArray(filters.rewardType)
-        ? filters.rewardType
-        : [filters.rewardType];
-      incentivesFiltered = incentivesFiltered.filter((i) => {
-        return rewardTypes.includes(i.reward.type);
-      });
+    // Incentive type filter
+    if (filters.type !== undefined) {
+      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
 
     return incentivesFiltered;
@@ -122,9 +111,9 @@ export class IncentivesService {
 
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
-      incentive.rewardedToken = this.enrichedToken(incentive.rewardedToken);
-      if (incentive.reward.type === RewardType.TOKEN) {
-        incentive.reward.token = this.enrichedToken(incentive.reward.token);
+      incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
+      if (incentive.type === IncentiveType.TOKEN) {
+        incentive.rewardToken = this.enrichedToken(incentive.rewardToken);
       }
     });
   }
@@ -176,7 +165,7 @@ export class IncentivesService {
   async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
     const healthChecks = await Promise.allSettled(
       this.providers.map(async (provider) => ({
-        source: provider.source,
+        source: provider.incentiveSource,
         healthy: await provider.isHealthy(),
       })),
     );

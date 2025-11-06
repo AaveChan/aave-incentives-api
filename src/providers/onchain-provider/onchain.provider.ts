@@ -23,10 +23,9 @@ import {
   Incentive,
   IncentiveSource,
   IncentiveType,
-  RewardType,
   Status,
   Token,
-  TokenReward,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { FetchOptions, IncentiveProvider } from '../index.js';
@@ -43,9 +42,8 @@ const INSTANCES_ENABLED: string[] = [
 // TODO: fetch all LM events to get all campaign (start and end timestamps) instead of only relying on the current incentives data (which only gives current emission data)
 
 export class OnchainProvider implements IncentiveProvider {
-  incentiveType = IncentiveType.ONCHAIN;
-  rewardType = RewardType.TOKEN as const;
-  source = IncentiveSource.ONCHAIN_RPC;
+  incentiveSource = IncentiveSource.ONCHAIN_RPC;
+  incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
 
   tokenPriceFetcherService = new TokenPriceFetcherService();
@@ -174,13 +172,7 @@ export class OnchainProvider implements IncentiveProvider {
             },
           );
 
-          const reward: TokenReward = {
-            type: this.rewardType,
-            token: rewardToken,
-            apr,
-          };
-
-          allIncentives.push({
+          const incentive: TokenIncentive = {
             name: this.getIncentiveName(underlyingToken, type),
             description: this.getIncentiveDescription(
               underlyingToken,
@@ -190,13 +182,17 @@ export class OnchainProvider implements IncentiveProvider {
             ),
             claimLink: this.claimLink,
             chainId,
-            rewardedToken,
-            reward,
+            source: this.incentiveSource,
+            type: this.incentiveType,
+            rewardedTokens: [rewardedToken],
+            rewardToken,
+            currentApr: apr,
             currentCampaignConfig,
             allCampaignsConfigs,
-            incentiveType: this.incentiveType,
             status,
-          });
+          };
+
+          allIncentives.push(incentive);
         }
       }
     }

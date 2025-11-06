@@ -1,6 +1,6 @@
 import z from 'zod';
 
-import { Incentive, IncentiveSource, IncentiveType, RewardType } from '@/types/index.js';
+import { Incentive, IncentiveSource, IncentiveType } from '@/types/index.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 
 export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
@@ -8,9 +8,8 @@ export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 export interface IncentiveProvider {
   getIncentives(options?: FetchOptions): Promise<Incentive[]>;
   isHealthy(): Promise<boolean>;
-  source: IncentiveSource;
-  incentiveType: IncentiveType;
-  rewardType?: RewardType;
+  incentiveSource: IncentiveSource;
+  incentiveType?: IncentiveType;
 }
 
 export * from './aci-provider/aci.provider.js';

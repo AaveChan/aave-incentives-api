@@ -5,19 +5,17 @@ import {
   Incentive,
   IncentiveSource,
   IncentiveType,
-  RewardType,
   Status,
   Token,
-  TokenReward,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { IncentiveProvider } from '../index.js';
 import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 
 export class ACIProvider implements IncentiveProvider {
-  source = IncentiveSource.ACI_ROUNDS;
-  incentiveType = IncentiveType.OFFCHAIN;
-  rewardType = RewardType.TOKEN as const;
+  incentiveSource = IncentiveSource.ACI_MASIV_API;
+  incentiveType = IncentiveType.TOKEN as const;
 
   logger = createLogger('ACIProvider');
 
@@ -49,44 +47,33 @@ export class ACIProvider implements IncentiveProvider {
 
       const description = action.info.wholeDescriptionString;
 
-      const actionToken = action.actionTokens[0];
+      const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
+      const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
-      if (!actionToken) {
-        this.logger.warn(
-          `No action token defined for action ${action.displayName}, skipping incentive creation.`,
-        );
-        continue;
-      }
-
-      const rewardedToken = this.convertAciInfraTokenToIncentiveToken(actionToken);
-      const rewardToken = this.convertAciInfraTokenToIncentiveToken(action.rewardToken);
-
-      const tokenReward: TokenReward = {
-        type: this.rewardType,
-        token: rewardToken,
-        apr: action.apr,
-      };
-
-      incentives.push({
+      const incentive: TokenIncentive = {
         name: action.displayName,
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,
-        rewardedToken,
-        reward: tokenReward,
+        type: this.incentiveType,
+        source: this.incentiveSource,
+        rewardedTokens,
+        rewardToken: rewardToken,
+        currentApr: action.apr,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
-        incentiveType: IncentiveType.OFFCHAIN,
         infosLink: action.info.forumLink.link,
         status,
-      });
+      };
+
+      incentives.push(incentive);
     }
 
     return incentives;
   }
 
-  private convertAciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
+  private aciInfraTokenToIncentiveToken = (aciInfraToken: AciInfraToken): Token => {
     const token: Token = {
       name: aciInfraToken.name,
       symbol: aciInfraToken.symbol,

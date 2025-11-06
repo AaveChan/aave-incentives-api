@@ -2,23 +2,25 @@ import { ink } from 'viem/chains';
 
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
-import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
+  BaseIncentive,
   CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
-  Reward,
-  RewardType,
+  PointWithoutValueIncentive,
   Token,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { FetchOptions, IncentiveProvider } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
+  MerklToken,
   RewardTokenType as MerklRewardTokenType,
 } from './types.js';
 
@@ -47,8 +49,7 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider implements IncentiveProvider {
   private logger = createLogger('MerklProvider');
-  incentiveType = IncentiveType.OFFCHAIN;
-  source = IncentiveSource.MERKL_API;
+  incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
   claimLink = 'https://app.merkl.xyz/';
@@ -67,49 +68,15 @@ export class MerklProvider implements IncentiveProvider {
 
     for (const opportunity of merklOpportunities) {
       const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
-
-      const rewardedTokenAddress = opportunity.explorerAddress;
-
-      if (!rewardMerklToken || !rewardedTokenAddress) {
+      if (!rewardMerklToken) {
+        this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
         continue;
       }
+      const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
 
-      const rewardToken: Token = {
-        name: rewardMerklToken.name,
-        address: rewardMerklToken.address,
-        symbol: rewardMerklToken.symbol,
-        decimals: rewardMerklToken.decimals,
-        chainId: rewardMerklToken.chainId,
-      };
-
-      let rewardedToken: Token = {
-        name: this.unknown,
-        address: rewardedTokenAddress,
-        symbol: this.unknown,
-        decimals: 18,
-        chainId: opportunity.chainId,
-      };
-
-      const rewardedTokenFetched = getAaveToken({
-        tokenAddress: rewardedTokenAddress,
-        chainId: opportunity.chainId,
-      });
-
-      if (
-        rewardMerklToken.address.toLowerCase() === rewardedTokenAddress.toLowerCase() &&
-        rewardMerklToken.chainId === opportunity.chainId
-      ) {
-        rewardedToken = {
-          ...rewardMerklToken,
-          priceFeed: rewardedTokenFetched?.priceFeed,
-        };
-      } else if (rewardedTokenFetched) {
-        rewardedToken = rewardedTokenFetched;
-      } else {
-        this.logger.error(
-          `Aave rewarded token not found for address ${rewardedTokenAddress} on chain ${opportunity.chainId}`,
-        );
-      }
+      const rewardedMerklTokens = opportunity.tokens;
+      const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
+      const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
 
       const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
       const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
@@ -122,42 +89,39 @@ export class MerklProvider implements IncentiveProvider {
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
-      let tokenReward: Reward | undefined;
-      if (rewardType == RewardType.POINT) {
-        tokenReward = {
-          type: rewardType,
-          point: {
-            name: rewardedToken.name,
-            protocol: protocolId,
-          },
-        };
-      }
-      if (rewardType == RewardType.TOKEN) {
-        tokenReward = {
-          type: rewardType,
-          token: rewardToken,
-          apr: opportunity.apr,
-        };
-      }
-
-      if (!tokenReward) {
-        this.logger.error(`Failed to map reward for opportunity ${opportunity.name}`);
-        continue;
-      }
-
-      allIncentives.push({
+      const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: opportunity.name,
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
-        rewardedToken,
-        reward: tokenReward,
+        rewardedTokens,
+        source: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
-        incentiveType: this.incentiveType,
         status: opportunity.status,
-      });
+      };
+
+      if (rewardType == IncentiveType.POINT) {
+        const pointIncentive: PointWithoutValueIncentive = {
+          ...baseIncentive,
+          type: IncentiveType.POINT_WITHOUT_VALUE,
+          point: {
+            name: rewardToken.name,
+            protocol: protocolId,
+          },
+        };
+        allIncentives.push(pointIncentive);
+      }
+      if (rewardType == IncentiveType.TOKEN) {
+        const pointIncentive: TokenIncentive = {
+          ...baseIncentive,
+          type: IncentiveType.TOKEN,
+          rewardToken,
+          currentApr: opportunity.apr,
+        };
+        allIncentives.push(pointIncentive);
+      }
     }
 
     return allIncentives;
@@ -275,11 +239,38 @@ export class MerklProvider implements IncentiveProvider {
   private mapRewardType(type: MerklRewardTokenType) {
     switch (type) {
       case MerklRewardTokenType.TOKEN:
-        return RewardType.TOKEN;
+        return IncentiveType.TOKEN;
       case MerklRewardTokenType.PRETGE:
-        return RewardType.POINT;
+        return IncentiveType.POINT;
     }
   }
+
+  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken): Token => {
+    const token: Token = {
+      name: merklToken.name,
+      address: merklToken.address,
+      symbol: merklToken.symbol,
+      decimals: merklToken.decimals,
+      chainId: merklToken.chainId,
+    };
+    return token;
+  };
+
+  private filterMerklTokens = (tokens: MerklToken[]): MerklToken[] =>
+    tokens.filter((token) => {
+      const aaveTokenInfo = getAaveTokenInfo({
+        tokenAddress: token.address,
+        chainId: token.chainId,
+      });
+      if (
+        !aaveTokenInfo?.type ||
+        aaveTokenInfo.type === AaveTokenType.STATA ||
+        aaveTokenInfo.type === AaveTokenType.UNDERLYING
+      ) {
+        return false;
+      }
+      return true;
+    });
 
   async isHealthy(): Promise<boolean> {
     try {

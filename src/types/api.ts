@@ -1,11 +1,49 @@
 import { Address } from 'viem';
 
-export interface Incentive {
+export type ApiResponse<T, E> = {
+  success: boolean;
+  data?: T;
+  error?: E;
+};
+
+export type GetIncentivesResponse = ApiResponse<
+  {
+    incentives: Incentive[];
+    totalCount: number;
+    lastUpdated: string;
+  },
+  undefined
+>;
+
+export type ApiErrorResponse = ApiResponse<
+  undefined,
+  {
+    message: string;
+    code: string;
+    details?: {
+      field: string;
+      message: string;
+    }[];
+  }
+>;
+
+// export type GetIncentivesResponse = {
+//   success: boolean;
+//   data: {
+//     incentives: Incentive[];
+//     totalCount: number;
+//     lastUpdated: string;
+//   };
+// };
+
+export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
+
+export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
   chainId: number;
-  rewardedToken: Token;
-  reward: Reward;
-  incentiveType: IncentiveType;
+  rewardedTokens: Token[];
+  type: T;
+  source: IncentiveSource;
   status: Status;
   description: string;
   claimLink: string;
@@ -14,21 +52,22 @@ export interface Incentive {
   allCampaignsConfigs?: CampaignConfig[];
   infosLink?: string;
   additionalData?: Record<string, unknown>;
-}
+};
 
-export type Reward = TokenReward | PointReward;
-export interface TokenReward {
-  type: RewardType.TOKEN;
-  token: Token;
-  apr?: number;
-}
+export type TokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
+  rewardToken: Token;
+  currentApr?: number;
+};
 
-export interface PointReward {
-  type: RewardType.POINT;
+export type PointIncentive = BaseIncentive<IncentiveType.POINT> & {
   point: Point;
-  pointValue?: number;
+  pointValue: number;
   pointValueUnit?: string;
-}
+};
+
+export type PointWithoutValueIncentive = BaseIncentive<IncentiveType.POINT_WITHOUT_VALUE> & {
+  point: Point;
+};
 
 export interface Token {
   name: string;
@@ -55,14 +94,9 @@ export type CampaignConfig = {
 };
 
 export enum IncentiveType {
-  ONCHAIN = 'ONCHAIN',
-  OFFCHAIN = 'OFFCHAIN',
-  EXTERNAL = 'EXTERNAL',
-}
-
-export enum RewardType {
   TOKEN = 'TOKEN',
   POINT = 'POINT',
+  POINT_WITHOUT_VALUE = 'POINT_WITHOUT_VALUE',
 }
 
 export enum Status {
@@ -72,18 +106,8 @@ export enum Status {
 }
 
 export enum IncentiveSource {
-  ACI_ROUNDS = 'ACI_ROUNDS',
+  ACI_MASIV_API = 'ACI_MASIV_API',
   MERKL_API = 'MERKL_API',
-  METROM_API = 'METROM_API',
   ONCHAIN_RPC = 'ONCHAIN_RPC',
-  HARDCODED = 'HARDCODED', // For external points, incentives without end date, etc
+  LOCAL_CONFIG = 'LOCAL_CONFIG', // For external points, incentives without end date, etc
 }
-
-export type GetIncentivesResponse = {
-  success: boolean;
-  data: {
-    incentives: Incentive[];
-    totalCount: number;
-    lastUpdated: string;
-  };
-};
