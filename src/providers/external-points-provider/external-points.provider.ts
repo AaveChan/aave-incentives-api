@@ -24,7 +24,7 @@ import { PointCampaign, PointIncentives, PointProgram } from './types.js';
 export class ExternalPointsProvider implements IncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
-  source = IncentiveSource.HARDCODED;
+  incentiveSource = IncentiveSource.HARDCODED;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
@@ -100,7 +100,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
         rewardedTokens: [rewardedToken],
-        incentiveSource: this.source,
+        incentiveSource: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,

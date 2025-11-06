@@ -45,10 +45,16 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
-    const providersFiltered = this.providers.filter(
-      (provider) =>
-        !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-    );
+    const providersFiltered = this.providers
+      .filter(
+        (provider) =>
+          !fetchOptions?.incentiveSource ||
+          provider.incentiveSource === fetchOptions.incentiveSource,
+      )
+      .filter(
+        (provider) =>
+          !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
+      );
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -59,7 +65,10 @@ export class IncentivesService {
       if (result.status === 'fulfilled') {
         allIncentives.push(...result.value);
       } else {
-        this.logger.error(`Provider ${providersFiltered[index]?.source} failed:`, result.reason);
+        this.logger.error(
+          `Provider ${providersFiltered[index]?.incentiveSource} failed:`,
+          result.reason,
+        );
       }
     });
 
@@ -79,6 +88,14 @@ export class IncentivesService {
     if (filters.status !== undefined) {
       const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
       incentivesFiltered = incentivesFiltered.filter((i) => statuses.includes(i.status));
+    }
+
+    // Incentive source filter
+    if (filters.incentiveSource !== undefined) {
+      const sources = Array.isArray(filters.incentiveSource)
+        ? filters.incentiveSource
+        : [filters.incentiveSource];
+      incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.incentiveSource));
     }
 
     // Incentive type filter
@@ -159,7 +176,7 @@ export class IncentivesService {
   async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
     const healthChecks = await Promise.allSettled(
       this.providers.map(async (provider) => ({
-        source: provider.source,
+        source: provider.incentiveSource,
         healthy: await provider.isHealthy(),
       })),
     );

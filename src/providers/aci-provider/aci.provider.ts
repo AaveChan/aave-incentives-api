@@ -14,7 +14,7 @@ import { IncentiveProvider } from '../index.js';
 import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 
 export class ACIProvider implements IncentiveProvider {
-  source = IncentiveSource.ACI_ROUNDS;
+  incentiveSource = IncentiveSource.ACI_ROUNDS;
   incentiveType = IncentiveType.TOKEN as const;
 
   logger = createLogger('ACIProvider');
@@ -56,7 +56,7 @@ export class ACIProvider implements IncentiveProvider {
         claimLink: this.claimLink,
         chainId: action.chainId,
         incentiveType: this.incentiveType,
-        incentiveSource: this.source,
+        incentiveSource: this.incentiveSource,
         rewardedTokens,
         rewardToken: rewardToken,
         currentApr: action.apr || 0,

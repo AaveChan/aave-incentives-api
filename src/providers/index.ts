@@ -8,7 +8,7 @@ export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 export interface IncentiveProvider {
   getIncentives(options?: FetchOptions): Promise<Incentive[]>;
   isHealthy(): Promise<boolean>;
-  source: IncentiveSource;
+  incentiveSource: IncentiveSource;
   incentiveType?: IncentiveType;
 }
 

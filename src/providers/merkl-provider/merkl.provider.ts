@@ -49,7 +49,7 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider implements IncentiveProvider {
   private logger = createLogger('MerklProvider');
-  source = IncentiveSource.MERKL_API;
+  incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
   claimLink = 'https://app.merkl.xyz/';
@@ -95,7 +95,7 @@ export class MerklProvider implements IncentiveProvider {
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedTokens,
-        incentiveSource: this.source,
+        incentiveSource: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,

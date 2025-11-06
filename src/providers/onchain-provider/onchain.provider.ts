@@ -42,7 +42,7 @@ const INSTANCES_ENABLED: string[] = [
 // TODO: fetch all LM events to get all campaign (start and end timestamps) instead of only relying on the current incentives data (which only gives current emission data)
 
 export class OnchainProvider implements IncentiveProvider {
-  source = IncentiveSource.ONCHAIN_RPC;
+  incentiveSource = IncentiveSource.ONCHAIN_RPC;
   incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
 
@@ -182,7 +182,7 @@ export class OnchainProvider implements IncentiveProvider {
             ),
             claimLink: this.claimLink,
             chainId,
-            incentiveSource: this.source,
+            incentiveSource: this.incentiveSource,
             incentiveType: this.incentiveType,
             rewardedTokens: [rewardedToken],
             rewardToken,

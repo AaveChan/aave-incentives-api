@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IncentiveType, Status } from '@/types/index.js';
+import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
 
 export const GetIncentivesQuerySchema = z.object({
   chainId: z.coerce.number().optional(),
@@ -8,6 +8,8 @@ export const GetIncentivesQuerySchema = z.object({
   status: z.enum(Status).optional(),
 
   incentiveType: z.enum(IncentiveType).optional(),
+
+  incentiveSource: z.enum(IncentiveSource).optional(),
 
   // // Pagination
   // page: z
