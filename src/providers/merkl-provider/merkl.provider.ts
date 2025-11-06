@@ -6,13 +6,15 @@ import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
+  BaseIncentive,
   CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
-  Reward,
+  PointWithoutValueIncentive,
   RewardType,
   Token,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { FetchOptions, IncentiveProvider } from '../index.js';
@@ -89,42 +91,39 @@ export class MerklProvider implements IncentiveProvider {
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
-      let tokenReward: Reward | undefined;
-      if (rewardType == RewardType.POINT) {
-        tokenReward = {
-          type: rewardType,
-          point: {
-            name: rewardToken.name,
-            protocol: protocolId,
-          },
-        };
-      }
-      if (rewardType == RewardType.TOKEN) {
-        tokenReward = {
-          type: rewardType,
-          token: rewardToken,
-          apr: opportunity.apr,
-        };
-      }
-
-      if (!tokenReward) {
-        this.logger.error(`Failed to map reward for opportunity ${opportunity.name}`);
-        continue;
-      }
-
-      allIncentives.push({
+      const baseIncentive: Omit<BaseIncentive, 'rewardType'> = {
         name: opportunity.name,
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedTokens,
-        reward: tokenReward,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
         incentiveType: this.incentiveType,
         status: opportunity.status,
-      });
+      };
+
+      if (rewardType == RewardType.POINT) {
+        const pointIncentive: PointWithoutValueIncentive = {
+          ...baseIncentive,
+          rewardType: RewardType.POINT_WITHOUT_VALUE,
+          point: {
+            name: rewardToken.name,
+            protocol: protocolId,
+          },
+        };
+        allIncentives.push(pointIncentive);
+      }
+      if (rewardType == RewardType.TOKEN) {
+        const pointIncentive: TokenIncentive = {
+          ...baseIncentive,
+          rewardType: RewardType.TOKEN,
+          rewardToken,
+          currentApr: opportunity.apr,
+        };
+        allIncentives.push(pointIncentive);
+      }
     }
 
     return allIncentives;

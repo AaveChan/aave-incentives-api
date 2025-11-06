@@ -26,7 +26,7 @@ import {
   RewardType,
   Status,
   Token,
-  TokenReward,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { FetchOptions, IncentiveProvider } from '../index.js';
@@ -174,13 +174,7 @@ export class OnchainProvider implements IncentiveProvider {
             },
           );
 
-          const reward: TokenReward = {
-            type: this.rewardType,
-            token: rewardToken,
-            apr,
-          };
-
-          allIncentives.push({
+          const incentive: TokenIncentive = {
             name: this.getIncentiveName(underlyingToken, type),
             description: this.getIncentiveDescription(
               underlyingToken,
@@ -190,13 +184,17 @@ export class OnchainProvider implements IncentiveProvider {
             ),
             claimLink: this.claimLink,
             chainId,
+            rewardType: RewardType.TOKEN,
             rewardedTokens: [rewardedToken],
-            reward,
+            rewardToken,
+            currentApr: apr || 0,
             currentCampaignConfig,
             allCampaignsConfigs,
             incentiveType: this.incentiveType,
             status,
-          });
+          };
+
+          allIncentives.push(incentive);
         }
       }
     }

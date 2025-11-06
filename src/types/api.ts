@@ -1,34 +1,37 @@
 import { Address } from 'viem';
 
-export interface Incentive {
+export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
+
+export type BaseIncentive<T extends RewardType = RewardType> = {
   name: string;
   chainId: number;
   rewardedTokens: Token[];
-  reward: Reward;
   incentiveType: IncentiveType;
   status: Status;
   description: string;
   claimLink: string;
+  rewardType: T;
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
   allCampaignsConfigs?: CampaignConfig[];
   infosLink?: string;
   additionalData?: Record<string, unknown>;
-}
+};
 
-export type Reward = TokenReward | PointReward;
-export interface TokenReward {
-  type: RewardType.TOKEN;
-  token: Token;
-  apr?: number;
-}
+export type TokenIncentive = BaseIncentive<RewardType.TOKEN> & {
+  rewardToken: Token;
+  currentApr: number;
+};
 
-export interface PointReward {
-  type: RewardType.POINT;
+export type PointIncentive = BaseIncentive<RewardType.POINT> & {
   point: Point;
-  pointValue?: number;
+  pointValue: number;
   pointValueUnit?: string;
-}
+};
+
+export type PointWithoutValueIncentive = BaseIncentive<RewardType.POINT_WITHOUT_VALUE> & {
+  point: Point;
+};
 
 export interface Token {
   name: string;
@@ -63,6 +66,7 @@ export enum IncentiveType {
 export enum RewardType {
   TOKEN = 'TOKEN',
   POINT = 'POINT',
+  POINT_WITHOUT_VALUE = 'POINT_WITHOUT_VALUE',
 }
 
 export enum Status {

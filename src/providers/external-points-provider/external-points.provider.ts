@@ -2,12 +2,14 @@ import { createLogger } from '@/config/logger.js';
 import { getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
+  BaseIncentive,
   CampaignConfig,
   Incentive,
   IncentiveSource,
   IncentiveType,
   Point,
-  PointReward,
+  PointIncentive,
+  PointWithoutValueIncentive,
   RewardType,
   Status,
 } from '@/types/index.js';
@@ -95,20 +97,12 @@ export class ExternalPointsProvider implements IncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const pointReward: PointReward = {
-        type: this.rewardType,
-        point,
-        pointValue,
-        pointValueUnit: program.pointValueUnit,
-      };
-
-      const incentive: Incentive = {
+      const baseIncentive: Omit<BaseIncentive, 'rewardType'> = {
         name: program.name,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
         rewardedTokens: [rewardedToken],
-        reward: pointReward,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
@@ -116,7 +110,23 @@ export class ExternalPointsProvider implements IncentiveProvider {
         status,
       };
 
-      incentives.push(incentive);
+      if (pointValue) {
+        const incentive: PointIncentive = {
+          ...baseIncentive,
+          rewardType: RewardType.POINT,
+          point,
+          pointValue,
+          pointValueUnit: program.pointValueUnit,
+        };
+        incentives.push(incentive);
+      } else {
+        const incentive: PointWithoutValueIncentive = {
+          ...baseIncentive,
+          rewardType: RewardType.POINT_WITHOUT_VALUE,
+          point,
+        };
+        incentives.push(incentive);
+      }
     }
 
     return incentives;

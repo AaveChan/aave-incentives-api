@@ -8,7 +8,7 @@ import {
   RewardType,
   Status,
   Token,
-  TokenReward,
+  TokenIncentive,
 } from '@/types/index.js';
 
 import { IncentiveProvider } from '../index.js';
@@ -52,26 +52,24 @@ export class ACIProvider implements IncentiveProvider {
       const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
-      const tokenReward: TokenReward = {
-        type: this.rewardType,
-        token: rewardToken,
-        apr: action.apr,
-      };
-
-      incentives.push({
+      const incentive: TokenIncentive = {
         name: action.displayName,
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,
+        rewardType: RewardType.TOKEN,
         rewardedTokens,
-        reward: tokenReward,
+        rewardToken: rewardToken,
+        currentApr: action.apr || 0,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
         incentiveType: IncentiveType.OFFCHAIN,
         infosLink: action.info.forumLink.link,
         status,
-      });
+      };
+
+      incentives.push(incentive);
     }
 
     return incentives;

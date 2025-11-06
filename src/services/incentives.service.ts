@@ -102,7 +102,7 @@ export class IncentivesService {
         ? filters.rewardType
         : [filters.rewardType];
       incentivesFiltered = incentivesFiltered.filter((i) => {
-        return rewardTypes.includes(i.reward.type);
+        return rewardTypes.includes(i.rewardType);
       });
     }
 
@@ -123,8 +123,8 @@ export class IncentivesService {
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
       incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
-      if (incentive.reward.type === RewardType.TOKEN) {
-        incentive.reward.token = this.enrichedToken(incentive.reward.token);
+      if (incentive.rewardType === RewardType.TOKEN) {
+        incentive.rewardToken = this.enrichedToken(incentive.rewardToken);
       }
     });
   }
