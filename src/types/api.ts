@@ -70,11 +70,11 @@ export enum Status {
 }
 
 export enum IncentiveSource {
-  ACI_ROUNDS = 'ACI_ROUNDS',
+  ACI_MASIV_API = 'ACI_MASIV_API',
   MERKL_API = 'MERKL_API',
-  METROM_API = 'METROM_API',
   ONCHAIN_RPC = 'ONCHAIN_RPC',
-  HARDCODED = 'HARDCODED', // For external points, incentives without end date, etc
+  LOCAL_CONFIG = 'LOCAL_CONFIG', // For external points, incentives without end date, etc
+  METROM_API = 'METROM_API',
 }
 
 export type GetIncentivesResponse = {
