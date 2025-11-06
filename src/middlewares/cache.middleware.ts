@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import crypto from 'crypto';
 import { NextFunction, Request, Response } from 'express';
 import NodeCache from 'node-cache';
@@ -25,6 +27,11 @@ export class HttpCacheMiddleware {
 
   cacheResponse(ttl?: number) {
     return (req: Request, res: Response, next: NextFunction) => {
+      if (process.env.DISABLE_CACHE === 'true') {
+        this.logger.info('[HTTP Cache] Disabled via env variable');
+        return next();
+      }
+
       const cacheKey = this.generateCacheKey(req);
 
       const cached = this.cache.get<CachedResponse>(cacheKey);
