@@ -5,17 +5,10 @@ info:
     API to fetch all incentives available on the Aave V3 protocol across multiple chains.
 
     This API aggregates incentives from multiple sources:
-    - ACI infra incentives
+    - ACI MASIv Infra incentives
     - Merkl infra incentives
     - Onchain incentives
-    - External Points incentives
-
-    ## Features
-    - Multi-chain support (Ethereum, Base, Arbitrum, Polygon, etc.)
-    - Real-time APR calculations
-    - Point-based rewards tracking
-    - Campaign status tracking (LIVE, PAST, UPCOMING)
-    - Comprehensive filtering and sorting
+    - Local config incentives
 
   version: 1.0.0
   contact:
@@ -33,20 +26,25 @@ servers:
 tags:
   - name: Incentives
     description: Endpoints for fetching and filtering incentives
+  - name: Health
+    description: API health and monitoring
 
 paths:
   /api/incentives:
     get:
       tags:
         - Incentives
+      summary: Get all incentives
       description: |
-        Fetches all available incentives with optional filtering.
+        Fetches all available incentives with optional filtering, sorting, and pagination.
+
+        Results are cached for 5 minutes for optimal performance.
       operationId: getIncentives
       parameters:
-        - $ref: '#/components/parameters/ChainId'
-        - $ref: '#/components/parameters/Status'
-        - $ref: '#/components/parameters/IncentiveType'
-        - $ref: '#/components/parameters/RewardType'
+        - $ref: '#/components/parameters/ChainIdParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/IncentiveSourceParam'
+        - $ref: '#/components/parameters/IncentiveTypeParam'
       responses:
         '200':
           description: Successfully retrieved incentives
@@ -61,14 +59,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetIncentivesResponse'
         '400':
-          $ref: '#/components/responses/ValidationError'
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundErrorResponse'
         '500':
-          $ref: '#/components/responses/InternalError'
+          $ref: '#/components/responses/InternalErrorResponse'
 
   /api/incentives/health:
     get:
       tags:
         - Health
+      summary: Get API health status
       description: Returns health status of all data providers
       operationId: getHealthStatus
       responses:
@@ -94,9 +95,10 @@ paths:
                           Merkl: true
                           ExternalPoints: true
                           Onchain: true
+
 components:
   parameters:
-    ChainId:
+    ChainIdParam:
       name: chainId
       in: query
       description: Filter by chain ID(s). Supports single value or comma-separated list.
@@ -109,99 +111,147 @@ components:
         single:
           value: 1
           summary: Single chain (Ethereum)
-        # multiple:
-        #   value: '1,137,42161'
-        #   summary: Multiple chains (Ethereum, Polygon, Arbitrum)
+        multiple:
+          value: '1,137,42161'
+          summary: Multiple chains (Ethereum, Polygon, Arbitrum)
 
-    Status:
+    StatusParam:
       name: status
       in: query
-      description: Filter by campaign status. Supports single value.
+      description: Filter by campaign status. Supports single value or comma-separated list.
       schema:
         oneOf:
           - $ref: '#/components/schemas/Status'
+          - type: string
+            pattern: '^(LIVE|PAST|UPCOMING)(,(LIVE|PAST|UPCOMING))*$'
       examples:
         single:
           value: LIVE
           summary: Only live campaigns
-        # multiple:
-        #   value: 'LIVE,UPCOMING'
-        #   summary: Live and upcoming campaigns
+        multiple:
+          value: 'LIVE,UPCOMING'
+          summary: Live and upcoming campaigns
 
-    IncentiveType:
-      name: incentiveType
+    IncentiveSourceParam:
+      name: source
+      in: query
+      description: Filter by incentive source
+      schema:
+        $ref: '#/components/schemas/IncentiveSource'
+
+    IncentiveTypeParam:
+      name: type
       in: query
       description: Filter by incentive type
       schema:
         $ref: '#/components/schemas/IncentiveType'
 
-    RewardType:
-      name: rewardType
-      in: query
-      description: Filter by reward type
-      schema:
-        $ref: '#/components/schemas/RewardType'
-
   schemas:
-    GetIncentivesResponse:
+    ApiResponse:
       type: object
       required:
         - success
-        - data
       properties:
         success:
           type: boolean
           example: true
-        data:
-          type: object
-          required:
-            - incentives
-            - totalCount
-            - lastUpdated
-          properties:
-            incentives:
-              type: array
-              items:
-                $ref: '#/components/schemas/Incentive'
-            totalCount:
-              type: integer
-              description: Total number of incentives
-              example: 30
-            lastUpdated:
-              type: string
-              format: date-time
-              description: Timestamp of when data was last fetched
-              example: '2025-01-15T10:30:00Z'
 
-    Incentive:
+    GetIncentivesResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - incentives
+                - totalCount
+                - lastUpdated
+              properties:
+                incentives:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Incentive'
+                totalCount:
+                  type: integer
+                  description: Total number of incentives (before filtering)
+                  example: 150
+                lastUpdated:
+                  type: string
+                  format: date-time
+                  description: Timestamp of when data was last fetched
+                  example: '2025-01-15T10:30:00Z'
+
+    ErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - error
+          properties:
+            success:
+              type: boolean
+              example: false
+            error:
+              type: object
+              required:
+                - message
+                - code
+              properties:
+                message:
+                  type: string
+                  example: 'Failed to fetch incentives'
+                code:
+                  type: string
+                  example: 'INTERNAL_ERROR'
+                details:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                        example: 'source'
+                      message:
+                        type: string
+                        example: 'Invalid option: expected one of \"ACI_MASIV_API\"|\"MERKL_API\"|\"ONCHAIN_RPC\"|\"LOCAL_CONFIG\"'
+
+    BaseIncentive:
       type: object
       required:
         - name
-        - description
         - chainId
-        - rewardedToken
-        - reward
-        - incentiveType
+        - rewardedTokens
+        - type
+        - source
         - status
+        - description
         - claimLink
       properties:
         name:
           type: string
           example: 'Etherfi Points - Supply weETH on Ethereum'
-        description:
-          type: string
-          example: 'Earn Etherfi loyalty points by supplying weETH on Aave Ethereum'
         chainId:
           type: integer
           example: 1
-        rewardedToken:
-          $ref: '#/components/schemas/Token'
-        reward:
-          oneOf:
-            - $ref: '#/components/schemas/TokenReward'
-            - $ref: '#/components/schemas/PointReward'
-          discriminator:
-            propertyName: type
+        rewardedTokens:
+          type: array
+          items:
+            $ref: '#/components/schemas/Token'
+        type:
+          $ref: '#/components/schemas/IncentiveType'
+        source:
+          $ref: '#/components/schemas/IncentiveSource'
+        status:
+          $ref: '#/components/schemas/Status'
+        description:
+          type: string
+        claimLink:
+          type: string
+          format: uri
+          example: 'https://app.merkl.xyz/'
         currentCampaignConfig:
           $ref: '#/components/schemas/CampaignConfig'
         nextCampaignConfig:
@@ -210,14 +260,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CampaignConfig'
-        incentiveType:
-          $ref: '#/components/schemas/IncentiveType'
-        status:
-          $ref: '#/components/schemas/Status'
-        claimLink:
-          type: string
-          format: uri
-          example: 'https://app.merkl.xyz/'
         infosLink:
           type: string
           format: uri
@@ -225,6 +267,75 @@ components:
         additionalData:
           type: object
           additionalProperties: true
+
+    TokenIncentive:
+      allOf:
+        - $ref: '#/components/schemas/BaseIncentive'
+        - type: object
+          required:
+            - type
+            - rewardToken
+          properties:
+            type:
+              type: string
+              enum: [TOKEN]
+            rewardToken:
+              $ref: '#/components/schemas/Token'
+            currentApr:
+              type: number
+              format: float
+              example: 5.6
+              description: Annual Percentage Rate
+
+    PointIncentive:
+      allOf:
+        - $ref: '#/components/schemas/BaseIncentive'
+        - type: object
+          required:
+            - type
+            - point
+            - pointValue
+          properties:
+            type:
+              type: string
+              enum: [POINT]
+            point:
+              $ref: '#/components/schemas/Point'
+            pointValue:
+              type: number
+              format: float
+              example: 1.2
+            pointValueUnit:
+              type: string
+              example: 'per_token'
+
+    PointWithoutValueIncentive:
+      allOf:
+        - $ref: '#/components/schemas/BaseIncentive'
+        - type: object
+          required:
+            - type
+            - point
+          properties:
+            type:
+              type: string
+              enum: [POINT_WITHOUT_VALUE]
+            point:
+              $ref: '#/components/schemas/Point'
+
+    Incentive:
+      oneOf:
+        - $ref: '#/components/schemas/TokenIncentive'
+        - $ref: '#/components/schemas/PointIncentive'
+        - $ref: '#/components/schemas/PointWithoutValueIncentive'
+      discriminator:
+        propertyName: type
+        mapping:
+          TOKEN: '#/components/schemas/TokenIncentive'
+          POINT: '#/components/schemas/PointIncentive'
+          POINT_WITHOUT_VALUE: '#/components/schemas/PointWithoutValueIncentive'
+      description: |
+        Represents any type of incentive (token, point with value, or point without value).
 
     Token:
       type: object
@@ -276,42 +387,6 @@ components:
           format: float
           example: 0.5
 
-    TokenReward:
-      type: object
-      required:
-        - type
-        - token
-      properties:
-        type:
-          type: string
-          enum: [token, point]
-        token:
-          $ref: '#/components/schemas/Token'
-        apr:
-          type: number
-          format: float
-          example: 8.5
-          description: Annual Percentage Rate
-
-    PointReward:
-      type: object
-      required:
-        - type
-        - point
-      properties:
-        type:
-          type: string
-          enum: [token, point]
-        point:
-          $ref: '#/components/schemas/Point'
-        pointValue:
-          type: number
-          format: float
-          example: 3
-        pointValueUnit:
-          type: string
-          example: 'x'
-
     CampaignConfig:
       type: object
       required:
@@ -320,10 +395,12 @@ components:
       properties:
         startTimestamp:
           type: integer
+          format: int64
           example: 1735700400
           description: Unix timestamp
         endTimestamp:
           type: integer
+          format: int64
           example: 1767236400
           description: Unix timestamp
         budget:
@@ -339,21 +416,22 @@ components:
           format: float
           example: 3
 
+    IncentiveSource:
+      type: string
+      enum: ['ACI_MASIV_API', 'MERKL_API', 'ONCHAIN_RPC', 'LOCAL_CONFIG']
+      description: |
+        - ACI_MASIV_API: Incentives from ACI Masiv infrastructure
+        - MERKL_API: Incentives from Merkl infrastructure
+        - ONCHAIN_RPC: Incentives fetched directly from onchain data
+        - LOCAL_CONFIG: Incentives from local configuration (external points, etc...)
+
     IncentiveType:
       type: string
-      enum: [MASIV, ONCHAIN, EXTERNAL]
+      enum: [TOKEN, POINT, POINT_WITHOUT_VALUE]
       description: |
-        - MASIV: ACI-run campaigns (regardless of infrastructure)
-        - ONCHAIN: stkAAVE, stkBPT, GHO Discount Program
-        - EXTERNAL: External token incentives or points
-
-    RewardType:
-      type: string
-      enum: [token, point, external_point]
-      description: |
-        - token: Rewards paid in tokens (has APR)
-        - point: Protocol-native points (may have value)
-        - external_point: External ecosystem points
+        - TOKEN: Token incentives (with APR)
+        - POINT: Points incentive (with value)
+        - POINT_WITHOUT_VALUE: Points incentive (without value)
 
     Status:
       type: string
@@ -363,77 +441,22 @@ components:
         - PAST: Campaign has ended
         - SOON: Campaign will start in the future
 
-    ValidationError:
-      type: object
-      required:
-        - name
-        - message
-        - info
-      properties:
-        name:
-          type: string
-          example: 'ValidationError'
-        message:
-          type: string
-          example: 'Validation failed'
-        info:
-          type: object
-          properties:
-            type:
-              type: string
-              example: 'validation'
-            on:
-              type: string
-              example: 'query'
-            found:
-              type: object
-              description: The actual query parameters received
-            errors:
-              type: array
-              items:
-                type: object
-                properties:
-                  path:
-                    type: string
-                    example: 'chainId'
-                  message:
-                    type: string
-                    example: 'chainId must be a valid number'
-                  code:
-                    type: string
-                    example: 'invalid_type'
-
-    ErrorResponse:
-      type: object
-      required:
-        - success
-        - error
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          required:
-            - message
-            - code
-          properties:
-            message:
-              type: string
-              example: 'Failed to fetch incentives'
-            code:
-              type: string
-              example: 'INTERNAL_ERROR'
-
   responses:
-    ValidationError:
+    ValidationErrorResponse:
       description: Validation error - Invalid query parameters
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ValidationError'
+            $ref: '#/components/schemas/ErrorResponse'
 
-    InternalError:
+    NotFoundErrorResponse:
+      description: Not found error - Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalErrorResponse:
       description: Internal server error
       content:
         application/json:
