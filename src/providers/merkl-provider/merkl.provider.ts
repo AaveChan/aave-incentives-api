@@ -89,13 +89,13 @@ export class MerklProvider implements IncentiveProvider {
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
-      const baseIncentive: Omit<BaseIncentive, 'incentiveType'> = {
+      const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: opportunity.name,
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedTokens,
-        incentiveSource: this.incentiveSource,
+        source: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
@@ -105,7 +105,7 @@ export class MerklProvider implements IncentiveProvider {
       if (rewardType == IncentiveType.POINT) {
         const pointIncentive: PointWithoutValueIncentive = {
           ...baseIncentive,
-          incentiveType: IncentiveType.POINT_WITHOUT_VALUE,
+          type: IncentiveType.POINT_WITHOUT_VALUE,
           point: {
             name: rewardToken.name,
             protocol: protocolId,
@@ -116,7 +116,7 @@ export class MerklProvider implements IncentiveProvider {
       if (rewardType == IncentiveType.TOKEN) {
         const pointIncentive: TokenIncentive = {
           ...baseIncentive,
-          incentiveType: IncentiveType.TOKEN,
+          type: IncentiveType.TOKEN,
           rewardToken,
           currentApr: opportunity.apr,
         };

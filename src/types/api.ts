@@ -6,8 +6,8 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
   chainId: number;
   rewardedTokens: Token[];
-  incentiveType: T;
-  incentiveSource: IncentiveSource;
+  type: T;
+  source: IncentiveSource;
   status: Status;
   description: string;
   claimLink: string;

@@ -47,14 +47,9 @@ export class IncentivesService {
 
     const providersFiltered = this.providers
       .filter(
-        (provider) =>
-          !fetchOptions?.incentiveSource ||
-          provider.incentiveSource === fetchOptions.incentiveSource,
+        (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
       )
-      .filter(
-        (provider) =>
-          !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-      );
+      .filter((provider) => !fetchOptions?.type || provider.incentiveType === fetchOptions.type);
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -91,19 +86,15 @@ export class IncentivesService {
     }
 
     // Incentive source filter
-    if (filters.incentiveSource !== undefined) {
-      const sources = Array.isArray(filters.incentiveSource)
-        ? filters.incentiveSource
-        : [filters.incentiveSource];
-      incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.incentiveSource));
+    if (filters.source !== undefined) {
+      const sources = Array.isArray(filters.source) ? filters.source : [filters.source];
+      incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.source));
     }
 
     // Incentive type filter
-    if (filters.incentiveType !== undefined) {
-      const types = Array.isArray(filters.incentiveType)
-        ? filters.incentiveType
-        : [filters.incentiveType];
-      incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.incentiveType));
+    if (filters.type !== undefined) {
+      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
 
     return incentivesFiltered;
@@ -123,7 +114,7 @@ export class IncentivesService {
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
       incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
-      if (incentive.incentiveType === IncentiveType.TOKEN) {
+      if (incentive.type === IncentiveType.TOKEN) {
         incentive.rewardToken = this.enrichedToken(incentive.rewardToken);
       }
     });

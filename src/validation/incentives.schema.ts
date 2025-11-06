@@ -7,9 +7,9 @@ export const GetIncentivesQuerySchema = z.object({
 
   status: z.enum(Status).optional(),
 
-  incentiveType: z.enum(IncentiveType).optional(),
+  type: z.enum(IncentiveType).optional(),
 
-  incentiveSource: z.enum(IncentiveSource).optional(),
+  source: z.enum(IncentiveSource).optional(),
 
   // // Pagination
   // page: z

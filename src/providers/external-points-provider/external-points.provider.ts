@@ -94,13 +94,13 @@ export class ExternalPointsProvider implements IncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const baseIncentive: Omit<BaseIncentive, 'incentiveType'> = {
+      const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: program.name,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
         rewardedTokens: [rewardedToken],
-        incentiveSource: this.incentiveSource,
+        source: this.incentiveSource,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
@@ -110,7 +110,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       if (pointValue) {
         const incentive: PointIncentive = {
           ...baseIncentive,
-          incentiveType: IncentiveType.POINT,
+          type: IncentiveType.POINT,
           point,
           pointValue,
           pointValueUnit: program.pointValueUnit,
@@ -119,7 +119,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       } else {
         const incentive: PointWithoutValueIncentive = {
           ...baseIncentive,
-          incentiveType: IncentiveType.POINT_WITHOUT_VALUE,
+          type: IncentiveType.POINT_WITHOUT_VALUE,
           point,
         };
         incentives.push(incentive);
