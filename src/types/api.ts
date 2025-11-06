@@ -1,5 +1,41 @@
 import { Address } from 'viem';
 
+export type ApiResponse<T, E> = {
+  success: boolean;
+  data?: T;
+  error?: E;
+};
+
+export type GetIncentivesResponse = ApiResponse<
+  {
+    incentives: Incentive[];
+    totalCount: number;
+    lastUpdated: string;
+  },
+  undefined
+>;
+
+export type ApiErrorResponse = ApiResponse<
+  undefined,
+  {
+    message: string;
+    code: string;
+    details?: {
+      field: string;
+      message: string;
+    }[];
+  }
+>;
+
+// export type GetIncentivesResponse = {
+//   success: boolean;
+//   data: {
+//     incentives: Incentive[];
+//     totalCount: number;
+//     lastUpdated: string;
+//   };
+// };
+
 export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
 
 export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
@@ -74,14 +110,4 @@ export enum IncentiveSource {
   MERKL_API = 'MERKL_API',
   ONCHAIN_RPC = 'ONCHAIN_RPC',
   LOCAL_CONFIG = 'LOCAL_CONFIG', // For external points, incentives without end date, etc
-  METROM_API = 'METROM_API',
 }
-
-export type GetIncentivesResponse = {
-  success: boolean;
-  data: {
-    incentives: Incentive[];
-    totalCount: number;
-    lastUpdated: string;
-  };
-};
