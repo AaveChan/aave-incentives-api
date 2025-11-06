@@ -2,15 +2,15 @@ import { Address } from 'viem';
 
 export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
 
-export type BaseIncentive<T extends RewardType = RewardType> = {
+export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
   chainId: number;
   rewardedTokens: Token[];
-  incentiveType: IncentiveType;
+  incentiveType: T;
+  incentiveSource: IncentiveSource;
   status: Status;
   description: string;
   claimLink: string;
-  rewardType: T;
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
   allCampaignsConfigs?: CampaignConfig[];
@@ -18,18 +18,18 @@ export type BaseIncentive<T extends RewardType = RewardType> = {
   additionalData?: Record<string, unknown>;
 };
 
-export type TokenIncentive = BaseIncentive<RewardType.TOKEN> & {
+export type TokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
   rewardToken: Token;
   currentApr: number;
 };
 
-export type PointIncentive = BaseIncentive<RewardType.POINT> & {
+export type PointIncentive = BaseIncentive<IncentiveType.POINT> & {
   point: Point;
   pointValue: number;
   pointValueUnit?: string;
 };
 
-export type PointWithoutValueIncentive = BaseIncentive<RewardType.POINT_WITHOUT_VALUE> & {
+export type PointWithoutValueIncentive = BaseIncentive<IncentiveType.POINT_WITHOUT_VALUE> & {
   point: Point;
 };
 
@@ -58,12 +58,6 @@ export type CampaignConfig = {
 };
 
 export enum IncentiveType {
-  ONCHAIN = 'ONCHAIN',
-  OFFCHAIN = 'OFFCHAIN',
-  EXTERNAL = 'EXTERNAL',
-}
-
-export enum RewardType {
   TOKEN = 'TOKEN',
   POINT = 'POINT',
   POINT_WITHOUT_VALUE = 'POINT_WITHOUT_VALUE',

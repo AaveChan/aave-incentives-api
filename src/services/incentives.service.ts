@@ -10,7 +10,7 @@ import {
   MerklProvider,
   OnchainProvider,
 } from '@/providers/index.js';
-import { Incentive, IncentiveSource, RewardType, Status, Token } from '@/types/index.js';
+import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/types/index.js';
 
 export class IncentivesService {
   private logger = createLogger('IncentivesService');
@@ -45,17 +45,10 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
-    const providersFiltered = this.providers
-      .filter(
-        (provider) =>
-          !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
-      )
-      .filter(
-        (provider) =>
-          !fetchOptions?.rewardType ||
-          !provider.rewardType ||
-          provider.rewardType === fetchOptions.rewardType,
-      );
+    const providersFiltered = this.providers.filter(
+      (provider) =>
+        !fetchOptions?.incentiveType || provider.incentiveType === fetchOptions.incentiveType,
+    );
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -96,16 +89,6 @@ export class IncentivesService {
       incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.incentiveType));
     }
 
-    // Reward type filter
-    if (filters.rewardType !== undefined) {
-      const rewardTypes = Array.isArray(filters.rewardType)
-        ? filters.rewardType
-        : [filters.rewardType];
-      incentivesFiltered = incentivesFiltered.filter((i) => {
-        return rewardTypes.includes(i.rewardType);
-      });
-    }
-
     return incentivesFiltered;
   }
 
@@ -123,7 +106,7 @@ export class IncentivesService {
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
       incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
-      if (incentive.rewardType === RewardType.TOKEN) {
+      if (incentive.incentiveType === IncentiveType.TOKEN) {
         incentive.rewardToken = this.enrichedToken(incentive.rewardToken);
       }
     });

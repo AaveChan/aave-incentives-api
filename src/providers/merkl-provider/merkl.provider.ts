@@ -12,7 +12,6 @@ import {
   IncentiveSource,
   IncentiveType,
   PointWithoutValueIncentive,
-  RewardType,
   Token,
   TokenIncentive,
 } from '@/types/index.js';
@@ -50,7 +49,6 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider implements IncentiveProvider {
   private logger = createLogger('MerklProvider');
-  incentiveType = IncentiveType.OFFCHAIN;
   source = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
@@ -91,23 +89,23 @@ export class MerklProvider implements IncentiveProvider {
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
-      const baseIncentive: Omit<BaseIncentive, 'rewardType'> = {
+      const baseIncentive: Omit<BaseIncentive, 'incentiveType'> = {
         name: opportunity.name,
         description: opportunity.description,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedTokens,
+        incentiveSource: this.source,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
-        incentiveType: this.incentiveType,
         status: opportunity.status,
       };
 
-      if (rewardType == RewardType.POINT) {
+      if (rewardType == IncentiveType.POINT) {
         const pointIncentive: PointWithoutValueIncentive = {
           ...baseIncentive,
-          rewardType: RewardType.POINT_WITHOUT_VALUE,
+          incentiveType: IncentiveType.POINT_WITHOUT_VALUE,
           point: {
             name: rewardToken.name,
             protocol: protocolId,
@@ -115,10 +113,10 @@ export class MerklProvider implements IncentiveProvider {
         };
         allIncentives.push(pointIncentive);
       }
-      if (rewardType == RewardType.TOKEN) {
+      if (rewardType == IncentiveType.TOKEN) {
         const pointIncentive: TokenIncentive = {
           ...baseIncentive,
-          rewardType: RewardType.TOKEN,
+          incentiveType: IncentiveType.TOKEN,
           rewardToken,
           currentApr: opportunity.apr,
         };
@@ -241,9 +239,9 @@ export class MerklProvider implements IncentiveProvider {
   private mapRewardType(type: MerklRewardTokenType) {
     switch (type) {
       case MerklRewardTokenType.TOKEN:
-        return RewardType.TOKEN;
+        return IncentiveType.TOKEN;
       case MerklRewardTokenType.PRETGE:
-        return RewardType.POINT;
+        return IncentiveType.POINT;
     }
   }
 

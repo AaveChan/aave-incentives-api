@@ -10,7 +10,6 @@ import {
   Point,
   PointIncentive,
   PointWithoutValueIncentive,
-  RewardType,
   Status,
 } from '@/types/index.js';
 
@@ -26,8 +25,6 @@ export class ExternalPointsProvider implements IncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
   source = IncentiveSource.HARDCODED;
-  incentiveType = IncentiveType.EXTERNAL;
-  rewardType = RewardType.POINT as const;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
@@ -97,23 +94,23 @@ export class ExternalPointsProvider implements IncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const baseIncentive: Omit<BaseIncentive, 'rewardType'> = {
+      const baseIncentive: Omit<BaseIncentive, 'incentiveType'> = {
         name: program.name,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
         rewardedTokens: [rewardedToken],
+        incentiveSource: this.source,
         currentCampaignConfig,
         nextCampaignConfig,
         allCampaignsConfigs,
-        incentiveType: IncentiveType.EXTERNAL,
         status,
       };
 
       if (pointValue) {
         const incentive: PointIncentive = {
           ...baseIncentive,
-          rewardType: RewardType.POINT,
+          incentiveType: IncentiveType.POINT,
           point,
           pointValue,
           pointValueUnit: program.pointValueUnit,
@@ -122,7 +119,7 @@ export class ExternalPointsProvider implements IncentiveProvider {
       } else {
         const incentive: PointWithoutValueIncentive = {
           ...baseIncentive,
-          rewardType: RewardType.POINT_WITHOUT_VALUE,
+          incentiveType: IncentiveType.POINT_WITHOUT_VALUE,
           point,
         };
         incentives.push(incentive);
