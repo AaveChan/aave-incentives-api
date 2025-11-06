@@ -45,11 +45,9 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
     const allIncentives: Incentive[] = [];
 
-    const providersFiltered = this.providers
-      .filter(
-        (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
-      )
-      .filter((provider) => !fetchOptions?.type || provider.incentiveType === fetchOptions.type);
+    const providersFiltered = this.providers.filter(
+      (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
+    );
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
