@@ -119,11 +119,19 @@ export class ACIProvider implements IncentiveProvider {
   };
 
   private getCampaignConfig = (campaign: Campaign) => {
+    let budget;
+
+    if (campaign.fixedBudget !== undefined) {
+      budget = campaign.fixedBudget;
+    } else if (campaign.fixedApr?.maxBudget !== undefined) {
+      budget = campaign.fixedApr.maxBudget;
+    }
+
     const campaignConfig: CampaignConfig = {
       startTimestamp: Number(campaign.startTimestamp),
       endTimestamp: Number(campaign.endTimestamp),
-      // budget: currentCampaign.budget ? currentCampaign.budget : undefined, // provided sometimes by ACI Infra, but sometimes wrong budget are defined (because overwritten by script)
-      // apr: currentCampaign.apr ? currentCampaign.apr : undefined, // provided sometimes by ACI Infra (overwritten by script)
+      budget,
+      apr: campaign.fixedApr ? campaign.fixedApr.apr : undefined,
     };
 
     return campaignConfig;
