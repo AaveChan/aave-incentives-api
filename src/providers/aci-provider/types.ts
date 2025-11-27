@@ -35,7 +35,11 @@ export type Campaign = {
   roundNumber: number;
   startTimestamp: string;
   endTimestamp: string;
-  rewardAmount?: string;
+  fixedBudget?: string;
+  fixedApr?: {
+    apr: number;
+    maxBudget?: string;
+  };
   campaignId?: string;
 };
 
