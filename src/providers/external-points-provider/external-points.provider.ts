@@ -24,6 +24,8 @@ import { PointCampaign, PointIncentives, PointProgram } from './types.js';
 export class ExternalPointsProvider implements IncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
+  name = 'ExternalPointsProvider';
+
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {

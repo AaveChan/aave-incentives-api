@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { createLogger } from './config/logger.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
+import { createStatusRoute } from './routes/status.route.js';
 import { ApiErrorResponse } from './types/index.js';
 
 const PORT: number = 5050;
@@ -37,8 +38,13 @@ app.use(
     hideModels: true,
     theme: 'deepSpace',
     showToolbar: 'localhost',
+    metaData: {
+      title: 'API Docs',
+    },
   }),
 );
+
+app.use('/status', createStatusRoute());
 
 const apiErrorResponse: ApiErrorResponse = {
   success: false,
