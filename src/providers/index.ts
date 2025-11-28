@@ -6,6 +6,7 @@ import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 
 export interface IncentiveProvider {
+  name: string;
   getIncentives(options?: FetchOptions): Promise<Incentive[]>;
   isHealthy(): Promise<boolean>;
   incentiveSource: IncentiveSource;

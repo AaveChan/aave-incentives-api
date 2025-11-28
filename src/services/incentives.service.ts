@@ -15,7 +15,7 @@ import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/type
 export class IncentivesService {
   private logger = createLogger('IncentivesService');
 
-  private providers: IncentiveProvider[] = [
+  public providers: IncentiveProvider[] = [
     new ACIProvider(),
     new MerklProvider(),
     new ExternalPointsProvider(),

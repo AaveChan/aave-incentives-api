@@ -1,7 +1,7 @@
+import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import { getViemClient } from '@/clients/viem.js';
 import {
   AaveInstanceEntries,
   AaveInstanceName,
@@ -42,6 +42,7 @@ const INSTANCES_ENABLED: string[] = [
 // TODO: fetch all LM events to get all campaign (start and end timestamps) instead of only relying on the current incentives data (which only gives current emission data)
 
 export class OnchainProvider implements IncentiveProvider {
+  name = 'OnchainProvider';
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
   incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
@@ -284,9 +285,11 @@ export class OnchainProvider implements IncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const client = getViemClient(mainnet.id);
-      const blockNumber = await client.getBlockNumber();
-      return blockNumber > 0 ? true : false;
+      const incentivesData = await this.aaveUIIncentiveService.getUiIncentivesData(
+        AaveV3Ethereum,
+        mainnet.id,
+      );
+      return incentivesData.length > 0;
     } catch {
       return false;
     }
