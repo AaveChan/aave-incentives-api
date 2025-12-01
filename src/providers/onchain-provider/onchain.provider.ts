@@ -2,6 +2,7 @@ import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
+import { createLogger } from '@/config/logger.js';
 import {
   AaveInstanceEntries,
   AaveInstanceName,
@@ -46,6 +47,8 @@ export class OnchainProvider implements IncentiveProvider {
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
   incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
+
+  private logger = createLogger('OnchainProvider');
 
   tokenPriceFetcherService = new TokenPriceFetcherService();
   erc20Service = new ERC20Service();
@@ -121,6 +124,11 @@ export class OnchainProvider implements IncentiveProvider {
     chainId: number;
   }) => {
     const allIncentives: Incentive[] = [];
+
+    if (incentivesData.rewardsTokenInformation.length <= 0) {
+      return allIncentives;
+    }
+
     const rewardedToken = getAaveToken({
       tokenAddress: rewardedTokenAddress,
       chainId,
@@ -132,69 +140,64 @@ export class OnchainProvider implements IncentiveProvider {
     });
 
     if (!rewardedToken || !underlyingToken) {
-      throw new Error(
-        `Rewarded token address not found for token ${rewardedTokenAddress} on chain ${chainId}`,
+      this.logger.error(
+        `Rewarded token address not found for token ${rewardedTokenAddress} on chain ${chainId}. Maybe update the aave-address-book package?`,
       );
-    }
-
-    if (!rewardedTokenAddress) {
-      return [];
+      return allIncentives;
     }
 
     const currentTimestamp = getCurrentTimestamp();
 
-    if (incentivesData.rewardsTokenInformation.length > 0) {
-      for (const rewardTokenInfo of incentivesData.rewardsTokenInformation) {
-        if (rewardTokenInfo) {
-          const status =
-            rewardTokenInfo.emissionEndTimestamp > currentTimestamp ? Status.LIVE : Status.PAST;
+    for (const rewardTokenInfo of incentivesData.rewardsTokenInformation) {
+      if (rewardTokenInfo) {
+        const status =
+          rewardTokenInfo.emissionEndTimestamp > currentTimestamp ? Status.LIVE : Status.PAST;
 
-          const priceFormatted = Number(
-            formatUnits(rewardTokenInfo.rewardPriceFeed, rewardTokenInfo.priceFeedDecimals),
-          );
+        const priceFormatted = Number(
+          formatUnits(rewardTokenInfo.rewardPriceFeed, rewardTokenInfo.priceFeedDecimals),
+        );
 
-          const rewardToken: Token = {
-            name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
-            symbol: rewardTokenInfo.rewardTokenSymbol,
-            address: rewardTokenInfo.rewardTokenAddress,
-            chainId,
-            decimals: rewardTokenInfo.rewardTokenDecimals,
-            priceFeed: rewardTokenInfo.rewardOracleAddress,
-            price: priceFormatted,
-          };
+        const rewardToken: Token = {
+          name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
+          symbol: rewardTokenInfo.rewardTokenSymbol,
+          address: rewardTokenInfo.rewardTokenAddress,
+          chainId,
+          decimals: rewardTokenInfo.rewardTokenDecimals,
+          priceFeed: rewardTokenInfo.rewardOracleAddress,
+          price: priceFormatted,
+        };
 
-          const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs(
-            {
-              chainId,
-              status,
-              rewardedToken,
-              rewardToken,
-              rewardTokenInfo,
-            },
-          );
+        const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs({
+          chainId,
+          status,
+          rewardedToken,
+          rewardToken,
+          rewardTokenInfo,
+        });
 
-          const incentive: TokenIncentive = {
-            name: this.getIncentiveName(underlyingToken, type),
-            description: this.getIncentiveDescription(
-              underlyingToken,
-              rewardToken,
-              type,
-              aaveInstanceName,
-            ),
-            claimLink: this.claimLink,
-            chainId,
-            source: this.incentiveSource,
-            type: this.incentiveType,
-            rewardedTokens: [rewardedToken],
+        const rewardedTokens = [rewardedToken];
+
+        const incentive: TokenIncentive = {
+          name: this.getIncentiveName(underlyingToken, type),
+          description: this.getIncentiveDescription(
+            underlyingToken,
             rewardToken,
-            currentApr: apr,
-            currentCampaignConfig,
-            allCampaignsConfigs,
-            status,
-          };
+            type,
+            aaveInstanceName,
+          ),
+          claimLink: this.claimLink,
+          chainId,
+          source: this.incentiveSource,
+          type: this.incentiveType,
+          rewardedTokens,
+          rewardToken,
+          currentApr: apr,
+          currentCampaignConfig,
+          allCampaignsConfigs,
+          status,
+        };
 
-          allIncentives.push(incentive);
-        }
+        allIncentives.push(incentive);
       }
     }
 
