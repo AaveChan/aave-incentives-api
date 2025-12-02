@@ -137,78 +137,6 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
       ],
     },
   ],
-  [POINT_PROGRAM_IDS.ETHENA]: [
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.USDe.A_TOKEN,
-        AaveV3Ethereum.ASSETS.sUSDe.A_TOKEN,
-        AaveV3EthereumLido.ASSETS.sUSDe.A_TOKEN,
-      ],
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 5,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.PT_USDe_31JUL2025.A_TOKEN,
-        AaveV3Ethereum.ASSETS.PT_USDe_25SEP2025.A_TOKEN,
-        AaveV3Ethereum.ASSETS.PT_USDe_27NOV2025.A_TOKEN,
-      ],
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 2,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.PT_sUSDE_31JUL2025.A_TOKEN,
-        AaveV3Ethereum.ASSETS.PT_sUSDE_25SEP2025.A_TOKEN,
-        AaveV3Ethereum.ASSETS.PT_sUSDE_27NOV2025.A_TOKEN,
-      ],
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 1,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: mainnet.id,
-      rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.PT_eUSDE_29MAY2025.A_TOKEN,
-        AaveV3Ethereum.ASSETS.PT_eUSDE_14AUG2025.A_TOKEN,
-      ],
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 2,
-        },
-      ],
-    },
-    {
-      programId: POINT_PROGRAM_IDS.ETHENA,
-      chainId: plasma.id,
-      rewardedTokenAddresses: [AaveV3Plasma.ASSETS.USDe.A_TOKEN, AaveV3Plasma.ASSETS.sUSDe.A_TOKEN],
-      campaigns: [
-        {
-          startTimestamp: BASE_TIMESTAMP,
-          pointValue: 5,
-        },
-      ],
-    },
-  ],
   [POINT_PROGRAM_IDS.KELP]: [
     {
       programId: POINT_PROGRAM_IDS.KELP,
@@ -275,6 +203,164 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
         {
           startTimestamp: BASE_TIMESTAMP,
           pointValue: 4,
+        },
+      ],
+    },
+  ],
+  [POINT_PROGRAM_IDS.ETHENA]: [
+    // // season 1
+    // {
+    //   startTimestamp: 1708300800, // 19/02/24 00:00:00
+    //   endTimestamp: 1712015999, // 01/04/24 23:59:59
+    //   pointValue: 5,
+    // },
+    // // season 2
+    // {
+    //   startTimestamp: 1712016000, // 02/04/24 00:00:00
+    //   endTimestamp: 1725321599, // 02/09/24 23:59:59
+    //   pointValue: 5,
+    // },
+    // // season 3
+    // {
+    //   startTimestamp: 1725321600, // 03/09/24 00:00:00
+    //   endTimestamp: 1742687999, // 22/03/25 23:59:59
+    //   pointValue: 5,
+    // },
+    // // season 4
+    // {
+    //   startTimestamp: 1742688000, // 23/03/25 00:00:00
+    //   endTimestamp: 1758671999, // 23/09/25 23:59:59
+    //   pointValue: 5,
+    // },
+    // // season 5
+    // {
+    //   startTimestamp: 1758672000, // 24/09/25 00:00:00
+    //   pointValue: 5,
+    // },
+    // For simplicity:
+    // - if an asset is onboarded during a season, we defined the fact that it has been eligible for the whole season from day 1 (while in reality it started when the asset was onboarded)
+    // - also for PT: when the PT reach maturity, we let the campaign run until the end of the season even if the PT is not valid anymore
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.USDe.A_TOKEN, // onboarding: 06/06/24
+        AaveV3Ethereum.ASSETS.sUSDe.A_TOKEN, // onboarding: 27/06/24
+      ],
+      campaigns: [
+        // season 2
+        {
+          startTimestamp: 1712016000, // 02/04/24 00:00:00
+          endTimestamp: 1725321599, // 02/09/24 23:59:59
+          pointValue: 5,
+        },
+        // season 3
+        {
+          startTimestamp: 1725321600, // 03/09/24 00:00:00
+          endTimestamp: 1742687999, // 22/03/25 23:59:59
+          pointValue: 5,
+        },
+        // season 4
+        {
+          startTimestamp: 1742688000, // 23/03/25 00:00:00
+          endTimestamp: 1758671999, // 23/09/25 23:59:59
+          pointValue: 5,
+        },
+        // season 5
+        {
+          startTimestamp: 1758672000, // 24/09/25 00:00:00
+          pointValue: 5,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3EthereumLido.ASSETS.sUSDe.A_TOKEN, // onboarding: 18/11/24
+      ],
+      campaigns: [
+        // season 3
+        {
+          startTimestamp: 1725321600, // 03/09/24 00:00:00
+          endTimestamp: 1742687999, // 22/03/25 23:59:59
+          pointValue: 5,
+        },
+        // season 4
+        {
+          startTimestamp: 1742688000, // 23/03/25 00:00:00
+          endTimestamp: 1758671999, // 23/09/25 23:59:59
+          pointValue: 5,
+        },
+        // season 5
+        {
+          startTimestamp: 1758672000, // 24/09/25 00:00:00
+          pointValue: 5,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: plasma.id,
+      rewardedTokenAddresses: [
+        AaveV3Plasma.ASSETS.USDe.A_TOKEN, // onboarding: 23/09/25
+        AaveV3Plasma.ASSETS.sUSDe.A_TOKEN, // onboarding: 23/09/25
+      ],
+      campaigns: [
+        // season 5
+        {
+          startTimestamp: 1758672000, // 24/09/25 00:00:00
+          pointValue: 5,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_USDe_31JUL2025.A_TOKEN, // onboarding: 27/05/25
+        AaveV3Ethereum.ASSETS.PT_USDe_25SEP2025.A_TOKEN, // onboarding: 30/07/25
+        AaveV3Ethereum.ASSETS.PT_USDe_27NOV2025.A_TOKEN, // onboarding: 09/09/25
+      ],
+      campaigns: [
+        // season 4
+        {
+          startTimestamp: 1742688000, // 23/03/25 00:00:00
+          endTimestamp: 1758671999, // 23/09/25 23:59:59
+          pointValue: 2,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_sUSDE_31JUL2025.A_TOKEN, // onboarding: 29/04/25
+        AaveV3Ethereum.ASSETS.PT_sUSDE_25SEP2025.A_TOKEN, // onboarding: 16/07/25
+        AaveV3Ethereum.ASSETS.PT_sUSDE_27NOV2025.A_TOKEN, // onboarding: 04/09/25
+      ],
+      campaigns: [
+        // season 4
+        {
+          startTimestamp: 1742688000, // 23/03/25 00:00:00
+          endTimestamp: 1758671999, // 23/09/25 23:59:59
+          pointValue: 1,
+        },
+      ],
+    },
+    {
+      programId: POINT_PROGRAM_IDS.ETHENA,
+      chainId: mainnet.id,
+      rewardedTokenAddresses: [
+        AaveV3Ethereum.ASSETS.PT_eUSDE_29MAY2025.A_TOKEN, // onboarding: 29/04/25
+        AaveV3Ethereum.ASSETS.PT_eUSDE_14AUG2025.A_TOKEN, // onboarding: 27/05/25
+      ],
+      campaigns: [
+        // season 4
+        {
+          startTimestamp: 1742688000, // 23/03/25 00:00:00
+          endTimestamp: 1758671999, // 23/09/25 23:59:59
+          pointValue: 2,
         },
       ],
     },
