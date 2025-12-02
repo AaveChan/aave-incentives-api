@@ -9,6 +9,7 @@ import {
   AaveTokenType,
   getAaveToken,
 } from '@/lib/aave/aave-tokens.js';
+import { generateIncentiveId } from '@/lib/utils/incentives.js';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   AaveUiIncentiveService,
@@ -177,6 +178,16 @@ export class OnchainProvider implements IncentiveProvider {
 
         const rewardedTokens = [rewardedToken];
 
+        const id = generateIncentiveId({
+          chainId,
+          rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
+          reward: rewardToken.address,
+        });
+
+        console.log(
+          `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
+        );
+
         const incentive: TokenIncentive = {
           name: this.getIncentiveName(underlyingToken, type),
           description: this.getIncentiveDescription(
@@ -185,6 +196,7 @@ export class OnchainProvider implements IncentiveProvider {
             type,
             aaveInstanceName,
           ),
+          id,
           claimLink: this.claimLink,
           chainId,
           source: this.incentiveSource,

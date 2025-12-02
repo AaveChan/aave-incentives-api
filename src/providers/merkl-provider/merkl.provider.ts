@@ -4,6 +4,11 @@ import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
+import {
+  gatherEqualIncentives,
+  generateIncentiveId,
+  sortIncentivesAllCampaigns,
+} from '@/lib/utils/incentives.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
@@ -58,6 +63,7 @@ export class MerklProvider implements IncentiveProvider {
   unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
+    console.log('Fetching Merkl incentives...');
     const allIncentives: Incentive[] = [];
 
     const chainId = fetchOptions?.chainId;
@@ -67,6 +73,10 @@ export class MerklProvider implements IncentiveProvider {
       chainId && chainProtocolMap[chainId] ? chainProtocolMap[chainId] : DEFAULT_PROTOCOL;
 
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
+
+    console.log(
+      `Fetched ${merklOpportunities.length} Merkl opportunities for protocol ${protocolId}`,
+    );
 
     for (const opportunity of merklOpportunities) {
       const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
@@ -91,9 +101,19 @@ export class MerklProvider implements IncentiveProvider {
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(opportunity.campaigns);
 
+      // some opportuniities has 2 different rewards tokens (because it bundles multiple campaigns)
+      // => in tha case, we should split them into 2 different incentives
+
+      const id = generateIncentiveId({
+        chainId: opportunity.chainId,
+        rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
+        reward: rewardToken.address,
+      });
+
       const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: opportunity.name,
         description: opportunity.description,
+        id: id,
         claimLink: this.claimLink,
         chainId: opportunity.chainId,
         rewardedTokens,
@@ -126,7 +146,13 @@ export class MerklProvider implements IncentiveProvider {
       }
     }
 
-    return allIncentives;
+    console.log(`Total Merkl incentives before gathering: ${allIncentives.length}`);
+
+    const allIncentivesGathered = gatherEqualIncentives(allIncentives);
+
+    const sortedIncentives = sortIncentivesAllCampaigns(allIncentivesGathered);
+
+    return sortedIncentives;
   }
 
   private async fetchIncentives(
