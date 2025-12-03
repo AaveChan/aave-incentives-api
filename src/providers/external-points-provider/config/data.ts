@@ -172,14 +172,26 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
       ],
     },
   ],
+  // S1 Start Date = Dec 18, 2024: 1734480000
+  // S1 End Date = June 18, 2025: 1750204800
+
+  // S2 Start Date = June 18, 2025: 1750204800
+  // S2 End Date = Nov 01, 2025: 1761955200
   [POINT_PROGRAM_IDS.SONIC]: [
     {
       programId: POINT_PROGRAM_IDS.SONIC,
       chainId: sonic.id,
       rewardedTokenAddresses: [AaveV3Sonic.ASSETS.wS.A_TOKEN, AaveV3Sonic.ASSETS.stS.A_TOKEN],
       campaigns: [
+        // S1
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1734480000,
+          endTimestamp: 1750204800,
+          pointValue: 8,
+        },
+        {
+          startTimestamp: 1750204800,
+          endTimestamp: 1761955200,
           pointValue: 12,
         },
       ],
@@ -190,7 +202,13 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
       rewardedTokenAddresses: [AaveV3Sonic.ASSETS.USDC.A_TOKEN],
       campaigns: [
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1734480000,
+          endTimestamp: 1750204800,
+          pointValue: 10,
+        },
+        {
+          startTimestamp: 1750204800,
+          endTimestamp: 1761955200,
           pointValue: 8,
         },
       ],
@@ -201,7 +219,13 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
       rewardedTokenAddresses: [AaveV3Sonic.ASSETS.WETH.A_TOKEN],
       campaigns: [
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1734480000,
+          endTimestamp: 1750204800,
+          pointValue: 4,
+        },
+        {
+          startTimestamp: 1750204800,
+          endTimestamp: 1761955200,
           pointValue: 4,
         },
       ],
