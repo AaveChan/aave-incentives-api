@@ -22,10 +22,12 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
   protected generateIncentiveId({
+    source,
     chainId,
     rewardedTokenAddresses,
     reward,
   }: {
+    source: IncentiveSource;
     chainId: number;
     rewardedTokenAddresses: Address[];
     reward: Address | Point;
@@ -37,7 +39,7 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
         : reward.name.toLowerCase()
       : '';
 
-    const uniqueString = `${chainId}:${normalizedRewarded}:${normalizedReward}`;
+    const uniqueString = `${source}:${chainId}:${normalizedRewarded}:${normalizedReward}`;
 
     const hash = crypto.createHash('md5').update(uniqueString).digest('hex');
 

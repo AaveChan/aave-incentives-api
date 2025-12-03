@@ -100,10 +100,8 @@ export class MerklProvider extends BaseIncentiveProvider {
         const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
           this.getCampaignConfigs(campaigns);
 
-        // some opportuniities has 2 different rewards tokens (because it bundles multiple campaigns)
-        // => in tha case, we should split them into 2 different incentives
-
         const id = this.generateIncentiveId({
+          source: this.incentiveSource,
           chainId: opportunity.chainId,
           rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
           reward: rewardToken.address,
@@ -145,8 +143,6 @@ export class MerklProvider extends BaseIncentiveProvider {
         }
       }
     }
-    // run this function for all campaigns => put it in incentive service?
-    // maybe add the sourcetype in the id to avoid any conflicts (even if low proba)
 
     return allIncentives;
   }

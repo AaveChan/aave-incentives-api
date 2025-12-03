@@ -98,6 +98,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
       };
 
       const id = this.generateIncentiveId({
+        source: this.incentiveSource,
         chainId: pointIncentive.chainId,
         rewardedTokenAddresses: [rewardedToken.address],
         reward: point,

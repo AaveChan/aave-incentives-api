@@ -179,6 +179,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
         const rewardedTokens = [rewardedToken];
 
         const id = this.generateIncentiveId({
+          source: this.incentiveSource,
           chainId,
           rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
           reward: rewardToken.address,

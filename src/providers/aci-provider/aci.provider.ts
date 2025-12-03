@@ -52,6 +52,7 @@ export class ACIProvider extends BaseIncentiveProvider {
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
       const id = this.generateIncentiveId({
+        source: this.incentiveSource,
         chainId: action.chainId,
         rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
         reward: rewardToken.address,
