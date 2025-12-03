@@ -63,7 +63,6 @@ export class MerklProvider implements IncentiveProvider {
   unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    console.log('Fetching Merkl incentives...');
     const allIncentives: Incentive[] = [];
 
     const chainId = fetchOptions?.chainId;
@@ -74,79 +73,82 @@ export class MerklProvider implements IncentiveProvider {
 
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
-    console.log(
-      `Fetched ${merklOpportunities.length} Merkl opportunities for protocol ${protocolId}`,
-    );
-
     for (const opportunity of merklOpportunities) {
-      const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
-      if (!rewardMerklToken) {
-        this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
-        continue;
-      }
-      const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
+      for (const rewardMerkl of opportunity.rewardsRecord.breakdowns) {
+        const rewardMerklToken = rewardMerkl.token;
+        if (!rewardMerklToken) {
+          this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
+          continue;
+        }
+        const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
 
-      const rewardedMerklTokens = opportunity.tokens;
-      const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
-      const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+        const rewardedMerklTokens = opportunity.tokens;
+        const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
+        const rewardedTokens = rewardedMerklTokensFiltered.map(
+          this.merklInfraTokenToIncentiveToken,
+        );
 
-      const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
-      const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
+        const merklRewardType = rewardMerkl.token.type;
+        const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
 
-      if (!rewardType) {
-        this.logger.error(`Unknown reward type for token ${tokenToString(rewardToken)}`);
-        continue;
-      }
+        if (!rewardType) {
+          this.logger.error(`Unknown reward type for token ${tokenToString(rewardToken)}`);
+          continue;
+        }
 
-      const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
-        this.getCampaignConfigs(opportunity.campaigns);
+        // get campaign of the current reward token only
+        const campaigns = opportunity.campaigns.filter(
+          (campaign) => campaign.rewardToken.address === rewardToken.address,
+        );
 
-      // some opportuniities has 2 different rewards tokens (because it bundles multiple campaigns)
-      // => in tha case, we should split them into 2 different incentives
+        const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
+          this.getCampaignConfigs(campaigns);
 
-      const id = generateIncentiveId({
-        chainId: opportunity.chainId,
-        rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
-        reward: rewardToken.address,
-      });
+        // some opportuniities has 2 different rewards tokens (because it bundles multiple campaigns)
+        // => in tha case, we should split them into 2 different incentives
 
-      const baseIncentive: Omit<BaseIncentive, 'type'> = {
-        name: opportunity.name,
-        description: opportunity.description,
-        id: id,
-        claimLink: this.claimLink,
-        chainId: opportunity.chainId,
-        rewardedTokens,
-        source: this.incentiveSource,
-        currentCampaignConfig,
-        nextCampaignConfig,
-        allCampaignsConfigs,
-        status: opportunity.status,
-      };
+        const id = generateIncentiveId({
+          chainId: opportunity.chainId,
+          rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
+          reward: rewardToken.address,
+        });
 
-      if (rewardType == IncentiveType.POINT) {
-        const pointIncentive: PointWithoutValueIncentive = {
-          ...baseIncentive,
-          type: IncentiveType.POINT_WITHOUT_VALUE,
-          point: {
-            name: rewardToken.name,
-            protocol: protocolId,
-          },
+        const baseIncentive: Omit<BaseIncentive, 'type'> = {
+          name: opportunity.name,
+          description: opportunity.description,
+          id: id,
+          claimLink: this.claimLink,
+          chainId: opportunity.chainId,
+          rewardedTokens,
+          source: this.incentiveSource,
+          currentCampaignConfig,
+          nextCampaignConfig,
+          allCampaignsConfigs,
+          status: opportunity.status,
         };
-        allIncentives.push(pointIncentive);
-      }
-      if (rewardType == IncentiveType.TOKEN) {
-        const pointIncentive: TokenIncentive = {
-          ...baseIncentive,
-          type: IncentiveType.TOKEN,
-          rewardToken,
-          currentApr: opportunity.apr,
-        };
-        allIncentives.push(pointIncentive);
+
+        if (rewardType == IncentiveType.POINT) {
+          const pointIncentive: PointWithoutValueIncentive = {
+            ...baseIncentive,
+            type: IncentiveType.POINT_WITHOUT_VALUE,
+            point: {
+              name: rewardToken.name,
+              protocol: protocolId,
+            },
+          };
+          allIncentives.push(pointIncentive);
+        }
+        if (rewardType == IncentiveType.TOKEN) {
+          const pointIncentive: TokenIncentive = {
+            ...baseIncentive,
+            type: IncentiveType.TOKEN,
+            rewardToken,
+            currentApr: opportunity.apr,
+          };
+          allIncentives.push(pointIncentive);
+        }
       }
     }
-
-    console.log(`Total Merkl incentives before gathering: ${allIncentives.length}`);
 
     const allIncentivesGathered = gatherEqualIncentives(allIncentives);
 
