@@ -9,7 +9,6 @@ import {
   AaveTokenType,
   getAaveToken,
 } from '@/lib/aave/aave-tokens.js';
-import { generateIncentiveId } from '@/lib/utils/incentives.js';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   AaveUiIncentiveService,
@@ -30,7 +29,8 @@ import {
   TokenIncentive,
 } from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
+import { FetchOptions } from '../index.js';
 
 const INSTANCES_ENABLED: string[] = [
   'AaveV3Ethereum',
@@ -43,7 +43,7 @@ const INSTANCES_ENABLED: string[] = [
 
 // TODO: fetch all LM events to get all campaign (start and end timestamps) instead of only relying on the current incentives data (which only gives current emission data)
 
-export class OnchainProvider implements IncentiveProvider {
+export class OnchainProvider extends BaseIncentiveProvider {
   name = 'OnchainProvider';
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
   incentiveType = IncentiveType.TOKEN as const;
@@ -178,15 +178,15 @@ export class OnchainProvider implements IncentiveProvider {
 
         const rewardedTokens = [rewardedToken];
 
-        const id = generateIncentiveId({
+        const id = this.generateIncentiveId({
           chainId,
           rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
           reward: rewardToken.address,
         });
 
-        console.log(
-          `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
-        );
+        // console.log(
+        //   `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
+        // );
 
         const incentive: TokenIncentive = {
           name: this.getIncentiveName(underlyingToken, type),

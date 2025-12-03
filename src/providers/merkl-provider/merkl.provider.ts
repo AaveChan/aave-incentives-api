@@ -4,11 +4,6 @@ import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
-import {
-  gatherEqualIncentives,
-  generateIncentiveId,
-  sortIncentivesAllCampaigns,
-} from '@/lib/utils/incentives.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
@@ -21,7 +16,8 @@ import {
   TokenIncentive,
 } from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
+import { FetchOptions } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
@@ -52,7 +48,7 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
-export class MerklProvider implements IncentiveProvider {
+export class MerklProvider extends BaseIncentiveProvider {
   private logger = createLogger('MerklProvider');
 
   name = 'MerklProvider';
@@ -107,7 +103,7 @@ export class MerklProvider implements IncentiveProvider {
         // some opportuniities has 2 different rewards tokens (because it bundles multiple campaigns)
         // => in tha case, we should split them into 2 different incentives
 
-        const id = generateIncentiveId({
+        const id = this.generateIncentiveId({
           chainId: opportunity.chainId,
           rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
           reward: rewardToken.address,
@@ -150,9 +146,9 @@ export class MerklProvider implements IncentiveProvider {
       }
     }
 
-    const allIncentivesGathered = gatherEqualIncentives(allIncentives);
+    const allIncentivesGathered = this.gatherEqualIncentives(allIncentives);
 
-    const sortedIncentives = sortIncentivesAllCampaigns(allIncentivesGathered);
+    const sortedIncentives = this.sortIncentivesAllCampaigns(allIncentivesGathered);
 
     return sortedIncentives;
   }

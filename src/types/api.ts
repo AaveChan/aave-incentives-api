@@ -27,15 +27,6 @@ export type ApiErrorResponse = ApiResponse<
   }
 >;
 
-// export type GetIncentivesResponse = {
-//   success: boolean;
-//   data: {
-//     incentives: Incentive[];
-//     totalCount: number;
-//     lastUpdated: string;
-//   };
-// };
-
 export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
 
 export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
@@ -47,7 +38,7 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   status: Status;
   description: string;
   claimLink: string;
-  id: string; // Unique identifier: chainId-rewardedTokens-rewardToken|point.name
+  id: string; // Unique identifier: chainId-rewardedTokens-rewardTokenAddress|point.name
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
   allCampaignsConfigs?: CampaignConfig[];
