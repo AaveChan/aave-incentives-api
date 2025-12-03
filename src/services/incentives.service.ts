@@ -10,7 +10,14 @@ import {
   MerklProvider,
   OnchainProvider,
 } from '@/providers/index.js';
-import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/types/index.js';
+import {
+  CampaignConfig,
+  Incentive,
+  IncentiveSource,
+  IncentiveType,
+  Status,
+  Token,
+} from '@/types/index.js';
 
 export class IncentivesService {
   private logger = createLogger('IncentivesService');
@@ -30,6 +37,8 @@ export class IncentivesService {
     allIncentives = this.applyFilters(allIncentives, filters);
 
     allIncentives = this.sort(allIncentives);
+
+    allIncentives = this.gatherEqualIncentives(allIncentives);
 
     // // display the number of token that have a priceFeed undefined
     // const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
@@ -106,7 +115,11 @@ export class IncentivesService {
     };
 
     // Sort: LIVE first, then by APR descending
-    return incentives.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+    let incentivesSorted = incentives.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+    incentivesSorted = this.sortIncentivesCampaigns(incentivesSorted);
+
+    return incentivesSorted;
   }
 
   private enrichedTokens(incentives: Incentive[]) {
@@ -179,4 +192,54 @@ export class IncentivesService {
 
     return status;
   }
+
+  private gatherEqualIncentives = (incentives: Incentive[]): Incentive[] => {
+    const getMaxTimestamp = (campaigns: CampaignConfig[]): number => {
+      return Math.max(...campaigns.map((campaign) => campaign.endTimestamp || 0));
+    };
+
+    const incentiveMap: Record<string, Incentive> = {};
+
+    for (const incentive of incentives) {
+      const existingIncentive = incentiveMap[incentive.id];
+      if (existingIncentive) {
+        // Merge allCampaignsConfigs
+        const mergedCampaignsConfigs = [
+          ...(existingIncentive.allCampaignsConfigs || []),
+          ...(incentive.allCampaignsConfigs || []),
+        ];
+
+        // Determine the most relevant currentCampaignConfig (prefer LIVE status)
+        if (
+          getMaxTimestamp(existingIncentive.allCampaignsConfigs || []) >
+          getMaxTimestamp(incentive.allCampaignsConfigs || [])
+        ) {
+          existingIncentive.allCampaignsConfigs = mergedCampaignsConfigs;
+        } else {
+          incentive.allCampaignsConfigs = mergedCampaignsConfigs;
+          incentiveMap[incentive.id] = incentive;
+        }
+      } else {
+        // console.log(`Adding new incentive with id ${incentive.id}`);
+        incentiveMap[incentive.id] = incentive;
+      }
+    }
+
+    return Object.values(incentiveMap);
+  };
+
+  private sortIncentivesCampaigns = (incentives: Incentive[]): Incentive[] => {
+    const sortCampaignsByEndTimestamp = (campaigns: CampaignConfig[]): CampaignConfig[] => {
+      return campaigns.sort((a, b) =>
+        a.endTimestamp && b.endTimestamp ? a.endTimestamp - b.endTimestamp : 0,
+      );
+    };
+
+    return incentives.map((incentive) => {
+      if (incentive.allCampaignsConfigs) {
+        incentive.allCampaignsConfigs = sortCampaignsByEndTimestamp(incentive.allCampaignsConfigs);
+      }
+      return incentive;
+    });
+  };
 }

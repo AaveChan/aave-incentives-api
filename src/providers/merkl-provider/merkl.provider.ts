@@ -145,12 +145,10 @@ export class MerklProvider extends BaseIncentiveProvider {
         }
       }
     }
+    // run this function for all campaigns => put it in incentive service?
+    // maybe add the sourcetype in the id to avoid any conflicts (even if low proba)
 
-    const allIncentivesGathered = this.gatherEqualIncentives(allIncentives);
-
-    const sortedIncentives = this.sortIncentivesAllCampaigns(allIncentivesGathered);
-
-    return sortedIncentives;
+    return allIncentives;
   }
 
   private async fetchIncentives(
