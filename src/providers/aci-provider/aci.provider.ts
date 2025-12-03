@@ -10,10 +10,10 @@ import {
   TokenIncentive,
 } from '@/types/index.js';
 
-import { IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
 import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 
-export class ACIProvider implements IncentiveProvider {
+export class ACIProvider extends BaseIncentiveProvider {
   name = 'ACIProvider';
   incentiveSource = IncentiveSource.ACI_MASIV_API;
   incentiveType = IncentiveType.TOKEN as const;
@@ -51,8 +51,15 @@ export class ACIProvider implements IncentiveProvider {
       const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
+      const id = this.generateIncentiveId({
+        chainId: action.chainId,
+        rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
+        reward: rewardToken.address,
+      });
+
       const incentive: TokenIncentive = {
         name: action.displayName,
+        id,
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,

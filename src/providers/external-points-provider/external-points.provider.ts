@@ -13,7 +13,8 @@ import {
   Status,
 } from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
+import { FetchOptions } from '../index.js';
 import {
   campaignsByChainId,
   pointCampaignsArray as pointCampaignsData,
@@ -21,7 +22,7 @@ import {
 } from './config/config.js';
 import { PointCampaign, PointIncentives, PointProgram } from './types.js';
 
-export class ExternalPointsProvider implements IncentiveProvider {
+export class ExternalPointsProvider extends BaseIncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
   name = 'ExternalPointsProvider';
@@ -96,8 +97,15 @@ export class ExternalPointsProvider implements IncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
+      const id = this.generateIncentiveId({
+        chainId: pointIncentive.chainId,
+        rewardedTokenAddresses: [rewardedToken.address],
+        reward: point,
+      });
+
       const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: program.name,
+        id,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
