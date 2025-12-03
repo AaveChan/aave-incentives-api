@@ -41,7 +41,7 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
 
     const uniqueString = `${source}:${chainId}:${normalizedRewarded}:${normalizedReward}`;
 
-    const hash = crypto.createHash('md5').update(uniqueString).digest('hex');
+    const hash = crypto.createHash('sha256').update(uniqueString).digest('hex');
 
     return `inc_${hash.substring(0, 16)}`; // 20 chars total
   }
