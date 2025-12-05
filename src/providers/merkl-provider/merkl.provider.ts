@@ -70,21 +70,36 @@ export class MerklProvider extends BaseIncentiveProvider {
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
-      for (const rewardMerkl of opportunity.rewardsRecord.breakdowns) {
-        const rewardMerklToken = rewardMerkl.token;
-        if (!rewardMerklToken) {
+      // if (opportunity.name == 'Lend USDT0 on Aave (net lending)') {
+      //   console.log('opportunity.id', opportunity.id);
+      //   console.log(
+      //     opportunity.campaigns.map((c) => {
+      //       return { start: c.startTimestamp, end: c.endTimestamp };
+      //     }),
+      //   );
+      // }
+
+      const rewardedMerklTokens = opportunity.tokens;
+      const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
+      const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+
+      const allMerklRewardTokens = opportunity.rewardsRecord.breakdowns.map(
+        (breakdown) => breakdown.token,
+      );
+      const uniqueMerklRewardTokens = Array.from(
+        new Set(allMerklRewardTokens.map((t) => t.address)),
+      ).map((address) => {
+        return allMerklRewardTokens.find((t) => t.address === address)!;
+      });
+
+      for (const merklRewardToken of uniqueMerklRewardTokens) {
+        if (!merklRewardToken) {
           this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
           continue;
         }
-        const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
+        const rewardToken = this.merklInfraTokenToIncentiveToken(merklRewardToken);
 
-        const rewardedMerklTokens = opportunity.tokens;
-        const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
-        const rewardedTokens = rewardedMerklTokensFiltered.map(
-          this.merklInfraTokenToIncentiveToken,
-        );
-
-        const merklRewardType = rewardMerkl.token.type;
+        const merklRewardType = merklRewardToken.type;
         const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
 
         if (!rewardType) {
@@ -99,6 +114,10 @@ export class MerklProvider extends BaseIncentiveProvider {
 
         const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
           this.getCampaignConfigs(campaigns);
+
+        // if (opportunity.name == 'Lend USDT0 on Aave (net lending)') {
+        //   console.log('allCampaignsConfigs', allCampaignsConfigs);
+        // }
 
         const id = this.generateIncentiveId({
           source: this.incentiveSource,
@@ -143,10 +162,6 @@ export class MerklProvider extends BaseIncentiveProvider {
         }
       }
     }
-
-    // TO FIX:
-    // la current campaign se retrouve au début de la liste des campagnes
-    // doublons de campaign dans le supply USDT
 
     return allIncentives;
   }
