@@ -6,8 +6,8 @@
   },
   "compilerOptions": {
     "target": "es2024",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "lib": ["ES2024"],
     "rootDir": "./src",
     "checkJs": true,

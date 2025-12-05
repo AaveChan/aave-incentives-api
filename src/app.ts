@@ -2,7 +2,6 @@ import { apiReference } from '@scalar/express-api-reference';
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger';
 import { router as incentivesRoutes } from './routes/incentives.route';
@@ -19,8 +18,6 @@ const app: Application = express();
 app.use(cors());
 
 // Serve static files from the 'public' directory
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 app.use(express.static(path.resolve(__dirname, '../public')));
 
 // Not mandatory (cause index.html is served by default), but explicit route for clarity or if needed later
