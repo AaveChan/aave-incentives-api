@@ -159,19 +159,24 @@ describe('IncentivesService', () => {
 
     const incentives = [
       baseIncentive({
-        id: 'X',
+        id: '1',
         allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
       }),
       baseIncentive({
-        id: 'X',
+        id: '1',
         allCampaignsConfigs: [{ startTimestamp: 100, endTimestamp: 200 }],
+      }),
+      baseIncentive({
+        id: '2',
+        allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 50 }],
       }),
     ];
 
     const merged = service['gatherEqualIncentives'](incentives);
 
-    expect(merged).toHaveLength(1);
+    expect(merged).toHaveLength(2);
     expect(merged[0]!.allCampaignsConfigs).toHaveLength(2);
+    expect(merged[1]!.allCampaignsConfigs).toHaveLength(1);
   });
 
   test('getHealthStatus() should return provider health map', async () => {
