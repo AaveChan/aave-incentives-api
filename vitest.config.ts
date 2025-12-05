@@ -8,6 +8,12 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    exclude: [
+      'node_modules',
+      'dist', // <– this is the important one
+      'coverage',
+      '**/dist/**', // optional double-safety
+    ],
   },
   resolve: {
     alias: {
