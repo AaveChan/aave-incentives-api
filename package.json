@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "jest --coverage",
+    "test": "pnpm exec vitest",
     "dev": "nodemon --exec tsx -r tsconfig-paths/register ./src/app.ts",
     "start": "tsx -r tsconfig-paths/register ./src/app.ts",
     "build": "tsc && tsc-alias",
@@ -34,20 +34,18 @@
     "@eslint/js": "^9.35.0",
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.3",
-    "@types/jest": "^30.0.0",
     "@types/node": "^24.5.2",
     "@types/supertest": "^6.0.3",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
-    "jest": "^30.1.3",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4",
-    "ts-jest": "^29.4.3",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.44.0"
+    "typescript-eslint": "^8.44.0",
+    "vitest": "^4.0.15"
   }
 }
