@@ -1,4 +1,5 @@
 import { mainnet } from 'viem/chains';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { Token } from '@/types/index.js';
 
@@ -14,26 +15,25 @@ const token: Token = {
 
 describe('Coingecko', () => {
   beforeEach(() => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => {
-          return Promise.resolve({
-            '0x3b50805453023a91a8bf641e279401a0b23fa6f9': {
-              usd: 0.01550861,
-            },
-          });
-        },
-      }),
-    ) as jest.Mock;
+    vi.restoreAllMocks();
+
+    const mockResponse: Response = {
+      ok: true,
+      json: () =>
+        Promise.resolve({
+          '0x3b50805453023a91a8bf641e279401a0b23fa6f9': {
+            usd: 0.01550861,
+          },
+        }),
+    } as Response;
+
+    globalThis.fetch = vi.fn(() => Promise.resolve(mockResponse));
   });
 
   test('getTokenPrice: valid token', async () => {
     const fetcher = new CoingeckoTokenPriceFetcher();
 
-    const price = await fetcher.getTokenPrice({
-      token,
-    });
+    const price = await fetcher.getTokenPrice({ token });
 
     expect(price).toBe(0.01550861);
   });
@@ -41,31 +41,29 @@ describe('Coingecko', () => {
   test('getTokenPrice: error unsupported blockNumber', async () => {
     const fetcher = new CoingeckoTokenPriceFetcher();
 
-    await expect(async () => {
-      await fetcher.getTokenPrice({
+    await expect(
+      fetcher.getTokenPrice({
         token,
         blockNumber: 123456789n,
-      });
-    }).rejects.toThrow();
+      }),
+    ).rejects.toThrow();
   });
 
   test('getTokenPrice: error in request response', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => {
-          return Promise.resolve({});
-        },
-      }),
-    ) as jest.Mock;
+    const mockResponse: Response = {
+      ok: false,
+      json: () => Promise.resolve({}),
+    } as Response;
+
+    globalThis.fetch = vi.fn(() => Promise.resolve(mockResponse));
 
     const fetcher = new CoingeckoTokenPriceFetcher();
 
-    await expect(async () => {
-      await fetcher.getTokenPrice({
+    await expect(
+      fetcher.getTokenPrice({
         token,
         blockNumber: 123456789n,
-      });
-    }).rejects.toThrow();
+      }),
+    ).rejects.toThrow();
   });
 });
