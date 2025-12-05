@@ -27,7 +27,11 @@ export type ApiErrorResponse = ApiResponse<
   }
 >;
 
-export type Incentive = TokenIncentive | PointIncentive | PointWithoutValueIncentive;
+export type Incentive = RawIncentive & {
+  id: string;
+};
+
+export type RawIncentive = RawTokenIncentive | RawPointIncentive | RawPointWithoutValueIncentive;
 
 export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
@@ -38,7 +42,7 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   status: Status;
   description: string;
   claimLink: string;
-  id: string; // Unique identifier: chainId-rewardedTokens-rewardTokenAddress|point.name
+  id?: string; // Unique identifier: chainId-rewardedTokens-rewardTokenAddress|point.name
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
   allCampaignsConfigs?: CampaignConfig[];
@@ -46,18 +50,18 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   additionalData?: Record<string, unknown>;
 };
 
-export type TokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
+export type RawTokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
   rewardToken: Token;
   currentApr?: number;
 };
 
-export type PointIncentive = BaseIncentive<IncentiveType.POINT> & {
+export type RawPointIncentive = BaseIncentive<IncentiveType.POINT> & {
   point: Point;
   pointValue: number;
   pointValueUnit?: string;
 };
 
-export type PointWithoutValueIncentive = BaseIncentive<IncentiveType.POINT_WITHOUT_VALUE> & {
+export type RawPointWithoutValueIncentive = BaseIncentive<IncentiveType.POINT_WITHOUT_VALUE> & {
   point: Point;
 };
 

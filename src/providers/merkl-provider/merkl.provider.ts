@@ -8,12 +8,12 @@ import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
-  PointWithoutValueIncentive,
+  RawIncentive,
+  RawPointWithoutValueIncentive,
+  RawTokenIncentive,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
@@ -58,8 +58,8 @@ export class MerklProvider extends BaseIncentiveProvider {
   claimLink = 'https://app.merkl.xyz/';
   unknown = 'UNKNOWN';
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const allIncentives: Incentive[] = [];
+  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+    const allIncentives: RawIncentive[] = [];
 
     const chainId = fetchOptions?.chainId;
 
@@ -119,17 +119,9 @@ export class MerklProvider extends BaseIncentiveProvider {
         //   console.log('allCampaignsConfigs', allCampaignsConfigs);
         // }
 
-        const id = this.generateIncentiveId({
-          source: this.incentiveSource,
-          chainId: opportunity.chainId,
-          rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
-          reward: rewardToken.address,
-        });
-
         const baseIncentive: Omit<BaseIncentive, 'type'> = {
           name: opportunity.name,
           description: opportunity.description,
-          id: id,
           claimLink: this.claimLink,
           chainId: opportunity.chainId,
           rewardedTokens,
@@ -141,7 +133,7 @@ export class MerklProvider extends BaseIncentiveProvider {
         };
 
         if (rewardType == IncentiveType.POINT) {
-          const pointIncentive: PointWithoutValueIncentive = {
+          const pointIncentive: RawPointWithoutValueIncentive = {
             ...baseIncentive,
             type: IncentiveType.POINT_WITHOUT_VALUE,
             point: {
@@ -152,7 +144,7 @@ export class MerklProvider extends BaseIncentiveProvider {
           allIncentives.push(pointIncentive);
         }
         if (rewardType == IncentiveType.TOKEN) {
-          const pointIncentive: TokenIncentive = {
+          const pointIncentive: RawTokenIncentive = {
             ...baseIncentive,
             type: IncentiveType.TOKEN,
             rewardToken,

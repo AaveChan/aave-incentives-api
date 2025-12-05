@@ -21,12 +21,12 @@ import { ERC20Service } from '@/services/erc20.service.js';
 import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
 import {
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
+  RawIncentive,
+  RawTokenIncentive,
   Status,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
@@ -55,14 +55,14 @@ export class OnchainProvider extends BaseIncentiveProvider {
   erc20Service = new ERC20Service();
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
+  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
 
     return incentives;
   }
 
   private async fetchIncentives(fetchOptions?: FetchOptions) {
-    const allIncentives: Incentive[] = [];
+    const allIncentives: RawIncentive[] = [];
 
     for (const [instanceName, aaveInstanceBook] of Object.entries(AaveInstanceEntries)) {
       const aaveInstanceName = instanceName as AaveInstanceName;
@@ -124,7 +124,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
     type: AaveTokenType.A | AaveTokenType.V;
     chainId: number;
   }) => {
-    const allIncentives: Incentive[] = [];
+    const allIncentives: RawIncentive[] = [];
 
     if (incentivesData.rewardsTokenInformation.length <= 0) {
       return allIncentives;
@@ -178,18 +178,11 @@ export class OnchainProvider extends BaseIncentiveProvider {
 
         const rewardedTokens = [rewardedToken];
 
-        const id = this.generateIncentiveId({
-          source: this.incentiveSource,
-          chainId,
-          rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
-          reward: rewardToken.address,
-        });
-
         // console.log(
         //   `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
         // );
 
-        const incentive: TokenIncentive = {
+        const incentive: RawTokenIncentive = {
           name: this.getIncentiveName(underlyingToken, type),
           description: this.getIncentiveDescription(
             underlyingToken,
@@ -197,7 +190,6 @@ export class OnchainProvider extends BaseIncentiveProvider {
             type,
             aaveInstanceName,
           ),
-          id,
           claimLink: this.claimLink,
           chainId,
           source: this.incentiveSource,

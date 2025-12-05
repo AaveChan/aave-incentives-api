@@ -8,10 +8,10 @@ import {
   IncentiveSource,
   IncentiveType,
   Point,
-  PointIncentive,
+  RawPointIncentive,
+  RawTokenIncentive,
   Status,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
 // --- Mocks des imports externes ---
@@ -57,7 +57,7 @@ const baseToken = (overrides: Partial<Token> = {}): Token => ({
   ...overrides,
 });
 
-const baseIncentive = (overrides: Partial<TokenIncentive> = {}): TokenIncentive => ({
+const baseTokenIncentive = (overrides: Partial<RawTokenIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
   rewardedTokens: [],
@@ -78,7 +78,7 @@ const basePoint = (overrides: Partial<Point> = {}): Point => ({
   ...overrides,
 });
 
-const basePointIncentive = (overrides: Partial<PointIncentive> = {}): PointIncentive => ({
+const basePointIncentive = (overrides: Partial<RawPointIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
   rewardedTokens: [],
@@ -99,8 +99,8 @@ describe('IncentivesService', () => {
   beforeEach(() => vi.clearAllMocks());
 
   test('fetchIncentives() should gather data from all providers', async () => {
-    const provider1 = new MockProvider([baseIncentive({ id: 'A' })]);
-    const provider2 = new MockProvider([baseIncentive({ id: 'B' })]);
+    const provider1 = new MockProvider([baseTokenIncentive({ id: 'A' })]);
+    const provider2 = new MockProvider([baseTokenIncentive({ id: 'B' })]);
 
     const service = new IncentivesService();
     service.providers = [provider1, provider2];
@@ -115,17 +115,17 @@ describe('IncentivesService', () => {
     const service = new IncentivesService();
 
     const incentives = [
-      baseIncentive({ id: '1', chainId: 1, status: Status.LIVE }),
-      baseIncentive({ id: '2', chainId: 1, status: Status.SOON }),
+      baseTokenIncentive({ id: '1', chainId: 1, status: Status.LIVE }),
+      baseTokenIncentive({ id: '2', chainId: 1, status: Status.SOON }),
       basePointIncentive({ id: '3', chainId: 1, status: Status.LIVE, type: IncentiveType.POINT }),
-      baseIncentive({
+      baseTokenIncentive({
         id: '4',
         chainId: 1,
         status: Status.LIVE,
         source: IncentiveSource.ACI_MASIV_API,
       }),
-      baseIncentive({ id: '5', chainId: 10, status: Status.LIVE }),
-      baseIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
+      baseTokenIncentive({ id: '5', chainId: 10, status: Status.LIVE }),
+      baseTokenIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
     ];
 
     const filters = {
@@ -158,15 +158,15 @@ describe('IncentivesService', () => {
     const service = new IncentivesService();
 
     const incentives = [
-      baseIncentive({
+      baseTokenIncentive({
         id: '1',
         allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
       }),
-      baseIncentive({
+      baseTokenIncentive({
         id: '1',
         allCampaignsConfigs: [{ startTimestamp: 100, endTimestamp: 200 }],
       }),
-      baseIncentive({
+      baseTokenIncentive({
         id: '2',
         allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 50 }],
       }),
@@ -196,7 +196,7 @@ describe('IncentivesService', () => {
   });
 
   test('getIncentives() should run full pipeline (enrich, filter, merge, sort)', async () => {
-    const incentive = baseIncentive({
+    const incentive = baseTokenIncentive({
       id: 'A',
       rewardedTokens: [baseToken()],
       rewardToken: baseToken(),

@@ -4,12 +4,12 @@ import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
   Point,
-  PointIncentive,
-  PointWithoutValueIncentive,
+  RawIncentive,
+  RawPointIncentive,
+  RawPointWithoutValueIncentive,
   Status,
 } from '@/types/index.js';
 
@@ -29,8 +29,8 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
 
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const allIncentives: Incentive[] = [];
+  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+    const allIncentives: RawIncentive[] = [];
 
     let pointCampaigns: PointIncentives[] = [];
 
@@ -65,8 +65,8 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
   private mapPointIncentiveToIncentives(
     pointIncentive: PointIncentives,
     program: PointProgram,
-  ): Incentive[] {
-    const incentives: Incentive[] = [];
+  ): RawIncentive[] {
+    const incentives: RawIncentive[] = [];
     for (const rewardedTokenAddress of pointIncentive.rewardedTokenAddresses) {
       const rewardedToken = getAaveToken({
         tokenAddress: rewardedTokenAddress,
@@ -97,16 +97,8 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const id = this.generateIncentiveId({
-        source: this.incentiveSource,
-        chainId: pointIncentive.chainId,
-        rewardedTokenAddresses: [rewardedToken.address],
-        reward: point,
-      });
-
       const baseIncentive: Omit<BaseIncentive, 'type'> = {
         name: program.name,
-        id,
         description: program.description,
         claimLink: program.externalLink,
         chainId: pointIncentive.chainId,
@@ -119,7 +111,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
       };
 
       if (pointValue) {
-        const incentive: PointIncentive = {
+        const incentive: RawPointIncentive = {
           ...baseIncentive,
           type: IncentiveType.POINT,
           point,
@@ -128,7 +120,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
         };
         incentives.push(incentive);
       } else {
-        const incentive: PointWithoutValueIncentive = {
+        const incentive: RawPointWithoutValueIncentive = {
           ...baseIncentive,
           type: IncentiveType.POINT_WITHOUT_VALUE,
           point,

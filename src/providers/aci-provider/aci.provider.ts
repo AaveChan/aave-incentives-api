@@ -2,12 +2,12 @@ import { createLogger } from '@/config/logger.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
+  RawIncentive,
+  RawTokenIncentive,
   Status,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
@@ -23,10 +23,10 @@ export class ACIProvider extends BaseIncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
 
-  async getIncentives(): Promise<Incentive[]> {
+  async getIncentives(): Promise<RawIncentive[]> {
     const aciIncentives = await this.fetchIncentives();
 
-    const incentives: Incentive[] = [];
+    const incentives: RawIncentive[] = [];
 
     // things to fix
     // - ✅ provide rounds with timestamp instead of blockNumber through ACI API
@@ -51,16 +51,8 @@ export class ACIProvider extends BaseIncentiveProvider {
       const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
-      const id = this.generateIncentiveId({
-        source: this.incentiveSource,
-        chainId: action.chainId,
-        rewardedTokenAddresses: rewardedTokens.map((t) => t.address),
-        reward: rewardToken.address,
-      });
-
-      const incentive: TokenIncentive = {
+      const incentive: RawTokenIncentive = {
         name: action.displayName,
-        id,
         description: description ? description : '',
         claimLink: this.claimLink,
         chainId: action.chainId,

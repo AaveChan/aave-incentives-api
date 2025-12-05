@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { Address } from 'viem';
+
 import { createLogger } from '@/config/logger.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
 import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
@@ -15,6 +18,7 @@ import {
   Incentive,
   IncentiveSource,
   IncentiveType,
+  RawIncentive,
   Status,
   Token,
 } from '@/types/index.js';
@@ -30,7 +34,25 @@ export class IncentivesService {
   ];
 
   async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
-    let allIncentives = await this.fetchIncentives(filters);
+    const allRawIncentives = await this.fetchIncentives(filters);
+
+    let allIncentives: Incentive[] = [];
+
+    for (const incentive of allRawIncentives) {
+      const id = this.generateIncentiveId({
+        source: incentive.source,
+        chainId: incentive.chainId,
+        rewardedTokenAddresses: incentive.rewardedTokens.map((t) => t.address),
+        reward:
+          incentive.type === IncentiveType.TOKEN
+            ? incentive.rewardToken.address
+            : incentive.point.name,
+      });
+      allIncentives.push({
+        ...incentive,
+        id,
+      });
+    }
 
     this.enrichedTokens(allIncentives);
 
@@ -51,8 +73,8 @@ export class IncentivesService {
     return allIncentives;
   }
 
-  async fetchIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const allIncentives: Incentive[] = [];
+  async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+    const allIncentives: RawIncentive[] = [];
 
     const providersFiltered = this.providers.filter(
       (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
@@ -75,6 +97,27 @@ export class IncentivesService {
     });
 
     return allIncentives;
+  }
+
+  private generateIncentiveId({
+    source,
+    chainId,
+    rewardedTokenAddresses,
+    reward,
+  }: {
+    source: IncentiveSource;
+    chainId: number;
+    rewardedTokenAddresses: Address[];
+    reward: Address | string; // rewardToken or point name
+  }): string {
+    const normalizedRewarded = rewardedTokenAddresses.join('-').toLowerCase().replace('0x', '');
+    const normalizedReward = reward.toLowerCase().replace('0x', '');
+
+    const uniqueString = `${source}:${chainId}:${normalizedRewarded}:${normalizedReward}`;
+
+    const hash = crypto.createHash('sha256').update(uniqueString).digest('hex');
+
+    return `inc_${hash.substring(0, 16)}`; // 20 chars total
   }
 
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
@@ -203,11 +246,12 @@ export class IncentivesService {
     for (const incentive of incentives) {
       const existingIncentive = incentiveMap[incentive.id];
       if (existingIncentive) {
-        if (existingIncentive.id == 'inc_971d9acca5738267') {
-          console.log(`Merging duplicate incentive with id ${incentive.id}`);
-          console.log(existingIncentive);
-          console.log(incentive);
-        }
+        // if (existingIncentive.id == 'inc_971d9acca5738267') {
+        //   console.log(`Merging duplicate incentive with id ${incentive.id}`);
+        //   console.log(existingIncentive);
+        //   console.log(incentive);
+        // }
+
         // Merge allCampaignsConfigs
         const mergedCampaignsConfigs = [
           ...(existingIncentive.allCampaignsConfigs || []),
