@@ -6,12 +6,12 @@ import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
 import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import {
-  // ACIProvider,
-  // ExternalPointsProvider,
+  ACIProvider,
+  ExternalPointsProvider,
   FetchOptions,
   IncentiveProvider,
   MerklProvider,
-  // OnchainProvider,
+  OnchainProvider,
 } from '@/providers/index.js';
 import {
   CampaignConfig,
@@ -27,10 +27,10 @@ export class IncentivesService {
   private logger = createLogger('IncentivesService');
 
   public providers: IncentiveProvider[] = [
-    // new ACIProvider(),
+    new ACIProvider(),
     new MerklProvider(),
-    // new ExternalPointsProvider(),
-    // new OnchainProvider(),
+    new ExternalPointsProvider(),
+    new OnchainProvider(),
   ];
 
   async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
@@ -246,19 +246,12 @@ export class IncentivesService {
     for (const incentive of incentives) {
       const existingIncentive = incentiveMap[incentive.id];
       if (existingIncentive) {
-        // if (existingIncentive.id == 'inc_971d9acca5738267') {
-        //   console.log(`Merging duplicate incentive with id ${incentive.id}`);
-        //   console.log(existingIncentive);
-        //   console.log(incentive);
-        // }
-
-        // Merge allCampaignsConfigs
         const mergedCampaignsConfigs = [
           ...(existingIncentive.allCampaignsConfigs || []),
           ...(incentive.allCampaignsConfigs || []),
         ];
 
-        // Determine the most relevant currentCampaignConfig (prefer LIVE status)
+        // Determine the most relevant currentCampaignConfig (prefer the more recent)
         if (
           getMaxTimestamp(existingIncentive.allCampaignsConfigs || []) >
           getMaxTimestamp(incentive.allCampaignsConfigs || [])
@@ -269,7 +262,6 @@ export class IncentivesService {
           incentiveMap[incentive.id] = incentive;
         }
       } else {
-        // console.log(`Adding new incentive with id ${incentive.id}`);
         incentiveMap[incentive.id] = incentive;
       }
     }
