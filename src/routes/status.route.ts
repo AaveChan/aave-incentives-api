@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { IncentivesService } from '@/services/incentives.service.js';
+import { IncentivesService } from '@/services/incentives.service';
 
 export function createStatusRoute() {
   const router = Router();

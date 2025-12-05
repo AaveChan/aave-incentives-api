@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import z from 'zod';
 
-import { ApiErrorResponse } from '@/types/api.js';
+import { ApiErrorResponse } from '@/types/api';
 
 export function validateQuery<S extends z.ZodSchema>(schema: S) {
   return (req: Request, res: Response, next: NextFunction) => {

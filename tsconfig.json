@@ -6,10 +6,10 @@
   },
   "compilerOptions": {
     "target": "es2024",
-    "module": "nodenext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "lib": ["ES2024"],
     "rootDir": "./src",
-    "moduleResolution": "nodenext",
     "checkJs": true,
     "outDir": "./dist",
     "esModuleInterop": true,

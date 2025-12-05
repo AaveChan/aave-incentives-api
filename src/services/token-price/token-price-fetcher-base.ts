@@ -1,4 +1,4 @@
-import { Token } from '@/types/index.js';
+import { Token } from '@/types/index';
 
 export abstract class TokenPriceFetcherBase {
   public fetcherName: string;

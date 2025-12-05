@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
+import { IncentiveSource, IncentiveType, Status } from '@/types/index';
 
 export const GetIncentivesQuerySchema = z
   .object({

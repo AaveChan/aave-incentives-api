@@ -4,11 +4,11 @@ import express, { Application, Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import { createLogger } from './config/logger.js';
-import { router as incentivesRoutes } from './routes/incentives.route.js';
-import { router as pingRoute } from './routes/ping.route.js';
-import { createStatusRoute } from './routes/status.route.js';
-import { ApiErrorResponse } from './types/index.js';
+import { createLogger } from './config/logger';
+import { router as incentivesRoutes } from './routes/incentives.route';
+import { router as pingRoute } from './routes/ping.route';
+import { createStatusRoute } from './routes/status.route';
+import { ApiErrorResponse } from './types/index';
 
 const PORT: number = 5050;
 

@@ -1,8 +1,8 @@
 import { mainnet } from 'viem/chains';
 
-import { Token } from '@/types/index.js';
+import { Token } from '@/types/index';
 
-import { CoingeckoTokenPriceFetcher } from './coingecko-fetcher.js';
+import { CoingeckoTokenPriceFetcher } from './coingecko-fetcher';
 
 const token: Token = {
   name: 'Renzo',

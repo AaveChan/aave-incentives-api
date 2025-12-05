@@ -1,5 +1,5 @@
-import { createLogger } from '@/config/logger.js';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
+import { createLogger } from '@/config/logger';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   CampaignConfig,
   Incentive,
@@ -8,10 +8,10 @@ import {
   Status,
   Token,
   TokenIncentive,
-} from '@/types/index.js';
+} from '@/types/index';
 
-import { IncentiveProvider } from '../index.js';
-import { Actions, Campaign, Token as AciInfraToken } from './types.js';
+import { IncentiveProvider } from '../index';
+import { Actions, Campaign, Token as AciInfraToken } from './types';
 
 export class ACIProvider implements IncentiveProvider {
   name = 'ACIProvider';

@@ -1,7 +1,7 @@
 import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { mainnet } from 'viem/chains';
 
-import { Token } from '@/types/index.js';
+import { Token } from '@/types/index';
 
 export const GHO: Token = {
   name: 'GHO Token',

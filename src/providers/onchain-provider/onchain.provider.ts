@@ -2,23 +2,23 @@ import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
-import { createLogger } from '@/config/logger.js';
+import { createLogger } from '@/config/logger';
 import {
   AaveInstanceEntries,
   AaveInstanceName,
   AaveTokenType,
   getAaveToken,
-} from '@/lib/aave/aave-tokens.js';
-import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
+} from '@/lib/aave/aave-tokens';
+import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   AaveUiIncentiveService,
   aIncentivesData,
   aTokenInfo,
   vIncentivesData,
   vTokenInfo,
-} from '@/services/aave-ui-incentive.service.js';
-import { ERC20Service } from '@/services/erc20.service.js';
-import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
+} from '@/services/aave-ui-incentive.service';
+import { ERC20Service } from '@/services/erc20.service';
+import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service';
 import {
   CampaignConfig,
   Incentive,
@@ -27,9 +27,9 @@ import {
   Status,
   Token,
   TokenIncentive,
-} from '@/types/index.js';
+} from '@/types/index';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { FetchOptions, IncentiveProvider } from '../index';
 
 const INSTANCES_ENABLED: string[] = [
   'AaveV3Ethereum',

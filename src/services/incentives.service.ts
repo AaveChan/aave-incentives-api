@@ -1,7 +1,7 @@
-import { createLogger } from '@/config/logger.js';
-import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
-import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
-import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { createLogger } from '@/config/logger';
+import PRICE_FEED_ORACLES from '@/constants/price-feeds/index';
+import { tokenWrapperMapping } from '@/constants/wrapper-address';
+import { getAaveTokenInfo } from '@/lib/aave/aave-tokens';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -9,8 +9,8 @@ import {
   IncentiveProvider,
   MerklProvider,
   OnchainProvider,
-} from '@/providers/index.js';
-import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/types/index.js';
+} from '@/providers/index';
+import { Incentive, IncentiveSource, IncentiveType, Status, Token } from '@/types/index';
 
 export class IncentivesService {
   private logger = createLogger('IncentivesService');

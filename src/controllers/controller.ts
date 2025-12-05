@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 
-import { createLogger } from '@/config/logger.js';
-import { IncentivesService } from '@/services/incentives.service.js';
-import { GetIncentivesResponse } from '@/types/index.js';
-import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
+import { createLogger } from '@/config/logger';
+import { IncentivesService } from '@/services/incentives.service';
+import { GetIncentivesResponse } from '@/types/index';
+import { GetIncentivesQuerySchema } from '@/validation/incentives.schema';
 
 export class IncentivesController {
   private logger = createLogger('IncentivesController');

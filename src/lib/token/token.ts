@@ -1,4 +1,4 @@
-import { Token } from '@/types/index.js';
+import { Token } from '@/types/index';
 
 export const compareTokens = (tokenA: Token, tokenB: Token) => {
   return tokenA.address === tokenB.address && tokenA.chainId === tokenB.chainId;

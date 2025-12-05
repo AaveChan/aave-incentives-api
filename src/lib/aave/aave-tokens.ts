@@ -23,10 +23,10 @@ import {
 import { Address, zeroAddress } from 'viem';
 import { ink } from 'viem/chains';
 
-import { createLogger } from '@/config/logger.js';
-import { Token } from '@/types/index.js';
+import { createLogger } from '@/config/logger';
+import { Token } from '@/types/index';
 
-import { getChain } from '../utils/chains.js';
+import { getChain } from '../utils/chains';
 
 export type BookType = {
   decimals: number;

@@ -1,6 +1,6 @@
 import { Address } from 'viem';
 
-import { AaveInstanceType, AaveTokenType, BookType } from '@/lib/aave/aave-tokens.js';
+import { AaveInstanceType, AaveTokenType, BookType } from '@/lib/aave/aave-tokens';
 
 export type Actions = Record<ActionName, Action>;
 

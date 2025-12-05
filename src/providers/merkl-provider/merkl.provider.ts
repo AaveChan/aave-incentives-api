@@ -1,10 +1,10 @@
 import { ink } from 'viem/chains';
 
-import { createLogger } from '@/config/logger.js';
-import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
-import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
-import { tokenToString } from '@/lib/token/token.js';
-import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
+import { createLogger } from '@/config/logger';
+import { ACI_ADDRESSES } from '@/constants/aci-addresses';
+import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens';
+import { tokenToString } from '@/lib/token/token';
+import { getCurrentTimestamp } from '@/lib/utils/timestamp';
 import {
   BaseIncentive,
   CampaignConfig,
@@ -14,15 +14,15 @@ import {
   PointWithoutValueIncentive,
   Token,
   TokenIncentive,
-} from '@/types/index.js';
+} from '@/types/index';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { FetchOptions, IncentiveProvider } from '../index';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
   MerklToken,
   RewardTokenType as MerklRewardTokenType,
-} from './types.js';
+} from './types';
 
 type MerklApiOptions = {
   chainId?: number;

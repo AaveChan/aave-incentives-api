@@ -1,8 +1,8 @@
 import { Address, erc20Abi } from 'viem';
 
-import { getViemClient } from '@/clients/viem.js';
-import { CACHE_TTLS } from '@/config/cache-ttls.js';
-import { withCache } from '@/lib/utils/cache.js';
+import { getViemClient } from '@/clients/viem';
+import { CACHE_TTLS } from '@/config/cache-ttls';
+import { withCache } from '@/lib/utils/cache';
 
 export class ERC20Service {
   getTotalSupply = withCache(
