@@ -116,7 +116,7 @@ describe('IncentivesService', () => {
 
     const incentives = [
       baseIncentive({ id: '1', chainId: 1, status: Status.LIVE }),
-      baseIncentive({ id: '2', chainId: 10, status: Status.SOON }),
+      baseIncentive({ id: '2', chainId: 1, status: Status.SOON }),
       basePointIncentive({ id: '3', chainId: 1, status: Status.LIVE, type: IncentiveType.POINT }),
       baseIncentive({
         id: '4',
@@ -125,6 +125,7 @@ describe('IncentivesService', () => {
         source: IncentiveSource.ACI_MASIV_API,
       }),
       baseIncentive({ id: '5', chainId: 10, status: Status.LIVE }),
+      baseIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
     ];
 
     const filters = {
@@ -138,7 +139,7 @@ describe('IncentivesService', () => {
 
     expect(result).toHaveLength(2);
     expect(result[0]!.id).toBe('1');
-    expect(result[1]!.id).toBe('5');
+    expect(result[1]!.id).toBe('6');
   });
 
   test('enrichedToken() should set priceFeed from Aave token book', () => {
