@@ -1,6 +1,8 @@
-import { getAaveTokenInfo } from '@/lib/aave/aave-tokens';
-import { IncentiveProvider } from '@/providers/index';
-import { IncentivesService } from '@/services/incentives.service';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { IncentiveProvider } from '@/providers/index.js';
+import { IncentivesService } from '@/services/incentives.service.js';
 import {
   Incentive,
   IncentiveSource,
@@ -10,19 +12,18 @@ import {
   Status,
   Token,
   TokenIncentive,
-} from '@/types/index';
+} from '@/types/index.js';
 
 // --- Mocks des imports externes ---
-jest.mock('@/lib/aave/aave-tokens', () => ({
-  getAaveTokenInfo: jest.fn(),
+vi.mock('@/lib/aave/aave-tokens', () => ({
+  getAaveTokenInfo: vi.fn(),
 }));
 
-jest.mock('@/constants/price-feeds/index', () => ({
-  __esModule: true,
+vi.mock('@/constants/price-feeds/index', () => ({
   default: { 1: { '0xToken': '0xOraclePriceFeed' } },
 }));
 
-jest.mock('@/constants/wrapper-address', () => ({
+vi.mock('@/constants/wrapper-address', () => ({
   tokenWrapperMapping: {
     '0xWrapperToken': { ORACLE: '0xWrapperOracle' },
   },
@@ -95,7 +96,7 @@ const basePointIncentive = (overrides: Partial<PointIncentive> = {}): PointIncen
 });
 
 describe('IncentivesService', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   test('fetchIncentives() should gather data from all providers', async () => {
     const provider1 = new MockProvider([baseIncentive({ id: 'A' })]);
@@ -115,7 +116,7 @@ describe('IncentivesService', () => {
 
     const incentives = [
       baseIncentive({ id: '1', chainId: 1, status: Status.LIVE }),
-      baseIncentive({ id: '2', chainId: 10, status: Status.SOON }),
+      baseIncentive({ id: '2', chainId: 1, status: Status.SOON }),
       basePointIncentive({ id: '3', chainId: 1, status: Status.LIVE, type: IncentiveType.POINT }),
       baseIncentive({
         id: '4',
@@ -124,6 +125,7 @@ describe('IncentivesService', () => {
         source: IncentiveSource.ACI_MASIV_API,
       }),
       baseIncentive({ id: '5', chainId: 10, status: Status.LIVE }),
+      baseIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
     ];
 
     const filters = {
@@ -136,13 +138,12 @@ describe('IncentivesService', () => {
     const result = service['applyFilters'](incentives, filters);
 
     expect(result).toHaveLength(2);
-    expect(result[0]).toBeDefined();
     expect(result[0]!.id).toBe('1');
-    expect(result[1]!.id).toBe('5');
+    expect(result[1]!.id).toBe('6');
   });
 
   test('enrichedToken() should set priceFeed from Aave token book', () => {
-    (getAaveTokenInfo as jest.Mock).mockReturnValue({
+    (getAaveTokenInfo as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       book: { ORACLE: '0xAaveOracle' },
     });
 
@@ -170,7 +171,6 @@ describe('IncentivesService', () => {
     const merged = service['gatherEqualIncentives'](incentives);
 
     expect(merged).toHaveLength(1);
-    expect(merged[0]).toBeDefined();
     expect(merged[0]!.allCampaignsConfigs).toHaveLength(2);
   });
 
@@ -197,7 +197,7 @@ describe('IncentivesService', () => {
       rewardToken: baseToken(),
     });
 
-    (getAaveTokenInfo as jest.Mock).mockReturnValue({
+    (getAaveTokenInfo as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       book: { ORACLE: '0xMockOracle' },
     });
 
@@ -209,11 +209,6 @@ describe('IncentivesService', () => {
     const result = await service.getIncentives();
 
     expect(result).toHaveLength(1);
-
-    expect(result[0]).toBeDefined();
-    expect(result[0]!.rewardedTokens[0]).toBeDefined();
-
-    // Enrich token was applied
     expect(result[0]!.rewardedTokens[0]!.priceFeed).toBe('0xMockOracle');
   });
 });
