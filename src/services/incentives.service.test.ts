@@ -1,6 +1,6 @@
-import { getAaveTokenInfo } from '@/lib/aave/aave-tokens';
-import { IncentiveProvider } from '@/providers/index';
-import { IncentivesService } from '@/services/incentives.service';
+import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { IncentiveProvider } from '@/providers/index.js';
+import { IncentivesService } from '@/services/incentives.service.js';
 import {
   Incentive,
   IncentiveSource,
@@ -10,7 +10,7 @@ import {
   Status,
   Token,
   TokenIncentive,
-} from '@/types/index';
+} from '@/types/index.js';
 
 // --- Mocks des imports externes ---
 jest.mock('@/lib/aave/aave-tokens', () => ({
