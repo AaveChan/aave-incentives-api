@@ -144,6 +144,10 @@ export class MerklProvider extends BaseIncentiveProvider {
       }
     }
 
+    // TO FIX:
+    // la current campaign se retrouve au début de la liste des campagnes
+    // doublons de campaign dans le supply USDT
+
     return allIncentives;
   }
 

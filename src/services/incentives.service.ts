@@ -3,12 +3,12 @@ import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
 import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import {
-  ACIProvider,
-  ExternalPointsProvider,
+  // ACIProvider,
+  // ExternalPointsProvider,
   FetchOptions,
   IncentiveProvider,
   MerklProvider,
-  OnchainProvider,
+  // OnchainProvider,
 } from '@/providers/index.js';
 import {
   CampaignConfig,
@@ -23,10 +23,10 @@ export class IncentivesService {
   private logger = createLogger('IncentivesService');
 
   public providers: IncentiveProvider[] = [
-    new ACIProvider(),
+    // new ACIProvider(),
     new MerklProvider(),
-    new ExternalPointsProvider(),
-    new OnchainProvider(),
+    // new ExternalPointsProvider(),
+    // new OnchainProvider(),
   ];
 
   async getIncentives(filters: FetchOptions = {}): Promise<Incentive[]> {
@@ -36,9 +36,9 @@ export class IncentivesService {
 
     allIncentives = this.applyFilters(allIncentives, filters);
 
-    allIncentives = this.sort(allIncentives);
-
     allIncentives = this.gatherEqualIncentives(allIncentives);
+
+    allIncentives = this.sort(allIncentives);
 
     // // display the number of token that have a priceFeed undefined
     // const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
@@ -203,6 +203,11 @@ export class IncentivesService {
     for (const incentive of incentives) {
       const existingIncentive = incentiveMap[incentive.id];
       if (existingIncentive) {
+        if (existingIncentive.id == 'inc_971d9acca5738267') {
+          console.log(`Merging duplicate incentive with id ${incentive.id}`);
+          console.log(existingIncentive);
+          console.log(incentive);
+        }
         // Merge allCampaignsConfigs
         const mergedCampaignsConfigs = [
           ...(existingIncentive.allCampaignsConfigs || []),
