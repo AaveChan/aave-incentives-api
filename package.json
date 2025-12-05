@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "test": "jest --coverage",
     "dev": "nodemon --exec tsx -r tsconfig-paths/register ./src/app.ts",
