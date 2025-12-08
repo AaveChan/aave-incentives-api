@@ -8,15 +8,16 @@ import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
-  PointWithoutValueIncentive,
+  RawIncentive,
+  RawPointWithoutValueIncentive,
+  RawTokenIncentive,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
+import { FetchOptions } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
@@ -38,7 +39,7 @@ export const MainProtocolId = {
 } as const;
 
 const chainProtocolMap: Record<number, MainProtocolId> = {
-  [ink.id]: MainProtocolId.TYDRO,
+  [ink.id]: MainProtocolId.TYDRO, // Aave on Ink is managed by Tydro
   // Add more chain-specific protocols here
   // [OTHER_CHAIN_ID]: MainProtocolId.OTHER,
 };
@@ -47,7 +48,7 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
-export class MerklProvider implements IncentiveProvider {
+export class MerklProvider extends BaseIncentiveProvider {
   private logger = createLogger('MerklProvider');
 
   name = 'MerklProvider';
@@ -57,72 +58,75 @@ export class MerklProvider implements IncentiveProvider {
   claimLink = 'https://app.merkl.xyz/';
   unknown = 'UNKNOWN';
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
-    const allIncentives: Incentive[] = [];
+  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+    const allIncentives: RawIncentive[] = [];
 
     const chainId = fetchOptions?.chainId;
 
-    // Determine which protocol to use for this chain
     const protocolId =
       chainId && chainProtocolMap[chainId] ? chainProtocolMap[chainId] : DEFAULT_PROTOCOL;
 
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
-      const rewardMerklToken = opportunity.rewardsRecord.breakdowns[0]?.token;
-      if (!rewardMerklToken) {
-        this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
-        continue;
-      }
-      const rewardToken = this.merklInfraTokenToIncentiveToken(rewardMerklToken);
-
       const rewardedMerklTokens = opportunity.tokens;
       const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
       const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
 
-      const merklRewardType = opportunity.rewardsRecord.breakdowns[0]?.token.type;
-      const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
+      const opportunityRewardTokens = this.getRewardTokensOpportunity(opportunity);
 
-      if (!rewardType) {
-        this.logger.error(`Unknown reward type for token ${tokenToString(rewardToken)}`);
-        continue;
-      }
+      for (const merklRewardToken of opportunityRewardTokens) {
+        const rewardToken = this.merklInfraTokenToIncentiveToken(merklRewardToken);
 
-      const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
-        this.getCampaignConfigs(opportunity.campaigns);
+        const merklRewardType = merklRewardToken.type;
+        const rewardType = merklRewardType ? this.mapRewardType(merklRewardType) : null;
 
-      const baseIncentive: Omit<BaseIncentive, 'type'> = {
-        name: opportunity.name,
-        description: opportunity.description,
-        claimLink: this.claimLink,
-        chainId: opportunity.chainId,
-        rewardedTokens,
-        source: this.incentiveSource,
-        currentCampaignConfig,
-        nextCampaignConfig,
-        allCampaignsConfigs,
-        status: opportunity.status,
-      };
+        if (!rewardType) {
+          this.logger.error(`Unknown reward type for token ${tokenToString(rewardToken)}`);
+          continue;
+        }
 
-      if (rewardType == IncentiveType.POINT) {
-        const pointIncentive: PointWithoutValueIncentive = {
-          ...baseIncentive,
-          type: IncentiveType.POINT_WITHOUT_VALUE,
-          point: {
-            name: rewardToken.name,
-            protocol: protocolId,
-          },
+        // get campaign of the current reward token only
+        const campaigns = opportunity.campaigns.filter(
+          (campaign) => campaign.rewardToken.address === rewardToken.address,
+        );
+
+        const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
+          this.getCampaignConfigs(campaigns);
+
+        const baseIncentive: Omit<BaseIncentive, 'type'> = {
+          name: opportunity.name,
+          description: opportunity.description,
+          claimLink: this.claimLink,
+          chainId: opportunity.chainId,
+          rewardedTokens,
+          source: this.incentiveSource,
+          currentCampaignConfig,
+          nextCampaignConfig,
+          allCampaignsConfigs,
+          status: opportunity.status,
         };
-        allIncentives.push(pointIncentive);
-      }
-      if (rewardType == IncentiveType.TOKEN) {
-        const pointIncentive: TokenIncentive = {
-          ...baseIncentive,
-          type: IncentiveType.TOKEN,
-          rewardToken,
-          currentApr: opportunity.apr,
-        };
-        allIncentives.push(pointIncentive);
+
+        if (rewardType == IncentiveType.POINT) {
+          const pointIncentive: RawPointWithoutValueIncentive = {
+            ...baseIncentive,
+            type: IncentiveType.POINT_WITHOUT_VALUE,
+            point: {
+              name: rewardToken.name,
+              protocol: protocolId,
+            },
+          };
+          allIncentives.push(pointIncentive);
+        }
+        if (rewardType == IncentiveType.TOKEN) {
+          const pointIncentive: RawTokenIncentive = {
+            ...baseIncentive,
+            type: IncentiveType.TOKEN,
+            rewardToken,
+            currentApr: opportunity.apr,
+          };
+          allIncentives.push(pointIncentive);
+        }
       }
     }
 
@@ -191,6 +195,24 @@ export class MerklProvider implements IncentiveProvider {
 
     return allMerklOpportunities;
   }
+
+  private getRewardTokensOpportunity = (
+    opportunity: MerklOpportunityWithCampaign,
+  ): MerklToken[] => {
+    const opportunityRewardTokens = opportunity.campaigns.map((campaign) => campaign.rewardToken);
+
+    const uniqueOpportunityRewardTokens = Array.from(
+      new Set(opportunityRewardTokens.map((t) => t.address)),
+    ).map((address) => {
+      return opportunityRewardTokens.find((t) => t.address === address);
+    });
+
+    const filteredUniqueOpportunityRewardTokens = uniqueOpportunityRewardTokens.filter(
+      (token) => token !== undefined,
+    );
+
+    return filteredUniqueOpportunityRewardTokens;
+  };
 
   private getCampaignConfigs = (campaigns: Campaign[]) => {
     let currentCampaignConfig: CampaignConfig | undefined;
