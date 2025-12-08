@@ -21,15 +21,16 @@ import { ERC20Service } from '@/services/erc20.service.js';
 import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
 import {
   CampaignConfig,
-  Incentive,
   IncentiveSource,
   IncentiveType,
+  RawIncentive,
+  RawTokenIncentive,
   Status,
   Token,
-  TokenIncentive,
 } from '@/types/index.js';
 
-import { FetchOptions, IncentiveProvider } from '../index.js';
+import { BaseIncentiveProvider } from '../base.provider.js';
+import { FetchOptions } from '../index.js';
 
 const INSTANCES_ENABLED: string[] = [
   'AaveV3Ethereum',
@@ -42,7 +43,7 @@ const INSTANCES_ENABLED: string[] = [
 
 // TODO: fetch all LM events to get all campaign (start and end timestamps) instead of only relying on the current incentives data (which only gives current emission data)
 
-export class OnchainProvider implements IncentiveProvider {
+export class OnchainProvider extends BaseIncentiveProvider {
   name = 'OnchainProvider';
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
   incentiveType = IncentiveType.TOKEN as const;
@@ -54,14 +55,14 @@ export class OnchainProvider implements IncentiveProvider {
   erc20Service = new ERC20Service();
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<Incentive[]> {
+  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
 
     return incentives;
   }
 
   private async fetchIncentives(fetchOptions?: FetchOptions) {
-    const allIncentives: Incentive[] = [];
+    const allIncentives: RawIncentive[] = [];
 
     for (const [instanceName, aaveInstanceBook] of Object.entries(AaveInstanceEntries)) {
       const aaveInstanceName = instanceName as AaveInstanceName;
@@ -123,7 +124,7 @@ export class OnchainProvider implements IncentiveProvider {
     type: AaveTokenType.A | AaveTokenType.V;
     chainId: number;
   }) => {
-    const allIncentives: Incentive[] = [];
+    const allIncentives: RawIncentive[] = [];
 
     if (incentivesData.rewardsTokenInformation.length <= 0) {
       return allIncentives;
@@ -177,7 +178,11 @@ export class OnchainProvider implements IncentiveProvider {
 
         const rewardedTokens = [rewardedToken];
 
-        const incentive: TokenIncentive = {
+        // console.log(
+        //   `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
+        // );
+
+        const incentive: RawTokenIncentive = {
           name: this.getIncentiveName(underlyingToken, type),
           description: this.getIncentiveDescription(
             underlyingToken,
