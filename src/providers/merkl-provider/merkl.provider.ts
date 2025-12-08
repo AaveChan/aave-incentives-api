@@ -39,7 +39,7 @@ export const MainProtocolId = {
 } as const;
 
 const chainProtocolMap: Record<number, MainProtocolId> = {
-  [ink.id]: MainProtocolId.TYDRO,
+  [ink.id]: MainProtocolId.TYDRO, // Aave on Ink is managed by Tydro
   // Add more chain-specific protocols here
   // [OTHER_CHAIN_ID]: MainProtocolId.OTHER,
 };
@@ -63,40 +63,19 @@ export class MerklProvider extends BaseIncentiveProvider {
 
     const chainId = fetchOptions?.chainId;
 
-    // Determine which protocol to use for this chain
     const protocolId =
       chainId && chainProtocolMap[chainId] ? chainProtocolMap[chainId] : DEFAULT_PROTOCOL;
 
     const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
-      // if (opportunity.name == 'Lend USDT0 on Aave (net lending)') {
-      //   console.log('opportunity.id', opportunity.id);
-      //   console.log(
-      //     opportunity.campaigns.map((c) => {
-      //       return { start: c.startTimestamp, end: c.endTimestamp };
-      //     }),
-      //   );
-      // }
-
       const rewardedMerklTokens = opportunity.tokens;
       const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
       const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
 
-      const allMerklRewardTokens = opportunity.rewardsRecord.breakdowns.map(
-        (breakdown) => breakdown.token,
-      );
-      const uniqueMerklRewardTokens = Array.from(
-        new Set(allMerklRewardTokens.map((t) => t.address)),
-      ).map((address) => {
-        return allMerklRewardTokens.find((t) => t.address === address)!;
-      });
+      const opportunityRewardTokens = this.getRewardTokensOpportunity(opportunity);
 
-      for (const merklRewardToken of uniqueMerklRewardTokens) {
-        if (!merklRewardToken) {
-          this.logger.error(`No reward token defined for opportunity ${opportunity.name}`);
-          continue;
-        }
+      for (const merklRewardToken of opportunityRewardTokens) {
         const rewardToken = this.merklInfraTokenToIncentiveToken(merklRewardToken);
 
         const merklRewardType = merklRewardToken.type;
@@ -114,10 +93,6 @@ export class MerklProvider extends BaseIncentiveProvider {
 
         const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
           this.getCampaignConfigs(campaigns);
-
-        // if (opportunity.name == 'Lend USDT0 on Aave (net lending)') {
-        //   console.log('allCampaignsConfigs', allCampaignsConfigs);
-        // }
 
         const baseIncentive: Omit<BaseIncentive, 'type'> = {
           name: opportunity.name,
@@ -220,6 +195,24 @@ export class MerklProvider extends BaseIncentiveProvider {
 
     return allMerklOpportunities;
   }
+
+  private getRewardTokensOpportunity = (
+    opportunity: MerklOpportunityWithCampaign,
+  ): MerklToken[] => {
+    const opportunityRewardTokens = opportunity.campaigns.map((campaign) => campaign.rewardToken);
+
+    const uniqueOpportunityRewardTokens = Array.from(
+      new Set(opportunityRewardTokens.map((t) => t.address)),
+    ).map((address) => {
+      return opportunityRewardTokens.find((t) => t.address === address);
+    });
+
+    const filteredUniqueOpportunityRewardTokens = uniqueOpportunityRewardTokens.filter(
+      (token) => token !== undefined,
+    );
+
+    return filteredUniqueOpportunityRewardTokens;
+  };
 
   private getCampaignConfigs = (campaigns: Campaign[]) => {
     let currentCampaignConfig: CampaignConfig | undefined;
