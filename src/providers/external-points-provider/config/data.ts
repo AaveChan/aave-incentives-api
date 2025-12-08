@@ -54,18 +54,96 @@ export const pointPrograms: Record<PointProgramId, PointProgram> = {
 };
 
 export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
+  //   // season 1
+  // {
+  //   startTimestamp: 1700006400, // 15/11/23 00:00:00
+  //   endTimestamp: 1710460799, // 14/03/24 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 2
+  // {
+  //   startTimestamp: 1710460800, // 15/11/23 00:00:00
+  //   endTimestamp: 1719791999, // 30/06/24 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 3
+  // {
+  //   startTimestamp: 1719792000, // 01/07/24 00:00:00
+  //   endTimestamp: 1726358399, // 14/09/24 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 4
+  // {
+  //   startTimestamp: 1726358400, // 15/09/24 00:00:00
+  //   endTimestamp: 1738367999, // 31/01/25 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 5
+  // {
+  //   startTimestamp: 1738368000, // 01/02/25 00:00:00
+  //   endTimestamp: 1748735999, // 31/05/25 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 5
+  // {
+  //   startTimestamp: 1748736000, // 01/06/25 00:00:00
+  //   endTimestamp: 1756684799, // 31/08/25 23:59:59
+  //   pointValue: 3,
+  // },
+  // // season 6
+  // {
+  //   startTimestamp: 1756684800, // 01/09/25 00:00:00
+  //   pointValue: 3,
+  // },
   [POINT_PROGRAM_IDS.ETHERFI]: [
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: mainnet.id,
       rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.weETH.A_TOKEN,
-        AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN,
-        AaveV3Ethereum.ASSETS.eBTC.A_TOKEN,
+        AaveV3Ethereum.ASSETS.weETH.A_TOKEN, // onboarding: 14/04/24
+        AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN, // onboarding: 09/09/24
+        AaveV3Ethereum.ASSETS.eBTC.A_TOKEN, // onboarding: 03/04/25
       ],
       campaigns: [
+        // season 1
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1700006400, // 15/11/23 00:00:00
+          endTimestamp: 1710460799, // 14/03/24 23:59:59
+          pointValue: 3,
+        },
+        // season 2
+        {
+          startTimestamp: 1710460800, // 15/11/23 00:00:00
+          endTimestamp: 1719791999, // 30/06/24 23:59:59
+          pointValue: 3,
+        },
+        // season 3
+        {
+          startTimestamp: 1719792000, // 01/07/24 00:00:00
+          endTimestamp: 1726358399, // 14/09/24 23:59:59
+          pointValue: 3,
+        },
+        // season 4
+        {
+          startTimestamp: 1726358400, // 15/09/24 00:00:00
+          endTimestamp: 1738367999, // 31/01/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/24 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -73,10 +151,13 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: plasma.id,
-      rewardedTokenAddresses: [AaveV3Plasma.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Plasma.ASSETS.weETH.A_TOKEN, // onboarding: 23/09/25
+      ],
       campaigns: [
+        // season 6
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -84,10 +165,43 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: base.id,
-      rewardedTokenAddresses: [AaveV3Base.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Base.ASSETS.weETH.A_TOKEN, // onboarding: 03/06/24
+      ],
       campaigns: [
+        // season 2
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1710460800, // 15/11/23 00:00:00
+          endTimestamp: 1719791999, // 30/06/24 23:59:59
+          pointValue: 3,
+        },
+        // season 3
+        {
+          startTimestamp: 1719792000, // 01/07/24 00:00:00
+          endTimestamp: 1726358399, // 14/09/24 23:59:59
+          pointValue: 3,
+        },
+        // season 4
+        {
+          startTimestamp: 1726358400, // 15/09/24 00:00:00
+          endTimestamp: 1738367999, // 31/01/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -95,10 +209,43 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: arbitrum.id,
-      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Arbitrum.ASSETS.weETH.A_TOKEN, // onboarding: 20/04/24
+      ],
       campaigns: [
+        // season 2
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1710460800, // 15/11/23 00:00:00
+          endTimestamp: 1719791999, // 30/06/24 23:59:59
+          pointValue: 3,
+        },
+        // season 3
+        {
+          startTimestamp: 1719792000, // 01/07/24 00:00:00
+          endTimestamp: 1726358399, // 14/09/24 23:59:59
+          pointValue: 3,
+        },
+        // season 4
+        {
+          startTimestamp: 1726358400, // 15/09/24 00:00:00
+          endTimestamp: 1738367999, // 31/01/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -106,10 +253,25 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: linea.id,
-      rewardedTokenAddresses: [AaveV3Linea.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Linea.ASSETS.weETH.A_TOKEN, // onboarding: 11/02/25
+      ],
       campaigns: [
+        // season 5
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -117,10 +279,37 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: scroll.id,
-      rewardedTokenAddresses: [AaveV3Scroll.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Scroll.ASSETS.weETH.A_TOKEN, // onboarding: 06/08/24
+      ],
       campaigns: [
+        // season 3
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1719792000, // 01/07/24 00:00:00
+          endTimestamp: 1726358399, // 14/09/24 23:59:59
+          pointValue: 3,
+        },
+        // season 4
+        {
+          startTimestamp: 1726358400, // 15/09/24 00:00:00
+          endTimestamp: 1738367999, // 31/01/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
@@ -128,10 +317,31 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
     {
       programId: POINT_PROGRAM_IDS.ETHERFI,
       chainId: zksync.id,
-      rewardedTokenAddresses: [AaveV3ZkSync.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3ZkSync.ASSETS.weETH.A_TOKEN, // onboarding: 19/01/25
+      ],
       campaigns: [
+        // season 4
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1726358400, // 15/09/24 00:00:00
+          endTimestamp: 1738367999, // 31/01/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1738368000, // 01/02/25 00:00:00
+          endTimestamp: 1748735999, // 31/05/25 23:59:59
+          pointValue: 3,
+        },
+        // season 5
+        {
+          startTimestamp: 1748736000, // 01/06/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+          pointValue: 3,
+        },
+        // season 6
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
           pointValue: 3,
         },
       ],
