@@ -12,8 +12,6 @@ import {
 } from '@bgd-labs/aave-address-book';
 import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'viem/chains';
 
-import { BASE_TIMESTAMP } from '@/lib/utils/timestamp.js';
-
 import { POINT_PROGRAM_IDS, PointIncentives, PointProgram, PointProgramId } from '../types.js';
 
 export const pointPrograms: Record<PointProgramId, PointProgram> = {
@@ -347,37 +345,102 @@ export const pointCampaigns: Record<PointProgramId, PointIncentives[]> = {
       ],
     },
   ],
+  //   // S1
+  // {
+  //   startTimestamp: 1702339200, // 12/12/23 00:00:00
+  //   endTimestamp: 1735689599, // 31/12/24 23:59:59
+  // },
+  // // S2
+  // {
+  //   startTimestamp: 1735689600, // 01/01/25 00:00:00
+  //   endTimestamp: 1746057599, // 30/04/25 23:59:59
+  // },
+  // // S3
+  // {
+  //   startTimestamp: 1746057600, // 01/05/25 00:00:00
+  //   endTimestamp: 1756684799, // 31/08/25 23:59:59
+  // },
+  // // S4
+  // {
+  //   startTimestamp: 1756684800, // 01/09/25 00:00:00
+  //   endTimestamp: 1740787199, // 31/08/25 23:59:59
+  // },
   [POINT_PROGRAM_IDS.KELP]: [
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: mainnet.id,
       rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.rsETH.A_TOKEN,
-        AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN,
+        AaveV3Ethereum.ASSETS.rsETH.A_TOKEN, // onboarding: 13/02/23
+        AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN, // onboarding: 15/12/24
       ],
       campaigns: [
+        // S1
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1702339200, // 12/12/23 00:00:00
+          endTimestamp: 1735689599, // 31/12/24 23:59:59
+        },
+        // S2
+        {
+          startTimestamp: 1735689600, // 01/01/25 00:00:00
+          endTimestamp: 1746057599, // 30/04/25 23:59:59
+        },
+        // S3
+        {
+          startTimestamp: 1746057600, // 01/05/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+        },
+        // S4
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
+          endTimestamp: 1740787199, // 31/08/25 23:59:59
         },
       ],
     },
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: base.id,
-      rewardedTokenAddresses: [AaveV3Base.ASSETS.wrsETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Base.ASSETS.wrsETH.A_TOKEN, // onboarding: 10/03/25
+      ],
       campaigns: [
+        // S2
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1735689600, // 01/01/25 00:00:00
+          endTimestamp: 1746057599, // 30/04/25 23:59:59
+        },
+        // S3
+        {
+          startTimestamp: 1746057600, // 01/05/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+        },
+        // S4
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
+          endTimestamp: 1740787199, // 31/08/25 23:59:59
         },
       ],
     },
     {
       programId: POINT_PROGRAM_IDS.KELP,
       chainId: arbitrum.id,
-      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.rsETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Arbitrum.ASSETS.rsETH.A_TOKEN, // onboarding: 03/04/25
+      ],
       campaigns: [
+        // S2
         {
-          startTimestamp: BASE_TIMESTAMP,
+          startTimestamp: 1735689600, // 01/01/25 00:00:00
+          endTimestamp: 1746057599, // 30/04/25 23:59:59
+        },
+        // S3
+        {
+          startTimestamp: 1746057600, // 01/05/25 00:00:00
+          endTimestamp: 1756684799, // 31/08/25 23:59:59
+        },
+        // S4
+        {
+          startTimestamp: 1756684800, // 01/09/25 00:00:00
+          endTimestamp: 1740787199, // 31/08/25 23:59:59
         },
       ],
     },
