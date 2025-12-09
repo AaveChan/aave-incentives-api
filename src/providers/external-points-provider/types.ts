@@ -40,3 +40,5 @@ export type PointCampaign = {
   endTimestamp?: number;
   pointValue?: number;
 };
+
+export type ProgramPointIncentives = Record<PointProgramId, PointIncentives[]>;

@@ -15,7 +15,7 @@ import {
 
 import { BaseIncentiveProvider } from '../base.provider.js';
 import { pointProgramsMap } from './config/config.js';
-import { pointIncentives as allPointsIncentives } from './config/data.js';
+import { programPointIncentives } from './config/data.js';
 import {
   PointCampaign,
   PointIncentives,
@@ -34,7 +34,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
   async getIncentives(): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    for (const [programId, pointIncentives] of Object.entries(allPointsIncentives)) {
+    for (const [programId, pointIncentives] of Object.entries(programPointIncentives)) {
       const program = pointProgramsMap.get(programId as PointProgramId);
       if (!program) {
         this.logger.error(`Point program ${programId} not found`);

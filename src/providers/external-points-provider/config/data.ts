@@ -14,7 +14,12 @@ import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'v
 
 import { IncentiveType } from '@/types/api.js';
 
-import { POINT_PROGRAM_IDS, PointIncentives, PointProgram, PointProgramId } from '../types.js';
+import {
+  POINT_PROGRAM_IDS,
+  PointProgram,
+  PointProgramId,
+  ProgramPointIncentives,
+} from '../types.js';
 
 // For simplicity:
 // - if an asset is onboarded during a season, we defined the fact that it has been eligible for the whole season from day 1 (while in reality it started when the asset was onboarded)
@@ -143,7 +148,7 @@ export const pointPrograms: Record<PointProgramId, PointProgram> = {
   },
 };
 
-export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
+export const programPointIncentives: ProgramPointIncentives = {
   [POINT_PROGRAM_IDS.ETHERFI]: [
     {
       chainId: mainnet.id,
