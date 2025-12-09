@@ -117,7 +117,7 @@ export const pointPrograms: Record<PointProgramId, PointProgram> = {
       },
       '4': {
         startTimestamp: 1756684800, // 01/09/25 00:00:00
-        endTimestamp: 1740787199, // 31/08/25 23:59:59
+        endTimestamp: 1772323199, // 28/02/26 23:59:59
       },
     },
   },
