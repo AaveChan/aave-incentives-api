@@ -75,26 +75,21 @@ export const pointPrograms: Record<PointProgramId, PointProgram> = {
       '1': {
         startTimestamp: 1708300800, // 19/02/24 00:00:00
         endTimestamp: 1712015999, // 01/04/24 23:59:59
-        pointValue: 5,
       },
       '2': {
         startTimestamp: 1712016000, // 02/04/24 00:00:00
         endTimestamp: 1725321599, // 02/09/24 23:59:59
-        pointValue: 5,
       },
       '3': {
         startTimestamp: 1725321600, // 03/09/24 00:00:00
         endTimestamp: 1742687999, // 22/03/25 23:59:59
-        pointValue: 5,
       },
       '4': {
         startTimestamp: 1742688000, // 23/03/25 00:00:00
         endTimestamp: 1758671999, // 23/09/25 23:59:59
-        pointValue: 5,
       },
       '5': {
         startTimestamp: 1758672000, // 24/09/25 00:00:00
-        pointValue: 5,
       },
     },
   },
