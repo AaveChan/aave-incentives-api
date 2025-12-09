@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger.js';
+import { createAciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
@@ -45,6 +46,8 @@ app.use(
 );
 
 app.use('/status', createStatusRoute());
+
+app.use('/aci-addresses', createAciAddressesRoute());
 
 const apiErrorResponse: ApiErrorResponse = {
   success: false,
