@@ -15,12 +15,15 @@ import {
 
 import { BaseIncentiveProvider } from '../base.provider.js';
 import { FetchOptions } from '../index.js';
+import { pointProgramsMap } from './config/config.js';
+import { pointIncentives as allPointsIncentives } from './config/data.js';
 import {
-  campaignsByChainId,
-  pointCampaignsArray as pointCampaignsData,
-  pointProgramsMap,
-} from './config/config.js';
-import { PointCampaign, PointIncentives, PointProgram } from './types.js';
+  PointCampaign,
+  PointIncentives,
+  PointIncentivesValuesPerSeason,
+  PointProgram,
+  PointProgramId,
+} from './types.js';
 
 export class ExternalPointsProvider extends BaseIncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
@@ -29,31 +32,31 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
 
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getIncentives(_fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    let pointCampaigns: PointIncentives[] = [];
-
-    if (fetchOptions?.chainId) {
-      pointCampaigns = campaignsByChainId.get(fetchOptions.chainId) || [];
-    } else {
-      pointCampaigns = pointCampaignsData;
-    }
-
-    for (const campaign of pointCampaigns) {
-      const program = pointProgramsMap.get(campaign.programId);
-
+    for (const [programId, pointIncentives] of Object.entries(allPointsIncentives)) {
+      const program = pointProgramsMap.get(programId as PointProgramId);
       if (!program) {
-        this.logger.error(`Point program ${campaign.programId} not found`);
+        this.logger.error(`Point program ${programId} not found`);
         continue;
       }
 
-      const incentives = this.mapPointIncentiveToIncentives(campaign, program);
+      for (const incentives of pointIncentives) {
+        // console.log('incentives');
+        // console.log(incentives);
+        const incentivesFormatted = this.mapPointIncentiveToIncentives(incentives, program);
+        // console.log(incentivesFormatted);
 
-      if (incentives) {
-        allIncentives.push(...incentives);
+        if (incentivesFormatted) {
+          allIncentives.push(...incentivesFormatted);
+        }
       }
     }
+
+    // console.log('allIncentives');
+    // console.log(allIncentives);
 
     return allIncentives;
   }
@@ -63,21 +66,63 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
   }
 
   private mapPointIncentiveToIncentives(
-    pointIncentive: PointIncentives,
+    pointIncentives: PointIncentives,
     program: PointProgram,
   ): RawIncentive[] {
     const incentives: RawIncentive[] = [];
-    for (const rewardedTokenAddress of pointIncentive.rewardedTokenAddresses) {
+
+    if (!pointIncentives.campaigns && (!pointIncentives.pointValues || !program.seasons)) {
+      this.logger.error(
+        `Point incentives for program ${program.id} on chain ${pointIncentives.chainId} has neither campaigns nor point values`,
+      );
+      return [];
+    }
+
+    for (const address of pointIncentives.rewardedTokenAddresses) {
       const rewardedToken = getAaveToken({
-        tokenAddress: rewardedTokenAddress,
-        chainId: pointIncentive.chainId,
+        tokenAddress: address,
+        chainId: pointIncentives.chainId,
       });
 
       if (!rewardedToken) {
         return [];
       }
 
-      const campaigns = pointIncentive.campaigns || [];
+      let campaigns: CampaignConfig[] = [];
+
+      if (pointIncentives.campaigns) {
+        campaigns = pointIncentives.campaigns;
+      } else if (pointIncentives.pointValues && program.seasons) {
+        const seasons = program.seasons;
+        if (seasons) {
+          if (typeof pointIncentives.pointValues === 'number') {
+            const pointValue = pointIncentives.pointValues;
+            campaigns = Object.entries(seasons).map(([, campaign]) => {
+              return {
+                ...campaign,
+                pointValue,
+              };
+            });
+          } else {
+            const seasonsCampaigns = Object.entries(seasons).map(([seasonId, campaign]) => {
+              const values = pointIncentives.pointValues as PointIncentivesValuesPerSeason;
+              const pointValue = values[seasonId];
+              return pointValue
+                ? {
+                    ...campaign,
+                    pointValue,
+                  }
+                : undefined;
+            });
+            campaigns = seasonsCampaigns.filter((campaign) => campaign !== undefined);
+          }
+        }
+      } else {
+        this.logger.error(
+          `Point incentives for program ${program.id} on chain ${pointIncentives.chainId} has no campaigns but has point values without seasons`,
+        );
+        return [];
+      }
 
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
         this.getCampaignConfigs(campaigns);
@@ -97,11 +142,12 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
         tgePrice: program.tgePrice,
       };
 
-      const baseIncentive: Omit<BaseIncentive, 'type'> = {
+      const baseIncentive: BaseIncentive<PointProgram['type']> = {
         name: program.name,
         description: program.description,
+        type: program.type,
         claimLink: program.externalLink,
-        chainId: pointIncentive.chainId,
+        chainId: pointIncentives.chainId,
         rewardedTokens: [rewardedToken],
         source: this.incentiveSource,
         currentCampaignConfig,
@@ -110,7 +156,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
         status,
       };
 
-      if (pointValue) {
+      if (baseIncentive.type === IncentiveType.POINT) {
         const incentive: RawPointIncentive = {
           ...baseIncentive,
           type: IncentiveType.POINT,

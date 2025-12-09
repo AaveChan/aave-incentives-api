@@ -1,61 +1,66 @@
-import { PointIncentives } from '../types.js';
-import { pointCampaigns, pointPrograms } from './data.js';
+// import { PointIncentives, PointProgramId } from '../types.js';
+import {
+  // pointIncentives,
+  pointPrograms,
+} from './data.js';
 
 // Export in flat
-export const pointCampaignsArray = Object.values(pointCampaigns).flat();
+// export const pointIncentivesArray = Object.values(pointIncentives).flat();
 export const pointProgramsArray = Object.values(pointPrograms).flat();
 
 // Create a lookup map for O(1) access (memoized)
 export const pointProgramsMap = new Map(pointProgramsArray.map((program) => [program.id, program]));
 
 // ===== OPTIMIZATION: Create index by chainId for fast lookups =====
-export const campaignsByChainId = new Map<number, PointIncentives[]>();
+// export const campaignsByChainId = new Map<number, PointIncentives[]>();
 
-for (const campaign of pointCampaignsArray) {
-  if (!campaignsByChainId.has(campaign.chainId)) {
-    campaignsByChainId.set(campaign.chainId, []);
-  }
-  campaignsByChainId.get(campaign.chainId)!.push(campaign);
-}
+// for (const incentive of pointIncentivesArray) {
+//   if (!campaignsByChainId.has(incentive.chainId)) {
+//     campaignsByChainId.set(incentive.chainId, []);
+//   }
+//   campaignsByChainId.get(incentive.chainId)!.push(incentive);
+// }
 
 // ===== VALIDATION: Detect duplicate program+asset+chain combinations =====
-interface CampaignKey {
-  programId: string;
-  chainId: number;
-  asset: string;
-}
+// interface CampaignKey {
+//   programId: string;
+//   chainId: number;
+//   asset: string;
+// }
 
-function validateNoDuplicates(campaigns: PointIncentives[]): void {
-  const seen = new Set<string>();
-  const duplicates: CampaignKey[] = [];
+// function validateNoDuplicates(campaigns: Record<PointProgramId, PointIncentives[]>): void {
+//   const seen = new Set<string>();
+//   const duplicates: CampaignKey[] = [];
 
-  for (const campaign of campaigns) {
-    for (const rewardedTokenAddress of campaign.rewardedTokenAddresses) {
-      const chainId = campaign.chainId;
-      const key = `${campaign.programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
+//   for (const [programId, programCampaigns] of Object.entries(campaigns)) {
+//     for (const campaign of programCampaigns) {
+//       for (const rewardedTokenAddress of campaign.rewardedTokenAddresses) {
+//         const chainId = campaign.chainId;
+//         const key = `${programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
 
-      if (seen.has(key)) {
-        duplicates.push({
-          programId: campaign.programId,
-          chainId,
-          asset: rewardedTokenAddress,
-        });
-      }
-      seen.add(key);
-    }
-  }
+//         if (seen.has(key)) {
+//           duplicates.push({
+//             programId: programId,
+//             chainId,
+//             asset: rewardedTokenAddress,
+//           });
+//         }
+//         seen.add(key);
+//       }
+//     }
+//   }
 
-  if (duplicates.length > 0) {
-    const errorMessage = duplicates
-      .map((d) => `  - ${d.programId} / ${d.asset} / chain ${d.chainId}`)
-      .join('\n');
+//   if (duplicates.length > 0) {
+//     const errorMessage = duplicates
+//       .map((d) => `  - ${d.programId} / ${d.asset} / chain ${d.chainId}`)
+//       .join('\n');
 
-    throw new Error(
-      `Duplicate campaigns detected:\n${errorMessage}\n\n` +
-        `Each program+asset+chain combination must be unique.`,
-    );
-  }
-}
+//     throw new Error(
+//       `Duplicate campaigns detected:\n${errorMessage}\n\n` +
+//         `Each program+asset+chain combination must be unique.`,
+//     );
+//   }
+// }
 
 // Run validation at module load time (fails fast if duplicates exist)
-validateNoDuplicates(pointCampaignsArray);
+// validateNoDuplicates(pointIncentives);
