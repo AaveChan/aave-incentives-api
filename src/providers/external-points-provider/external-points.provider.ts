@@ -135,8 +135,8 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
       };
 
       const baseIncentive: BaseIncentive<PointProgram['type']> = {
-        name: program.name,
-        description: program.description,
+        name: `${program.name} on ${rewardedToken.symbol}`,
+        description: `${program.description} on ${rewardedToken.symbol}`,
         type: program.type,
         claimLink: program.externalLink,
         chainId: pointIncentives.chainId,
