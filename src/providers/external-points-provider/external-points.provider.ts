@@ -80,44 +80,17 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
         return [];
       }
 
-      let campaigns: CampaignConfig[] = [];
+      const allPointCampaigns = this.getAllPointCampaigns(program, pointIncentives);
 
-      if (pointIncentives.campaigns) {
-        campaigns = pointIncentives.campaigns;
-      } else if (pointIncentives.pointValues && program.seasons) {
-        const seasons = program.seasons;
-        if (seasons) {
-          if (typeof pointIncentives.pointValues === 'number') {
-            const pointValue = pointIncentives.pointValues;
-            campaigns = Object.entries(seasons).map(([, campaign]) => {
-              return {
-                ...campaign,
-                pointValue,
-              };
-            });
-          } else {
-            const seasonsCampaigns = Object.entries(seasons).map(([seasonId, campaign]) => {
-              const values = pointIncentives.pointValues as PointIncentivesValuesPerSeason;
-              const pointValue = values[seasonId];
-              return pointValue
-                ? {
-                    ...campaign,
-                    pointValue,
-                  }
-                : undefined;
-            });
-            campaigns = seasonsCampaigns.filter((campaign) => campaign !== undefined);
-          }
-        }
-      } else {
+      if (allPointCampaigns.length === 0) {
         this.logger.error(
-          `Point incentives for program ${program.id} on chain ${pointIncentives.chainId} has no campaigns but has point values without seasons`,
+          `No point campaigns found for program ${program.id} on chain ${pointIncentives.chainId} for rewarded token ${address}`,
         );
-        return [];
+        continue;
       }
 
       const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
-        this.getCampaignConfigs(campaigns);
+        this.getCampaignConfigs(allPointCampaigns);
 
       let status: Status = Status.PAST;
       let pointValue: number | undefined = undefined;
@@ -169,6 +142,41 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
 
     return incentives;
   }
+
+  private getAllPointCampaigns = (program: PointProgram, pointIncentives: PointIncentives) => {
+    let pointCampaigns: PointCampaign[] = [];
+
+    if (pointIncentives.campaigns) {
+      pointCampaigns = pointIncentives.campaigns;
+    } else if (pointIncentives.pointValues && program.seasons) {
+      const seasons = program.seasons;
+      if (seasons) {
+        if (typeof pointIncentives.pointValues === 'number') {
+          const pointValue = pointIncentives.pointValues;
+          pointCampaigns = Object.entries(seasons).map(([, campaign]) => {
+            return {
+              ...campaign,
+              pointValue,
+            };
+          });
+        } else {
+          const seasonsCampaigns = Object.entries(seasons).map(([seasonId, campaign]) => {
+            const values = pointIncentives.pointValues as PointIncentivesValuesPerSeason;
+            const pointValue = values[seasonId];
+            return pointValue
+              ? {
+                  ...campaign,
+                  pointValue,
+                }
+              : undefined;
+          });
+          pointCampaigns = seasonsCampaigns.filter((campaign) => campaign !== undefined);
+        }
+      }
+    }
+
+    return pointCampaigns;
+  };
 
   private getCampaignConfigs = (campaigns: PointCampaign[]) => {
     let currentCampaignConfig: CampaignConfig | undefined;
