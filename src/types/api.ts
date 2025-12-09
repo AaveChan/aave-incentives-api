@@ -57,7 +57,7 @@ export type RawTokenIncentive = BaseIncentive<IncentiveType.TOKEN> & {
 
 export type RawPointIncentive = BaseIncentive<IncentiveType.POINT> & {
   point: Point;
-  pointValue: number;
+  pointValue?: number;
   pointValueUnit?: string;
 };
 

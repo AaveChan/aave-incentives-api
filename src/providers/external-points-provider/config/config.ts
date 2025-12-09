@@ -1,22 +1,8 @@
-import { PointIncentives } from '../types.js';
-import { pointCampaigns, pointPrograms } from './data.js';
+import { ProgramPointIncentives } from '../types.js';
+import { pointPrograms, programPointIncentives } from './data.js';
 
-// Export in flat
-export const pointCampaignsArray = Object.values(pointCampaigns).flat();
-export const pointProgramsArray = Object.values(pointPrograms).flat();
-
-// Create a lookup map for O(1) access (memoized)
+const pointProgramsArray = Object.values(pointPrograms).flat();
 export const pointProgramsMap = new Map(pointProgramsArray.map((program) => [program.id, program]));
-
-// ===== OPTIMIZATION: Create index by chainId for fast lookups =====
-export const campaignsByChainId = new Map<number, PointIncentives[]>();
-
-for (const campaign of pointCampaignsArray) {
-  if (!campaignsByChainId.has(campaign.chainId)) {
-    campaignsByChainId.set(campaign.chainId, []);
-  }
-  campaignsByChainId.get(campaign.chainId)!.push(campaign);
-}
 
 // ===== VALIDATION: Detect duplicate program+asset+chain combinations =====
 interface CampaignKey {
@@ -25,23 +11,25 @@ interface CampaignKey {
   asset: string;
 }
 
-function validateNoDuplicates(campaigns: PointIncentives[]): void {
+function validateNoDuplicates(programPointIncentives: ProgramPointIncentives): void {
   const seen = new Set<string>();
   const duplicates: CampaignKey[] = [];
 
-  for (const campaign of campaigns) {
-    for (const rewardedTokenAddress of campaign.rewardedTokenAddresses) {
-      const chainId = campaign.chainId;
-      const key = `${campaign.programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
+  for (const [programId, pointIncentives] of Object.entries(programPointIncentives)) {
+    for (const incentive of pointIncentives) {
+      for (const rewardedTokenAddress of incentive.rewardedTokenAddresses) {
+        const chainId = incentive.chainId;
+        const key = `${programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
 
-      if (seen.has(key)) {
-        duplicates.push({
-          programId: campaign.programId,
-          chainId,
-          asset: rewardedTokenAddress,
-        });
+        if (seen.has(key)) {
+          duplicates.push({
+            programId: programId,
+            chainId,
+            asset: rewardedTokenAddress,
+          });
+        }
+        seen.add(key);
       }
-      seen.add(key);
     }
   }
 
@@ -58,4 +46,4 @@ function validateNoDuplicates(campaigns: PointIncentives[]): void {
 }
 
 // Run validation at module load time (fails fast if duplicates exist)
-validateNoDuplicates(pointCampaignsArray);
+validateNoDuplicates(programPointIncentives);

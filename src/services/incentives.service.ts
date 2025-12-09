@@ -270,10 +270,9 @@ export class IncentivesService {
   };
 
   private sortIncentivesCampaigns = (incentives: Incentive[]): Incentive[] => {
+    // use startTimestamp because it is always defined
     const sortCampaignsByEndTimestamp = (campaigns: CampaignConfig[]): CampaignConfig[] => {
-      return campaigns.sort((a, b) =>
-        a.endTimestamp && b.endTimestamp ? a.endTimestamp - b.endTimestamp : 0,
-      );
+      return campaigns.sort((a, b) => a.startTimestamp - b.startTimestamp);
     };
 
     return incentives.map((incentive) => {
