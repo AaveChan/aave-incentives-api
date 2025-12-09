@@ -148,8 +148,8 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     {
       chainId: mainnet.id,
       rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.weETH.A_TOKEN,
-        AaveV3Ethereum.ASSETS.eBTC.A_TOKEN,
+        AaveV3Ethereum.ASSETS.weETH.A_TOKEN, // 14/04/24
+        AaveV3Ethereum.ASSETS.eBTC.A_TOKEN, // 03/04/25
       ],
       pointValues: {
         '2': 3,
@@ -162,7 +162,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: mainnet.id,
-      rewardedTokenAddresses: [AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3EthereumEtherFi.ASSETS.weETH.A_TOKEN, // 09/09/24
+      ],
       pointValues: {
         '3': 3,
         '4': 3,
@@ -173,14 +175,18 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: plasma.id,
-      rewardedTokenAddresses: [AaveV3Plasma.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Plasma.ASSETS.weETH.A_TOKEN, // 23/09/25
+      ],
       pointValues: {
         '7': 3,
       },
     },
     {
       chainId: base.id,
-      rewardedTokenAddresses: [AaveV3Base.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Base.ASSETS.weETH.A_TOKEN, // 03/06/24
+      ],
       pointValues: {
         '2': 3,
         '3': 3,
@@ -192,7 +198,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: arbitrum.id,
-      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Arbitrum.ASSETS.weETH.A_TOKEN, // 20/04/24
+      ],
       pointValues: {
         '2': 3,
         '3': 3,
@@ -204,7 +212,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: linea.id,
-      rewardedTokenAddresses: [AaveV3Linea.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Linea.ASSETS.weETH.A_TOKEN, // 11/02/25
+      ],
       pointValues: {
         '5': 3,
         '6': 3,
@@ -213,7 +223,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: scroll.id,
-      rewardedTokenAddresses: [AaveV3Scroll.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Scroll.ASSETS.weETH.A_TOKEN, // 06/08/24
+      ],
       pointValues: {
         '3': 3,
         '4': 3,
@@ -224,7 +236,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: zksync.id,
-      rewardedTokenAddresses: [AaveV3ZkSync.ASSETS.weETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3ZkSync.ASSETS.weETH.A_TOKEN, // 19/01/25
+      ],
       pointValues: {
         '4': 3,
         '5': 3,
@@ -237,8 +251,8 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     {
       chainId: mainnet.id,
       rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.rsETH.A_TOKEN,
-        AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN,
+        AaveV3Ethereum.ASSETS.rsETH.A_TOKEN, // 13/02/23
+        AaveV3EthereumLido.ASSETS.rsETH.A_TOKEN, // 15/12/24
       ],
       pointValues: {
         '1': 2,
@@ -249,7 +263,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: base.id,
-      rewardedTokenAddresses: [AaveV3Base.ASSETS.wrsETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Base.ASSETS.wrsETH.A_TOKEN, // 10/03/25
+      ],
       pointValues: {
         '2': 2,
         '3': 2,
@@ -258,7 +274,9 @@ export const pointIncentives: Record<PointProgramId, PointIncentives[]> = {
     },
     {
       chainId: arbitrum.id,
-      rewardedTokenAddresses: [AaveV3Arbitrum.ASSETS.rsETH.A_TOKEN],
+      rewardedTokenAddresses: [
+        AaveV3Arbitrum.ASSETS.rsETH.A_TOKEN, // 03/04/25
+      ],
       pointValues: {
         '2': 2,
         '3': 2,

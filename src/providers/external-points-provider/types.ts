@@ -24,13 +24,6 @@ export interface PointProgram {
   additionalData?: Record<string, unknown>;
 }
 
-// export interface PointIncentives {
-//   programId: PointProgramId;
-//   chainId: number;
-//   rewardedTokens: RewardToken[];
-//   campaigns?: PointCampaign[];
-// }
-
 export interface PointIncentives {
   chainId: number;
   rewardedTokenAddresses: Address[];
@@ -47,9 +40,3 @@ export type PointCampaign = {
   endTimestamp?: number;
   pointValue?: number;
 };
-
-// export type RewardToken = {
-//   address: Address;
-//   deploymentBlock: number;
-//   deploymentTimestamp: number;
-// };

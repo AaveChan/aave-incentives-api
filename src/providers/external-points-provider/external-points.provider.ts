@@ -14,7 +14,6 @@ import {
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
-import { FetchOptions } from '../index.js';
 import { pointProgramsMap } from './config/config.js';
 import { pointIncentives as allPointsIncentives } from './config/data.js';
 import {
@@ -32,8 +31,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
 
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getIncentives(_fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  async getIncentives(): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
     for (const [programId, pointIncentives] of Object.entries(allPointsIncentives)) {
@@ -44,19 +42,13 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
       }
 
       for (const incentives of pointIncentives) {
-        // console.log('incentives');
-        // console.log(incentives);
         const incentivesFormatted = this.mapPointIncentiveToIncentives(incentives, program);
-        // console.log(incentivesFormatted);
 
         if (incentivesFormatted) {
           allIncentives.push(...incentivesFormatted);
         }
       }
     }
-
-    // console.log('allIncentives');
-    // console.log(allIncentives);
 
     return allIncentives;
   }

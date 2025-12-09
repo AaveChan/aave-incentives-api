@@ -141,24 +141,9 @@ export class IncentivesService {
       incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.source));
     }
 
-    // console.log('allIncentives before enrichedTokens');
-    // console.log(incentivesFiltered);
-
-    console.log('====> allIncentives before enrichedTokens');
-    console.log(
-      incentivesFiltered.map((i) => ({
-        name: i.name,
-        type: i.type,
-        rewardedTokens: i.rewardedTokens.map((t) => t.name),
-        currentCampaign: i.currentCampaignConfig,
-      })),
-    );
-
     // Incentive type filter
     if (filters.type !== undefined) {
       const types = Array.isArray(filters.type) ? filters.type : [filters.type];
-      console.log('types');
-      console.log(types);
       incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
 
