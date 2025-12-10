@@ -148,8 +148,8 @@ export class IncentivesService {
     }
 
     // Chain ID filter
-    if (filters.chainId !== undefined) {
-      const chainIds = Array.isArray(filters.chainId) ? filters.chainId : [filters.chainId];
+    if (filters.chainIds !== undefined) {
+      const chainIds = filters.chainIds;
       incentivesFiltered = incentivesFiltered.filter((i) => chainIds.includes(i.chainId));
     }
 

@@ -3,6 +3,13 @@ import { z } from 'zod';
 
 import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
 
+const chainIdList = z.string().transform((value) =>
+  value
+    .split(',')
+    .map((v) => parseInt(v.trim()))
+    .filter((v) => !isNaN(v)),
+);
+
 const ethAddress = z
   .string()
   .refine(isAddress, {
@@ -22,7 +29,7 @@ const addressesList = z
 
 export const GetIncentivesQuerySchema = z
   .object({
-    chainId: z.coerce.number().optional(),
+    chainIds: chainIdList.optional(),
 
     status: z.enum(Status).optional(),
 
