@@ -1,6 +1,24 @@
+import { Address, isAddress } from 'viem';
 import { z } from 'zod';
 
 import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
+
+const ethAddress = z
+  .string()
+  .refine(isAddress, {
+    message: 'Invalid Ethereum address',
+  })
+  .transform((addr) => addr as Address);
+
+const addressesList = z
+  .string()
+  .transform((value) =>
+    value
+      .split(',')
+      .map((v) => v.trim())
+      .filter(Boolean),
+  )
+  .pipe(z.array(ethAddress));
 
 export const GetIncentivesQuerySchema = z
   .object({
@@ -12,43 +30,9 @@ export const GetIncentivesQuerySchema = z
 
     source: z.enum(IncentiveSource).optional(),
 
-    // // Pagination
-    // page: z
-    //   .string()
-    //   .regex(/^\d+$/)
-    //   .transform((val) => parseInt(val, 10))
-    //   .optional(),
+    rewardedTokenAddresses: addressesList.optional(),
 
-    // limit: z
-    //   .string()
-    //   .regex(/^\d+$/)
-    //   .transform((val) => parseInt(val, 10))
-    //   .refine((val) => val <= 100, 'limit cannot exceed 100')
-    //   .optional(),
-
-    // offset: z
-    //   .string()
-    //   .regex(/^\d+$/)
-    //   .transform((val) => parseInt(val, 10))
-    //   .optional(),
-
-    // // Sorting
-    // sortBy: z.enum(['name', 'apr', 'startTimestamp', 'endTimestamp', 'budgetSpent']).optional(),
-
-    // sortOrder: z.enum(['asc', 'desc']).optional(),
-
-    // // APR range
-    // minApr: z
-    //   .string()
-    //   .regex(/^\d+(\.\d+)?$/)
-    //   .transform((val) => parseFloat(val))
-    //   .optional(),
-
-    // maxApr: z
-    //   .string()
-    //   .regex(/^\d+(\.\d+)?$/)
-    //   .transform((val) => parseFloat(val))
-    //   .optional(),
+    rewardTokenAddresses: addressesList.optional(),
   })
   .strict();
 

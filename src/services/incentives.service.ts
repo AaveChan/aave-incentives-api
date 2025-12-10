@@ -123,6 +123,30 @@ export class IncentivesService {
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
     let incentivesFiltered = [...incentives];
 
+    // Rewarded token addresses filter
+    if (filters.rewardedTokenAddresses !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddresses.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter((i) =>
+        i.rewardedTokens.some((t) =>
+          rewardedTokenAddressesNormalized.includes(t.address.toLowerCase()),
+        ),
+      );
+    }
+
+    // Reward token addresses filter
+    if (filters.rewardTokenAddresses !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardTokenAddresses.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter(
+        (i) =>
+          i.type === IncentiveType.TOKEN &&
+          rewardedTokenAddressesNormalized.includes(i.rewardToken.address.toLowerCase()),
+      );
+    }
+
     // Chain ID filter
     if (filters.chainId !== undefined) {
       const chainIds = Array.isArray(filters.chainId) ? filters.chainId : [filters.chainId];
