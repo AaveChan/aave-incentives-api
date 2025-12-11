@@ -63,14 +63,6 @@ export class IncentivesService {
 
     allIncentives = this.sort(allIncentives);
 
-    // // display the number of token that have a priceFeed undefined
-    // const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
-    //   return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceFeed;
-    // });
-    // this.logger.verbose(
-    //   `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceFeed.`,
-    // );
-
     return allIncentives;
   }
 

@@ -14,7 +14,6 @@ import {
   Token,
 } from '@/types/index.js';
 
-// --- Mocks des imports externes ---
 vi.mock('@/lib/aave/aave-tokens', () => ({
   getAaveTokenInfo: vi.fn(),
 }));
@@ -29,7 +28,6 @@ vi.mock('@/constants/wrapper-address', () => ({
   },
 }));
 
-// --- Fake Providers ---
 class MockProvider implements IncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
 
