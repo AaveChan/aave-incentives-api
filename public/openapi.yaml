@@ -26,11 +26,11 @@ servers:
 tags:
   - name: Incentives
     description: Endpoints for fetching and filtering incentives
-  - name: Health
+  - name: Status
     description: API health and monitoring
 
 paths:
-  /api/incentives:
+  /incentives:
     get:
       tags:
         - Incentives
@@ -41,10 +41,12 @@ paths:
         Results are cached for 5 minutes for optimal performance.
       operationId: getIncentives
       parameters:
-        - $ref: '#/components/parameters/ChainIdParam'
-        - $ref: '#/components/parameters/StatusParam'
-        - $ref: '#/components/parameters/IncentiveSourceParam'
-        - $ref: '#/components/parameters/IncentiveTypeParam'
+        - $ref: '#/components/parameters/ChainId'
+        - $ref: '#/components/parameters/Source'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/RewardedTokenAddress'
+        - $ref: '#/components/parameters/RewardTokenAddress'
       responses:
         '200':
           description: Successfully retrieved incentives
@@ -65,10 +67,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalErrorResponse'
 
-  /api/incentives/health:
+  /status:
     get:
       tags:
-        - Health
+        - Status
       summary: Get API health status
       description: Returns health status of all data providers
       operationId: getHealthStatus
@@ -98,53 +100,95 @@ paths:
 
 components:
   parameters:
-    ChainIdParam:
+    ChainId:
       name: chainId
       in: query
       description: Filter by chain ID(s). Supports single value or comma-separated list.
       schema:
-        oneOf:
-          - type: integer
-          - type: string
-            pattern: '^\d+(,\d+)*$'
+        type: string
+        pattern: '^\d+(,\d+)*$'
       examples:
         single:
-          value: 1
+          value: '1'
           summary: Single chain (Ethereum)
         multiple:
-          value: '1,137,42161'
-          summary: Multiple chains (Ethereum, Polygon, Arbitrum)
+          value: '1,9745'
+          summary: Multiple chains (Ethereum, Plasma)
 
-    StatusParam:
+    Source:
+      name: source
+      in: query
+      description: Filter by incentive source(s). Supports single value or comma-separated list.
+      schema:
+        type: string
+        pattern: '^(ACI_MASIV_API|MERKL_API|ONCHAIN_RPC|LOCAL_CONFIG)(,(ACI_MASIV_API|MERKL_API|ONCHAIN_RPC|LOCAL_CONFIG))*$'
+      examples:
+        single:
+          value: ACI_MASIV_API
+          summary: Single source
+        multiple:
+          value: 'ACI_MASIV_API,MERKL_API'
+          summary: Multiple sources
+
+    Type:
+      name: type
+      in: query
+      description: Filter by incentive type(s). Supports single value or comma-separated list.
+      schema:
+        type: string
+        pattern: '^(TOKEN|POINT|POINT_WITHOUT_VALUE)(,(TOKEN|POINT|POINT_WITHOUT_VALUE))*$'
+      examples:
+        single:
+          value: TOKEN
+          summary: Only token incentives
+        multiple:
+          value: 'TOKEN,POINT'
+          summary: Token and point incentives
+
+    Status:
       name: status
       in: query
       description: Filter by campaign status. Supports single value or comma-separated list.
       schema:
-        oneOf:
-          - $ref: '#/components/schemas/Status'
-          - type: string
-            pattern: '^(LIVE|PAST|UPCOMING)(,(LIVE|PAST|UPCOMING))*$'
+        type: string
+        pattern: '^(LIVE|PAST|SOON)(,(LIVE|PAST|SOON))*$'
       examples:
         single:
           value: LIVE
           summary: Only live campaigns
         multiple:
-          value: 'LIVE,UPCOMING'
+          value: 'LIVE,SOON'
           summary: Live and upcoming campaigns
 
-    IncentiveSourceParam:
-      name: source
+    RewardedTokenAddress:
+      name: rewardedTokenAddress
       in: query
-      description: Filter by incentive source
+      description: Filter by rewarded token contract address(es). Supports single value or comma-separated list.
       schema:
-        $ref: '#/components/schemas/IncentiveSource'
+        type: string
+        pattern: '^0x[a-fA-F0-9]{40}$'
+      examples:
+        single:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+          summary: Single token address
+        multiple:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+          summary: Multiple token addresses
 
-    IncentiveTypeParam:
-      name: type
+    RewardTokenAddress:
+      name: rewardTokenAddress
       in: query
-      description: Filter by incentive type
+      description: Filter by reward token contract address(es). Supports single value or comma-separated list.
       schema:
-        $ref: '#/components/schemas/IncentiveType'
+        type: string
+        pattern: '^0x[a-fA-F0-9]{40}(,0x[a-fA-F0-9]{40})*$'
+      examples:
+        single:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+          summary: Single reward token
+        multiple:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+          summary: Multiple reward tokens
 
   schemas:
     ApiResponse:
@@ -216,7 +260,7 @@ components:
                         example: 'source'
                       message:
                         type: string
-                        example: 'Invalid option: expected one of \"ACI_MASIV_API\"|\"MERKL_API\"|\"ONCHAIN_RPC\"|\"LOCAL_CONFIG\"'
+                        example: 'Invalid option: expected one of "ACI_MASIV_API"|"MERKL_API"|"ONCHAIN_RPC"|"LOCAL_CONFIG"'
 
     BaseIncentive:
       type: object
@@ -230,24 +274,30 @@ components:
         - description
         - claimLink
       properties:
+        id:
+          type: string
+          description: Unique identifier (based on chainId-rewardedTokens-rewardTokenAddress|point.name)
         name:
           type: string
-          example: 'Etherfi Points - Supply weETH on Ethereum'
+          example: 'Supply WETH on Ethereum Core'
         chainId:
           type: integer
           example: 1
         rewardedTokens:
           type: array
+          minItems: 1
           items:
             $ref: '#/components/schemas/Token'
+          description: Non-empty array of tokens being rewarded
         type:
           $ref: '#/components/schemas/IncentiveType'
         source:
           $ref: '#/components/schemas/IncentiveSource'
         status:
-          $ref: '#/components/schemas/Status'
+          $ref: '#/components/schemas/IncentiveStatus'
         description:
           type: string
+          example: 'Earn Etherfi loyalty points on aEthweETH'
         claimLink:
           type: string
           format: uri
@@ -267,6 +317,7 @@ components:
         additionalData:
           type: object
           additionalProperties: true
+          description: Additional metadata specific to the incentive
 
     TokenIncentive:
       allOf:
@@ -285,7 +336,7 @@ components:
               type: number
               format: float
               example: 5.6
-              description: Annual Percentage Rate
+              description: Current Annual Percentage Rate
 
     PointIncentive:
       allOf:
@@ -294,7 +345,6 @@ components:
           required:
             - type
             - point
-            - pointValue
           properties:
             type:
               type: string
@@ -305,9 +355,11 @@ components:
               type: number
               format: float
               example: 1.2
+              description: Value of the point
             pointValueUnit:
               type: string
               example: 'per_token'
+              description: Unit for point value calculation
 
     PointWithoutValueIncentive:
       allOf:
@@ -336,6 +388,7 @@ components:
           POINT_WITHOUT_VALUE: '#/components/schemas/PointWithoutValueIncentive'
       description: |
         Represents any type of incentive (token, point with value, or point without value).
+        The type field determines which properties are available.
 
     Token:
       type: object
@@ -366,9 +419,12 @@ components:
           type: number
           format: float
           example: 4250.75
+          description: Current price in USD
         priceFeed:
           type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
           example: '0x5424384B256154046E9667dDFaaa5e550145215e'
+          description: Chainlink price feed address
 
     Point:
       type: object
@@ -386,35 +442,37 @@ components:
           type: number
           format: float
           example: 0.5
+          description: TGE price
 
     CampaignConfig:
       type: object
       required:
         - startTimestamp
-        - endTimestamp
       properties:
         startTimestamp:
           type: integer
           format: int64
           example: 1735700400
-          description: Unix timestamp
+          description: Unix timestamp for campaign start
         endTimestamp:
           type: integer
           format: int64
           example: 1767236400
-          description: Unix timestamp
+          description: Unix timestamp for campaign end (optional, undefined if no end)
         budget:
-          type: number
-          format: float
-          example: 200000
+          type: string
+          example: '200000'
+          description: Campaign budget (for token incentives)
         apr:
           type: number
           format: float
           example: 8.5
+          description: Annual Percentage Rate (for token incentives)
         pointValue:
           type: number
           format: float
           example: 3
+          description: Point value (for point incentives)
 
     IncentiveSource:
       type: string
@@ -423,7 +481,7 @@ components:
         - ACI_MASIV_API: Incentives from ACI Masiv infrastructure
         - MERKL_API: Incentives from Merkl infrastructure
         - ONCHAIN_RPC: Incentives fetched directly from onchain data
-        - LOCAL_CONFIG: Incentives from local configuration (external points, etc...)
+        - LOCAL_CONFIG: Incentives from local configuration (external points, incentives without end date, etc.)
 
     IncentiveType:
       type: string
@@ -433,7 +491,7 @@ components:
         - POINT: Points incentive (with value)
         - POINT_WITHOUT_VALUE: Points incentive (without value)
 
-    Status:
+    IncentiveStatus:
       type: string
       enum: [LIVE, PAST, SOON]
       description: |
@@ -448,6 +506,14 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              message: 'Validation failed'
+              code: 'VALIDATION_ERROR'
+              details:
+                - field: 'chainId'
+                  message: 'Invalid chain ID format'
 
     NotFoundErrorResponse:
       description: Not found error - Resource not found
@@ -455,6 +521,11 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              message: 'Resource not found'
+              code: 'NOT_FOUND'
 
     InternalErrorResponse:
       description: Internal server error
@@ -462,3 +533,8 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              message: 'An unexpected error occurred'
+              code: 'INTERNAL_ERROR'
