@@ -77,8 +77,17 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const providersFiltered = fetchOptions?.source
+    let providersFiltered = fetchOptions?.source
       ? this.providers.filter((provider) => fetchOptions.source?.includes(provider.incentiveSource))
+      : this.providers;
+
+    // filter by incentive type, but if type is not specified on provider, include it
+    providersFiltered = fetchOptions?.type
+      ? this.providers.filter((provider) =>
+          provider.incentiveType && fetchOptions.type
+            ? fetchOptions.type.includes(provider.incentiveType)
+            : true,
+        )
       : this.providers;
 
     // Fetch from all providers in parallel
