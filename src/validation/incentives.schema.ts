@@ -31,20 +31,7 @@ const chainIdList = z.string().transform((value) =>
     .filter((v) => !isNaN(v)),
 );
 
-// Enum parser
-
-// const enumList = <T extends Record<string, string | number>>(enumObj: T) =>
-//   z
-//     .string()
-//     .transform((value) =>
-//       value
-//         .split(',')
-//         .map((v) => v.trim())
-//         .filter(Boolean),
-//     )
-//     .pipe(z.array(z.enum(Object.values(enumObj) as [string, ...string[]]))) as unknown as z.ZodType<
-//     Array<T[keyof T]>
-//   >;
+// Enum list parser
 
 const enumList = <T extends Record<string, string | number>>(enumObj: T) => {
   const values = Object.values(enumObj) as [string, ...string[]];
@@ -65,11 +52,11 @@ export const GetIncentivesQuerySchema = z
   .object({
     chainId: chainIdList.optional(),
 
-    status: enumList(Status).optional(),
+    source: enumList(IncentiveSource).optional(),
 
     type: enumList(IncentiveType).optional(),
 
-    source: enumList(IncentiveSource).optional(),
+    status: enumList(Status).optional(),
 
     rewardedTokenAddress: addressesList.optional(),
 
