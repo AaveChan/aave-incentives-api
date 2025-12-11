@@ -175,7 +175,7 @@ export class MerklProvider extends BaseIncentiveProvider {
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
       chainId: fetchOptions?.chainIds?.join(','),
-      status: fetchOptions?.status,
+      status: fetchOptions?.status?.join(','),
       mainProtocolId: mainProtocolIds.join(','),
     };
     console.log(merklApiOptions);
@@ -184,6 +184,8 @@ export class MerklProvider extends BaseIncentiveProvider {
         url.searchParams.append(key, value.toString());
       }
     }
+
+    console.log(`Fetching Merkl incentives from URL: ${url.toString()}`);
 
     let allMerklOpportunities: MerklOpportunityWithCampaign[] = [];
 

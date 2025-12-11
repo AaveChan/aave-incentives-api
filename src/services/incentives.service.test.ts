@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
-import { IncentiveProvider } from '@/providers/index.js';
+import { FetchOptions, IncentiveProvider } from '@/providers/index.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import {
   Incentive,
@@ -128,11 +128,11 @@ describe('IncentivesService', () => {
       baseTokenIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
     ];
 
-    const filters = {
-      chainId: 1,
-      status: Status.LIVE,
-      type: IncentiveType.TOKEN,
-      source: IncentiveSource.MERKL_API,
+    const filters: FetchOptions = {
+      chainIds: [1],
+      status: [Status.LIVE],
+      type: [IncentiveType.TOKEN],
+      source: [IncentiveSource.MERKL_API],
     };
 
     const result = service['applyFilters'](incentives, filters);

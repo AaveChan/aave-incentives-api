@@ -77,9 +77,9 @@ export class IncentivesService {
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const providersFiltered = this.providers.filter(
-      (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
-    );
+    const providersFiltered = fetchOptions?.source
+      ? this.providers.filter((provider) => fetchOptions.source?.includes(provider.incentiveSource))
+      : this.providers;
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -124,6 +124,10 @@ export class IncentivesService {
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
     let incentivesFiltered = [...incentives];
 
+    console.log('Applying filters:', filters);
+
+    console.log(incentives.length, 'incentives before filtering');
+
     // Rewarded token addresses filter
     if (filters.rewardedTokenAddresses !== undefined) {
       const rewardedTokenAddressesNormalized = filters.rewardedTokenAddresses.map((address) =>
@@ -156,21 +160,23 @@ export class IncentivesService {
 
     // Status filter
     if (filters.status !== undefined) {
-      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
-      incentivesFiltered = incentivesFiltered.filter((i) => statuses.includes(i.status));
+      const status = filters.status;
+      incentivesFiltered = incentivesFiltered.filter((i) => status.includes(i.status));
     }
 
     // Incentive source filter
     if (filters.source !== undefined) {
-      const sources = Array.isArray(filters.source) ? filters.source : [filters.source];
+      const sources = filters.source;
       incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.source));
     }
 
     // Incentive type filter
     if (filters.type !== undefined) {
-      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      const types = filters.type;
       incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
+
+    console.log(incentivesFiltered.length, 'incentives after filtering');
 
     return incentivesFiltered;
   }
