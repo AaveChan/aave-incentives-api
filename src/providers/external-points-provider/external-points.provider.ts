@@ -27,8 +27,6 @@ import {
 export class ExternalPointsProvider extends BaseIncentiveProvider {
   private logger = createLogger('ExternalPointsProvider');
 
-  name = 'ExternalPointsProvider';
-
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
   async getIncentives(): Promise<RawIncentive[]> {

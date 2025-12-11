@@ -9,6 +9,7 @@ import { createAciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
+import { createStatusDataRoute } from './routes/status-data.route.js';
 import { ApiErrorResponse } from './types/index.js';
 
 const PORT: number = 5050;
@@ -29,9 +30,22 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// --- Routes ---
+
+// Incentives
 app.use('/incentives', incentivesRoutes);
+
+// Ping
 app.use('/ping', pingRoute);
 
+// ACI Addresses
+app.use('/aci-addresses', createAciAddressesRoute());
+
+app.use('/status-data', createStatusDataRoute());
+
+// --- Pages ---
+
+// Docs page
 app.use(
   '/docs',
   apiReference({
@@ -45,9 +59,8 @@ app.use(
   }),
 );
 
+// Status page
 app.use('/status', createStatusRoute());
-
-app.use('/aci-addresses', createAciAddressesRoute());
 
 const apiErrorResponse: ApiErrorResponse = {
   success: false,

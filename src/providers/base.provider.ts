@@ -6,7 +6,6 @@ import { IncentiveSource, IncentiveType, RawIncentive } from '@/types/index.js';
 import { FetchOptions, IncentiveProvider } from './index.js';
 
 export abstract class BaseIncentiveProvider implements IncentiveProvider {
-  abstract name: string;
   abstract incentiveSource: IncentiveSource;
   incentiveType?: IncentiveType;
   // Providers must implement this

@@ -54,7 +54,6 @@ const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider extends BaseIncentiveProvider {
   private logger = createLogger('MerklProvider');
 
-  name = 'MerklProvider';
   incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities';
