@@ -64,5 +64,4 @@ export const GetIncentivesQuerySchema = z
   })
   .strict();
 
-// Type inference automatique depuis le schema
 export type GetIncentivesQuery = z.infer<typeof GetIncentivesQuerySchema>;
