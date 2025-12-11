@@ -1,5 +1,7 @@
 import { Address } from 'viem';
 
+import { NonEmptyArray } from '@/lib/utils/non-empty-array.js';
+
 export type ApiResponse<T, E> = {
   success: boolean;
   data?: T;
@@ -36,7 +38,7 @@ export type RawIncentive = RawTokenIncentive | RawPointIncentive | RawPointWitho
 export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
   chainId: number;
-  rewardedTokens: Token[];
+  rewardedTokens: NonEmptyTokens;
   type: T;
   source: IncentiveSource;
   status: Status;
@@ -74,6 +76,8 @@ export interface Token {
   price?: number;
   priceFeed?: Address;
 }
+
+export type NonEmptyTokens = NonEmptyArray<Token>;
 
 export interface Point {
   name: string;
