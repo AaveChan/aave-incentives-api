@@ -28,7 +28,8 @@ import {
 } from './types.js';
 
 type MerklApiOptions = {
-  chainId?: number;
+  campaigns?: boolean;
+  chainId?: string;
   mainProtocolId?: string;
   status?: string;
 };
@@ -56,18 +57,19 @@ export class MerklProvider extends BaseIncentiveProvider {
   name = 'MerklProvider';
   incentiveSource = IncentiveSource.MERKL_API;
 
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
+  apiUrl = 'https://api.merkl.xyz/v4/opportunities';
   claimLink = 'https://app.merkl.xyz/';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const chainId = fetchOptions?.chainId;
+    const chainIds = fetchOptions?.chainId;
 
-    const protocolId =
-      chainId && chainProtocolMap[chainId] ? chainProtocolMap[chainId] : DEFAULT_PROTOCOL;
+    const protocolIds = chainIds
+      ? chainIds.map((chainId) => this.getProtocolId(chainId))
+      : [DEFAULT_PROTOCOL];
 
-    const merklOpportunities = await this.fetchIncentives(protocolId, fetchOptions);
+    const merklOpportunities = await this.fetchIncentives(protocolIds, fetchOptions);
 
     for (const opportunity of merklOpportunities) {
       const rewardedMerklTokens = opportunity.tokens;
@@ -134,6 +136,7 @@ export class MerklProvider extends BaseIncentiveProvider {
         };
 
         if (rewardType == IncentiveType.POINT) {
+          const protocolId = this.getProtocolId(opportunity.chainId);
           const pointIncentive: RawPointWithoutValueIncentive = {
             ...baseIncentive,
             type: IncentiveType.POINT_WITHOUT_VALUE,
@@ -159,17 +162,23 @@ export class MerklProvider extends BaseIncentiveProvider {
     return allIncentives;
   }
 
+  private getProtocolId(chainId: number): MainProtocolId {
+    return chainProtocolMap[chainId] || DEFAULT_PROTOCOL;
+  }
+
   private async fetchIncentives(
-    mainProtocolId: MainProtocolId,
+    mainProtocolIds: MainProtocolId[],
     fetchOptions?: FetchOptions,
   ): Promise<MerklOpportunityWithCampaign[]> {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
-      chainId: fetchOptions?.chainId,
-      status: fetchOptions?.status,
-      mainProtocolId: mainProtocolId,
+      campaigns: true,
+      chainId: fetchOptions?.chainId?.join(','),
+      status: fetchOptions?.status?.join(','),
+      mainProtocolId: mainProtocolIds.join(','),
     };
+
     for (const [key, value] of Object.entries(merklApiOptions)) {
       if (value !== undefined) {
         url.searchParams.append(key, value.toString());

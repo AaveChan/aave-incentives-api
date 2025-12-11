@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
-import { IncentiveProvider } from '@/providers/index.js';
+import { FetchOptions, IncentiveProvider } from '@/providers/index.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import {
   Incentive,
@@ -14,7 +14,6 @@ import {
   Token,
 } from '@/types/index.js';
 
-// --- Mocks des imports externes ---
 vi.mock('@/lib/aave/aave-tokens', () => ({
   getAaveTokenInfo: vi.fn(),
 }));
@@ -29,7 +28,6 @@ vi.mock('@/constants/wrapper-address', () => ({
   },
 }));
 
-// --- Fake Providers ---
 class MockProvider implements IncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
 
@@ -128,11 +126,11 @@ describe('IncentivesService', () => {
       baseTokenIncentive({ id: '6', chainId: 1, status: Status.LIVE }),
     ];
 
-    const filters = {
-      chainId: 1,
-      status: Status.LIVE,
-      type: IncentiveType.TOKEN,
-      source: IncentiveSource.MERKL_API,
+    const filters: FetchOptions = {
+      chainId: [1],
+      status: [Status.LIVE],
+      type: [IncentiveType.TOKEN],
+      source: [IncentiveSource.MERKL_API],
     };
 
     const result = service['applyFilters'](incentives, filters);

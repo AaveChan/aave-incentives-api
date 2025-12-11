@@ -86,7 +86,7 @@ export interface Point {
 }
 
 export type CampaignConfig = {
-  startTimestamp: number; // Can be 0 if undated start
+  startTimestamp: number; // Can be BASE_TIMESTAMP if undated start
   endTimestamp?: number; // Can be undefined if no end
   budget?: string; // if token incentive
   apr?: number; // if token incentive

@@ -63,23 +63,24 @@ export class IncentivesService {
 
     allIncentives = this.sort(allIncentives);
 
-    // // display the number of token that have a priceFeed undefined
-    // const undefinedPricesFeedOracle = allIncentives.filter((incentive) => {
-    //   return incentive.reward.type === 'TOKEN' && !incentive.reward.token.priceFeed;
-    // });
-    // this.logger.verbose(
-    //   `There are ${undefinedPricesFeedOracle.length} incentives out of ${allIncentives.length} with undefined reward token priceFeed.`,
-    // );
-
     return allIncentives;
   }
 
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const providersFiltered = this.providers.filter(
-      (provider) => !fetchOptions?.source || provider.incentiveSource === fetchOptions.source,
-    );
+    let providersFiltered = fetchOptions?.source
+      ? this.providers.filter((provider) => fetchOptions.source?.includes(provider.incentiveSource))
+      : this.providers;
+
+    // filter by incentive type, but if type is not specified on provider, include it
+    providersFiltered = fetchOptions?.type
+      ? this.providers.filter((provider) =>
+          provider.incentiveType && fetchOptions.type
+            ? fetchOptions.type.includes(provider.incentiveType)
+            : true,
+        )
+      : this.providers;
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
@@ -124,27 +125,51 @@ export class IncentivesService {
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
     let incentivesFiltered = [...incentives];
 
+    // Rewarded token addresses filter
+    if (filters.rewardedTokenAddress !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter((i) =>
+        i.rewardedTokens.some((t) =>
+          rewardedTokenAddressesNormalized.includes(t.address.toLowerCase()),
+        ),
+      );
+    }
+
+    // Reward token addresses filter
+    if (filters.rewardTokenAddress !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardTokenAddress.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter(
+        (i) =>
+          i.type === IncentiveType.TOKEN &&
+          rewardedTokenAddressesNormalized.includes(i.rewardToken.address.toLowerCase()),
+      );
+    }
+
     // Chain ID filter
     if (filters.chainId !== undefined) {
-      const chainIds = Array.isArray(filters.chainId) ? filters.chainId : [filters.chainId];
+      const chainIds = filters.chainId;
       incentivesFiltered = incentivesFiltered.filter((i) => chainIds.includes(i.chainId));
     }
 
     // Status filter
     if (filters.status !== undefined) {
-      const statuses = Array.isArray(filters.status) ? filters.status : [filters.status];
-      incentivesFiltered = incentivesFiltered.filter((i) => statuses.includes(i.status));
+      const status = filters.status;
+      incentivesFiltered = incentivesFiltered.filter((i) => status.includes(i.status));
     }
 
     // Incentive source filter
     if (filters.source !== undefined) {
-      const sources = Array.isArray(filters.source) ? filters.source : [filters.source];
+      const sources = filters.source;
       incentivesFiltered = incentivesFiltered.filter((i) => sources.includes(i.source));
     }
 
     // Incentive type filter
     if (filters.type !== undefined) {
-      const types = Array.isArray(filters.type) ? filters.type : [filters.type];
+      const types = filters.type;
       incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
 
