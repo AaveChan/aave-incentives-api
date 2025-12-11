@@ -63,7 +63,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const chainIds = fetchOptions?.chainIds;
+    const chainIds = fetchOptions?.chainId;
 
     const protocolIds = chainIds
       ? chainIds.map((chainId) => this.getProtocolId(chainId))
@@ -174,7 +174,7 @@ export class MerklProvider extends BaseIncentiveProvider {
 
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
-      chainId: fetchOptions?.chainIds?.join(','),
+      chainId: fetchOptions?.chainId?.join(','),
       status: fetchOptions?.status?.join(','),
       mainProtocolId: mainProtocolIds.join(','),
     };

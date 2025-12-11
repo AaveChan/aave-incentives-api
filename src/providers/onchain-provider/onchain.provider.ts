@@ -71,9 +71,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
         continue;
       }
 
-      if (
-        fetchOptions?.chainIds ? fetchOptions.chainIds.includes(aaveInstanceBook.CHAIN_ID) : true
-      ) {
+      if (fetchOptions?.chainId ? fetchOptions.chainId.includes(aaveInstanceBook.CHAIN_ID) : true) {
         const chainId = aaveInstanceBook.CHAIN_ID;
         // console.time(`getUiIncentivesData-${chainId}`);
         const incentivesData = await this.aaveUIIncentiveService.getUiIncentivesData(

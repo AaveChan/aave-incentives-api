@@ -63,7 +63,7 @@ const enumList = <T extends Record<string, string | number>>(enumObj: T) => {
 
 export const GetIncentivesQuerySchema = z
   .object({
-    chainIds: chainIdList.optional(),
+    chainId: chainIdList.optional(),
 
     status: enumList(Status).optional(),
 
@@ -71,9 +71,9 @@ export const GetIncentivesQuerySchema = z
 
     source: enumList(IncentiveSource).optional(),
 
-    rewardedTokenAddresses: addressesList.optional(),
+    rewardedTokenAddress: addressesList.optional(),
 
-    rewardTokenAddresses: addressesList.optional(),
+    rewardTokenAddress: addressesList.optional(),
   })
   .strict();
 

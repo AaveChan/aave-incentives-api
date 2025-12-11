@@ -129,7 +129,7 @@ describe('IncentivesService', () => {
     ];
 
     const filters: FetchOptions = {
-      chainIds: [1],
+      chainId: [1],
       status: [Status.LIVE],
       type: [IncentiveType.TOKEN],
       source: [IncentiveSource.MERKL_API],

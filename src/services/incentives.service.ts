@@ -129,8 +129,8 @@ export class IncentivesService {
     console.log(incentives.length, 'incentives before filtering');
 
     // Rewarded token addresses filter
-    if (filters.rewardedTokenAddresses !== undefined) {
-      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddresses.map((address) =>
+    if (filters.rewardedTokenAddress !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
         address.toLowerCase(),
       );
       incentivesFiltered = incentivesFiltered.filter((i) =>
@@ -141,8 +141,8 @@ export class IncentivesService {
     }
 
     // Reward token addresses filter
-    if (filters.rewardTokenAddresses !== undefined) {
-      const rewardedTokenAddressesNormalized = filters.rewardTokenAddresses.map((address) =>
+    if (filters.rewardTokenAddress !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardTokenAddress.map((address) =>
         address.toLowerCase(),
       );
       incentivesFiltered = incentivesFiltered.filter(
@@ -153,8 +153,8 @@ export class IncentivesService {
     }
 
     // Chain ID filter
-    if (filters.chainIds !== undefined) {
-      const chainIds = filters.chainIds;
+    if (filters.chainId !== undefined) {
+      const chainIds = filters.chainId;
       incentivesFiltered = incentivesFiltered.filter((i) => chainIds.includes(i.chainId));
     }
 
