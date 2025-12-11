@@ -60,7 +60,7 @@ const baseToken = (overrides: Partial<Token> = {}): Token => ({
 const baseTokenIncentive = (overrides: Partial<RawTokenIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
-  rewardedTokens: [],
+  rewardedTokens: [baseToken()],
   type: IncentiveType.TOKEN,
   source: IncentiveSource.MERKL_API,
   status: Status.LIVE,
@@ -81,7 +81,7 @@ const basePoint = (overrides: Partial<Point> = {}): Point => ({
 const basePointIncentive = (overrides: Partial<RawPointIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
-  rewardedTokens: [],
+  rewardedTokens: [baseToken()],
   type: IncentiveType.POINT,
   source: IncentiveSource.MERKL_API,
   status: Status.LIVE,

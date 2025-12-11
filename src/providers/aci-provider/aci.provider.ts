@@ -1,9 +1,11 @@
 import { createLogger } from '@/config/logger.js';
+import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   CampaignConfig,
   IncentiveSource,
   IncentiveType,
+  NonEmptyTokens,
   RawIncentive,
   RawTokenIncentive,
   Status,
@@ -48,7 +50,17 @@ export class ACIProvider extends BaseIncentiveProvider {
 
       const description = action.info.wholeDescriptionString;
 
-      const rewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
+      const rawRewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
+      let rewardedTokens: NonEmptyTokens;
+      try {
+        rewardedTokens = toNonEmpty(rawRewardedTokens);
+      } catch {
+        this.logger.error(
+          `No valid rewarded tokens for action ${action.displayName} on chain ${action.chainId}`,
+        );
+        continue;
+      }
+
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
       const incentive: RawTokenIncentive = {

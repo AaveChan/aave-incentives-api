@@ -5,6 +5,7 @@ import { createLogger } from '@/config/logger.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
 import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -167,7 +168,13 @@ export class IncentivesService {
 
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
-      incentive.rewardedTokens = incentive.rewardedTokens.map(this.enrichedToken);
+      try {
+        incentive.rewardedTokens = toNonEmpty(incentive.rewardedTokens.map(this.enrichedToken));
+      } catch {
+        this.logger.error(
+          `Incentive ${incentive.id} has no valid rewarded tokens after enrichment`,
+        );
+      }
       if (incentive.type === IncentiveType.TOKEN) {
         incentive.rewardToken = this.enrichedToken(incentive.rewardToken);
       }
