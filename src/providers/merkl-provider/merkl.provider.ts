@@ -178,14 +178,12 @@ export class MerklProvider extends BaseIncentiveProvider {
       status: fetchOptions?.status?.join(','),
       mainProtocolId: mainProtocolIds.join(','),
     };
-    console.log(merklApiOptions);
+
     for (const [key, value] of Object.entries(merklApiOptions)) {
       if (value !== undefined) {
         url.searchParams.append(key, value.toString());
       }
     }
-
-    console.log(`Fetching Merkl incentives from URL: ${url.toString()}`);
 
     let allMerklOpportunities: MerklOpportunityWithCampaign[] = [];
 
@@ -198,8 +196,6 @@ export class MerklProvider extends BaseIncentiveProvider {
       url.searchParams.set('page', page.toString());
       const response = await fetch(url.toString());
       merklOpportunities = (await response.json()) as MerklOpportunityWithCampaign[];
-
-      console.log(merklOpportunities);
 
       allMerklOpportunities.push(...merklOpportunities);
       page++;

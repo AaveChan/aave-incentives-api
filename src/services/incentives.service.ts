@@ -124,10 +124,6 @@ export class IncentivesService {
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
     let incentivesFiltered = [...incentives];
 
-    console.log('Applying filters:', filters);
-
-    console.log(incentives.length, 'incentives before filtering');
-
     // Rewarded token addresses filter
     if (filters.rewardedTokenAddress !== undefined) {
       const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
@@ -175,8 +171,6 @@ export class IncentivesService {
       const types = filters.type;
       incentivesFiltered = incentivesFiltered.filter((i) => types.includes(i.type));
     }
-
-    console.log(incentivesFiltered.length, 'incentives after filtering');
 
     return incentivesFiltered;
   }
