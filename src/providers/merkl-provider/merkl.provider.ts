@@ -2,14 +2,16 @@ import { ink } from 'viem/chains';
 
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
-import { AaveTokenType, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
+import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
   IncentiveSource,
   IncentiveType,
+  NonEmptyTokens,
   RawIncentive,
   RawPointWithoutValueIncentive,
   RawTokenIncentive,
@@ -56,7 +58,6 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
   claimLink = 'https://app.merkl.xyz/';
-  unknown = 'UNKNOWN';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
@@ -71,7 +72,32 @@ export class MerklProvider extends BaseIncentiveProvider {
     for (const opportunity of merklOpportunities) {
       const rewardedMerklTokens = opportunity.tokens;
       const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
-      const rewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+      let rawRewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+
+      if (opportunity.explorerAddress) {
+        const explorerToken = getAaveToken({
+          tokenAddress: opportunity.explorerAddress,
+          chainId: opportunity.chainId,
+        });
+        if (explorerToken) {
+          const isAlreadyIncluded = rawRewardedTokens.find(
+            (t) => t.address === explorerToken.address && t.chainId === explorerToken.chainId,
+          );
+          if (!isAlreadyIncluded) {
+            rawRewardedTokens = [...rawRewardedTokens, explorerToken];
+          }
+        }
+      }
+
+      let rewardedTokens: NonEmptyTokens;
+      try {
+        rewardedTokens = toNonEmpty(rawRewardedTokens);
+      } catch {
+        this.logger.error(
+          `No valid rewarded tokens for opportunity ${opportunity.name} on chain ${opportunity.chainId}`,
+        );
+        continue;
+      }
 
       const opportunityRewardTokens = this.getRewardTokensOpportunity(opportunity);
 

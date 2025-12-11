@@ -176,8 +176,6 @@ export class OnchainProvider extends BaseIncentiveProvider {
           rewardTokenInfo,
         });
 
-        const rewardedTokens = [rewardedToken];
-
         // console.log(
         //   `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
         // );
@@ -194,7 +192,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
           chainId,
           source: this.incentiveSource,
           type: this.incentiveType,
-          rewardedTokens,
+          rewardedTokens: [rewardedToken],
           rewardToken,
           currentApr: apr,
           currentCampaignConfig,
