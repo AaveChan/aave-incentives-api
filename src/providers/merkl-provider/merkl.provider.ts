@@ -28,6 +28,7 @@ import {
 } from './types.js';
 
 type MerklApiOptions = {
+  campaigns?: boolean;
   chainId?: string;
   mainProtocolId?: string;
   status?: string;
@@ -56,7 +57,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   name = 'MerklProvider';
   incentiveSource = IncentiveSource.MERKL_API;
 
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities/campaigns';
+  apiUrl = 'https://api.merkl.xyz/v4/opportunities';
   claimLink = 'https://app.merkl.xyz/';
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
@@ -172,6 +173,7 @@ export class MerklProvider extends BaseIncentiveProvider {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
+      campaigns: true,
       chainId: fetchOptions?.chainIds?.join(','),
       status: fetchOptions?.status,
       mainProtocolId: mainProtocolIds.join(','),
