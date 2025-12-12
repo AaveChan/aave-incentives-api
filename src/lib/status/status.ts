@@ -20,9 +20,9 @@ export const getStatus = async (): Promise<Status> => {
     incentivesService.providers.map(async (provider) => {
       try {
         const healthy = await provider.isHealthy();
-        results[provider.incentiveSource] = healthy;
+        results[provider.name] = healthy;
       } catch {
-        results[provider.incentiveSource] = false;
+        results[provider.name] = false;
       }
     }),
   );

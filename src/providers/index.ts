@@ -1,11 +1,12 @@
 import z from 'zod';
 
-import { IncentiveSource, IncentiveType, RawIncentive } from '@/types/index.js';
+import { IncentiveSource, IncentiveType, ProviderName, RawIncentive } from '@/types/index.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 
 export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 
 export interface IncentiveProvider {
+  name: ProviderName;
   getIncentives(options?: FetchOptions): Promise<RawIncentive[]>;
   isHealthy(): Promise<boolean>;
   incentiveSource: IncentiveSource;

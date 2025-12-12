@@ -12,6 +12,7 @@ import {
   IncentiveSource,
   IncentiveType,
   NonEmptyTokens,
+  ProviderName,
   RawIncentive,
   RawPointWithoutValueIncentive,
   RawTokenIncentive,
@@ -54,6 +55,7 @@ const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider extends BaseIncentiveProvider {
   private logger = createLogger('MerklProvider');
 
+  name = ProviderName.Merkl;
   incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities';

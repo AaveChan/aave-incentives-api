@@ -105,9 +105,17 @@ export enum Status {
   SOON = 'SOON',
 }
 
+// provider & incentive source
 export enum IncentiveSource {
   ACI_MASIV_API = 'ACI_MASIV_API',
   MERKL_API = 'MERKL_API',
   ONCHAIN_RPC = 'ONCHAIN_RPC',
   LOCAL_CONFIG = 'LOCAL_CONFIG', // For external points, incentives without end date, etc
+}
+
+export enum ProviderName {
+  ACI = 'ACIProvider',
+  Merkl = 'MerklProvider',
+  ExternalPoints = 'ExternalPointsProvider',
+  Onchain = 'OnchainProvider',
 }
