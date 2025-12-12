@@ -53,13 +53,13 @@ const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider extends BaseIncentiveProvider {
-  private logger = createLogger('MerklProvider');
-
   name = ProviderName.Merkl;
   incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities';
   claimLink = 'https://app.merkl.xyz/';
+
+  private logger = createLogger(this.name);
 
   async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];

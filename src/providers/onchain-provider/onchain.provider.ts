@@ -50,7 +50,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
   incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
 
-  private logger = createLogger('OnchainProvider');
+  private logger = createLogger(this.name);
 
   tokenPriceFetcherService = new TokenPriceFetcherService();
   erc20Service = new ERC20Service();
