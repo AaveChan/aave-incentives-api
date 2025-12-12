@@ -67,13 +67,13 @@ paths:
         '500':
           $ref: '#/components/responses/InternalErrorResponse'
 
-  /status:
+  /status-data:
     get:
       tags:
         - Status
-      summary: Get API health status
-      description: Returns health status of all data providers
-      operationId: getHealthStatus
+      summary: Get API status
+      description: Returns global + providers health status
+      operationId: getStatus
       responses:
         '200':
           description: Health status retrieved successfully
@@ -82,21 +82,26 @@ paths:
               schema:
                 type: object
                 properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
+                  status:
+                    type: string
+                    enum: ['HEALTHY', 'DEGRADED', 'DOWN']
+                    example: 'HEALTHY'
+                  providersStatus:
                     type: object
                     properties:
-                      providers:
-                        type: object
-                        additionalProperties:
-                          type: boolean
-                        example:
-                          ACI: true
-                          Merkl: true
-                          ExternalPoints: true
-                          Onchain: true
+                      ACIProvider:
+                        type: boolean
+                      MerklProvider:
+                        type: boolean
+                      OnchainProvider:
+                        type: boolean
+                      ExternalPointsProvider:
+                        type: boolean
+                    example:
+                      ACIProvider: true
+                      MerklProvider: true
+                      OnchainProvider: true
+                      ExternalPointsProvider: true
 
 components:
   parameters:
