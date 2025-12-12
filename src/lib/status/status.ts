@@ -1,9 +1,9 @@
 import { IncentivesService } from '@/services/incentives.service.js';
 
 export enum GlobalStatus {
-  Healthy = 'healthy',
-  Degraded = 'degraded',
-  Down = 'down',
+  HEALTHY = 'HEALTHY',
+  DEGRADED = 'DEGRADED',
+  DOWN = 'DOWN',
 }
 
 export type Status = {
@@ -33,10 +33,10 @@ export const getStatus = async (): Promise<Status> => {
   const isUnhealthy = values.every((v) => !v);
 
   const globalStatus = isHealthy
-    ? GlobalStatus.Healthy
+    ? GlobalStatus.HEALTHY
     : isUnhealthy
-    ? GlobalStatus.Down
-    : GlobalStatus.Degraded;
+    ? GlobalStatus.DOWN
+    : GlobalStatus.DEGRADED;
 
   return { status: globalStatus, providersStatus: results };
 };

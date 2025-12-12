@@ -9,15 +9,15 @@ export function createStatusRoute() {
     const status = await getStatus();
 
     const statusStyles = {
-      [GlobalStatus.Healthy]: 'color: #2ecc71;',
-      [GlobalStatus.Degraded]: 'color: #f39c12;',
-      [GlobalStatus.Down]: 'color: #e74c3c;',
+      [GlobalStatus.HEALTHY]: 'color: #2ecc71;',
+      [GlobalStatus.DEGRADED]: 'color: #f39c12;',
+      [GlobalStatus.DOWN]: 'color: #e74c3c;',
     };
 
     const statusLabels = {
-      [GlobalStatus.Healthy]: 'Healthy ✓',
-      [GlobalStatus.Degraded]: 'Degraded ~',
-      [GlobalStatus.Down]: 'Down ✗',
+      [GlobalStatus.HEALTHY]: 'Healthy ✓',
+      [GlobalStatus.DEGRADED]: 'Degraded ~',
+      [GlobalStatus.DOWN]: 'Down ✗',
     };
 
     res.send(`
