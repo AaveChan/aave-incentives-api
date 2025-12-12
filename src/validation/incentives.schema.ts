@@ -1,6 +1,7 @@
 import { Address, isAddress } from 'viem';
 import { z } from 'zod';
 
+import { uniqueArray } from '@/lib/utils/array.js';
 import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
 
 // Address list parser
@@ -20,16 +21,20 @@ const addressesList = z
       .map((v) => v.trim())
       .filter(Boolean),
   )
+  .transform((arr) => uniqueArray(arr))
   .pipe(z.array(ethAddress));
 
 // Number list parser
 
-const chainIdList = z.string().transform((value) =>
-  value
-    .split(',')
-    .map((v) => parseInt(v.trim()))
-    .filter((v) => !isNaN(v)),
-);
+const chainIdList = z
+  .string()
+  .transform((value) =>
+    value
+      .split(',')
+      .map((v) => parseInt(v.trim()))
+      .filter((v) => !isNaN(v)),
+  )
+  .transform((arr) => uniqueArray(arr));
 
 // Enum list parser
 
@@ -45,7 +50,8 @@ const enumList = <T extends Record<string, string | number>>(enumObj: T) => {
         .filter(Boolean),
     )
     .pipe(z.array(z.enum(values)))
-    .transform((arr) => arr as Array<T[keyof T]>);
+    .transform((arr) => arr as Array<T[keyof T]>)
+    .transform((arr) => uniqueArray(arr));
 };
 
 export const GetIncentivesQuerySchema = z

@@ -4,6 +4,7 @@ import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { tokenToString } from '@/lib/token/token.js';
+import { uniqueArray } from '@/lib/utils/array.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
@@ -66,9 +67,10 @@ export class MerklProvider extends BaseIncentiveProvider {
 
     const chainIds = fetchOptions?.chainId;
 
-    const protocolIds = chainIds
+    let protocolIds = chainIds
       ? chainIds.map((chainId) => this.getProtocolId(chainId))
       : [DEFAULT_PROTOCOL];
+    protocolIds = uniqueArray(protocolIds);
 
     const merklOpportunities = await this.fetchIncentives(protocolIds, fetchOptions);
 
