@@ -1,25 +1,24 @@
 import { Router } from 'express';
 
-import { IncentivesService } from '@/services/incentives.service.js';
+import { getStatus, GlobalStatus } from '@/lib/status/status.js';
 
 export function createStatusRoute() {
   const router = Router();
 
-  const incentivesService = new IncentivesService();
-
   router.get('/', async (_req, res) => {
-    const results: Record<string, boolean> = {};
+    const status = await getStatus();
 
-    await Promise.all(
-      incentivesService.providers.map(async (provider) => {
-        try {
-          const healthy = await provider.isHealthy();
-          results[provider.name] = healthy;
-        } catch {
-          results[provider.name] = false;
-        }
-      }),
-    );
+    const statusStyles = {
+      [GlobalStatus.HEALTHY]: 'color: #2ecc71;',
+      [GlobalStatus.DEGRADED]: 'color: #f39c12;',
+      [GlobalStatus.DOWN]: 'color: #e74c3c;',
+    };
+
+    const statusLabels = {
+      [GlobalStatus.HEALTHY]: 'Healthy ✓',
+      [GlobalStatus.DEGRADED]: 'Degraded ~',
+      [GlobalStatus.DOWN]: 'Down ✗',
+    };
 
     res.send(`
       <!DOCTYPE html>
@@ -40,6 +39,14 @@ export function createStatusRoute() {
               text-align: center;
               margin-bottom: 2rem;
             }
+
+            .global-status {
+              text-align: center;
+              font-size: 1.5rem;
+              font-weight: 700;
+              margin-bottom: 1.5rem;
+            }
+
             .provider {
               display: flex;
               justify-content: space-between;
@@ -50,6 +57,7 @@ export function createStatusRoute() {
               border-radius: 8px;
               border: 1px solid #222;
             }
+
             .status-ok {
               color: #2ecc71;
               font-weight: 600;
@@ -61,9 +69,16 @@ export function createStatusRoute() {
           </style>
         </head>
         <body>
-          <h1>Providers Health Status</h1>
+          <h1>API Status</h1>
 
-          ${Object.entries(results)
+          <div class="global-status">
+            Global status:
+            <span style="${statusStyles[status.status]}">
+              ${statusLabels[status.status]}
+            </span>
+          </div>
+
+          ${Object.entries(status.providersStatus)
             .map(
               ([name, healthy]) => `
                 <div class="provider">

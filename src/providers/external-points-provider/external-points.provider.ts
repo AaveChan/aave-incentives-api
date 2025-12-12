@@ -7,6 +7,7 @@ import {
   IncentiveSource,
   IncentiveType,
   Point,
+  ProviderName,
   RawIncentive,
   RawPointIncentive,
   RawPointWithoutValueIncentive,
@@ -25,11 +26,10 @@ import {
 } from './types.js';
 
 export class ExternalPointsProvider extends BaseIncentiveProvider {
-  private logger = createLogger('ExternalPointsProvider');
-
-  name = 'ExternalPointsProvider';
-
+  name = ProviderName.ExternalPoints;
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
+
+  private logger = createLogger(this.name);
 
   async getIncentives(): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];

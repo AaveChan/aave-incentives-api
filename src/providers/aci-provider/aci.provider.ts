@@ -6,6 +6,7 @@ import {
   IncentiveSource,
   IncentiveType,
   NonEmptyTokens,
+  ProviderName,
   RawIncentive,
   RawTokenIncentive,
   Status,
@@ -16,11 +17,11 @@ import { BaseIncentiveProvider } from '../base.provider.js';
 import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 
 export class ACIProvider extends BaseIncentiveProvider {
-  name = 'ACIProvider';
+  name = ProviderName.ACI;
   incentiveSource = IncentiveSource.ACI_MASIV_API;
   incentiveType = IncentiveType.TOKEN as const;
 
-  logger = createLogger('ACIProvider');
+  logger = createLogger(this.name);
 
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';

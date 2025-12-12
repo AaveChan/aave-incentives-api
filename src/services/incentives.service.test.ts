@@ -8,6 +8,7 @@ import {
   IncentiveSource,
   IncentiveType,
   Point,
+  ProviderName,
   RawPointIncentive,
   RawTokenIncentive,
   Status,
@@ -31,7 +32,7 @@ vi.mock('@/constants/wrapper-address', () => ({
 class MockProvider implements IncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
 
-  name = 'test';
+  name = ProviderName.Merkl;
   incentiveType?: IncentiveType | undefined;
 
   constructor(private incentives: Incentive[] = [], private healthy = true) {}
