@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@bgd-labs/aave-address-book':
-        specifier: ^4.34.1
-        version: 4.36.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))
+        specifier: ^4.38.0
+        version: 4.38.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))
       '@scalar/express-api-reference':
         specifier: ^0.8.23
         version: 0.8.23
@@ -102,8 +102,8 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@bgd-labs/aave-address-book@4.36.0':
-    resolution: {integrity: sha512-9vpDl3SYJyxVronEIEmh3B1Z58o87A5b98DCvsDmeochD1UMdsi8GmptgQ5fDwHFyiqRGwlbA1uy0YCExdz+Zg==}
+  '@bgd-labs/aave-address-book@4.38.0':
+    resolution: {integrity: sha512-qic555Lqm/qC4BeZsiOmafxnm8E4R04kGhfWPsKjilRFnORHaBPs2+FhIv2wJmO8/xJaKT92pWrUJfc/Brbr0A==}
     peerDependencies:
       viem: ^2.23.5
 
@@ -2287,7 +2287,7 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@bgd-labs/aave-address-book@4.36.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))':
+  '@bgd-labs/aave-address-book@4.38.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))':
     dependencies:
       viem: 2.38.5(typescript@5.9.3)(zod@4.1.12)
 
