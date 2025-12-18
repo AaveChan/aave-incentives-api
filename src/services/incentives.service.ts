@@ -43,7 +43,7 @@ export class IncentivesService {
       const id = this.generateIncentiveId({
         source: incentive.source,
         chainId: incentive.chainId,
-        rewardedTokenAddresses: incentive.rewardedTokens.map((t) => t.address),
+        rewardedTokenAddresses: incentive.involvedTokens.map((t) => t.address),
         reward:
           incentive.type === IncentiveType.TOKEN
             ? incentive.rewardToken.address
@@ -131,7 +131,7 @@ export class IncentivesService {
         address.toLowerCase(),
       );
       incentivesFiltered = incentivesFiltered.filter((i) =>
-        i.rewardedTokens.some((t) =>
+        i.involvedTokens.some((t) =>
           rewardedTokenAddressesNormalized.includes(t.address.toLowerCase()),
         ),
       );
@@ -194,7 +194,8 @@ export class IncentivesService {
   private enrichedTokens(incentives: Incentive[]) {
     incentives.forEach((incentive) => {
       try {
-        incentive.rewardedTokens = toNonEmpty(incentive.rewardedTokens.map(this.enrichedToken));
+        incentive.rewardedToken = this.enrichedToken(incentive.rewardedToken);
+        incentive.involvedTokens = toNonEmpty(incentive.involvedTokens.map(this.enrichedToken));
       } catch {
         this.logger.error(
           `Incentive ${incentive.id} has no valid rewarded tokens after enrichment`,

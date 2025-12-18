@@ -77,7 +77,9 @@ export class MerklProvider extends BaseIncentiveProvider {
     for (const opportunity of merklOpportunities) {
       const rewardedMerklTokens = opportunity.tokens;
       const rewardedMerklTokensFiltered = this.filterMerklTokens(rewardedMerklTokens);
-      let rawRewardedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+      let rawInvolvedTokens = rewardedMerklTokensFiltered.map(this.merklInfraTokenToIncentiveToken);
+
+      let rewardedToken: Token | undefined;
 
       if (opportunity.explorerAddress) {
         const explorerToken = getAaveToken({
@@ -85,23 +87,32 @@ export class MerklProvider extends BaseIncentiveProvider {
           chainId: opportunity.chainId,
         });
         if (explorerToken) {
-          const isAlreadyIncluded = rawRewardedTokens.find(
+          const isAlreadyIncluded = rawInvolvedTokens.find(
             (t) => t.address === explorerToken.address && t.chainId === explorerToken.chainId,
           );
           if (!isAlreadyIncluded) {
-            rawRewardedTokens = [...rawRewardedTokens, explorerToken];
+            rawInvolvedTokens = [...rawInvolvedTokens, explorerToken];
           }
+          rewardedToken = explorerToken;
         }
       }
 
-      let rewardedTokens: NonEmptyTokens;
+      let involvedTokens: NonEmptyTokens;
       try {
-        rewardedTokens = toNonEmpty(rawRewardedTokens);
+        involvedTokens = toNonEmpty(rawInvolvedTokens);
       } catch {
         this.logger.error(
           `No valid rewarded tokens for opportunity ${opportunity.name} on chain ${opportunity.chainId}`,
         );
         continue;
+      }
+
+      // If explorerToken is not found, set the first involved token as rewarded token
+      if (!rewardedToken) {
+        this.logger.error(
+          `No explorer token for opportunity ${opportunity.name} on chain ${opportunity.chainId}, setting the first involved token as rewarded token`,
+        );
+        rewardedToken = involvedTokens[0];
       }
 
       const opportunityRewardTokens = this.getRewardTokensOpportunity(opportunity);
@@ -130,7 +141,8 @@ export class MerklProvider extends BaseIncentiveProvider {
           description: opportunity.description,
           claimLink: this.claimLink,
           chainId: opportunity.chainId,
-          rewardedTokens,
+          rewardedToken,
+          involvedTokens,
           source: this.incentiveSource,
           currentCampaignConfig,
           nextCampaignConfig,

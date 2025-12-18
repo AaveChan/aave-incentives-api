@@ -59,7 +59,8 @@ const baseToken = (overrides: Partial<Token> = {}): Token => ({
 const baseTokenIncentive = (overrides: Partial<RawTokenIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
-  rewardedTokens: [baseToken()],
+  rewardedToken: baseToken(),
+  involvedTokens: [baseToken()],
   type: IncentiveType.TOKEN,
   source: IncentiveSource.MERKL_API,
   status: Status.LIVE,
@@ -80,7 +81,8 @@ const basePoint = (overrides: Partial<Point> = {}): Point => ({
 const basePointIncentive = (overrides: Partial<RawPointIncentive> = {}): Incentive => ({
   name: 'test',
   chainId: 1,
-  rewardedTokens: [baseToken()],
+  rewardedToken: baseToken(),
+  involvedTokens: [baseToken()],
   type: IncentiveType.POINT,
   source: IncentiveSource.MERKL_API,
   status: Status.LIVE,
@@ -197,7 +199,8 @@ describe('IncentivesService', () => {
   test('getIncentives() should run full pipeline (enrich, filter, merge, sort)', async () => {
     const incentive = baseTokenIncentive({
       id: 'A',
-      rewardedTokens: [baseToken()],
+      rewardedToken: baseToken(),
+      involvedTokens: [baseToken()],
       rewardToken: baseToken(),
     });
 
@@ -213,6 +216,7 @@ describe('IncentivesService', () => {
     const result = await service.getIncentives();
 
     expect(result).toHaveLength(1);
-    expect(result[0]!.rewardedTokens[0]!.priceFeed).toBe('0xMockOracle');
+    expect(result[0]!.rewardedToken.priceFeed).toBe('0xMockOracle');
+    expect(result[0]!.involvedTokens[0]!.priceFeed).toBe('0xMockOracle');
   });
 });

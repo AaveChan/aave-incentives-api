@@ -38,7 +38,8 @@ export type RawIncentive = RawTokenIncentive | RawPointIncentive | RawPointWitho
 export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   name: string;
   chainId: number;
-  rewardedTokens: NonEmptyTokens;
+  rewardedToken: Token;
+  involvedTokens: NonEmptyTokens;
   type: T;
   source: IncentiveSource;
   status: Status;
