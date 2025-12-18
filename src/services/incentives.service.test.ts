@@ -217,6 +217,6 @@ describe('IncentivesService', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]!.rewardedToken.priceFeed).toBe('0xMockOracle');
-    expect(result[0]!.involvedTokens[0]!.priceFeed).toBe('0xMockOracle');
+    expect(result[0]!.involvedTokens[0].priceFeed).toBe('0xMockOracle');
   });
 });
