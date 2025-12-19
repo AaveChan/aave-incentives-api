@@ -30,7 +30,7 @@ const aArbARBWrapper: Address = '0x2c63f9da936624Ac7313b972251D340260A4bF08';
 
 const aLinWeETHWrapper: Address = '0xDcC1bcC6eCD1E63cBA178C289bC1dA9f757a2eF4';
 
-const aETHPYUSDWrapper: Address = '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019';
+const aEthPYUSDWrapper: Address = '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019';
 
 const EURCWrapper: Address = '0x82a5530942263645dD3B8101740c2a0Ac30c7919'; // withdraw wrapper
 
@@ -51,7 +51,7 @@ export const wrapperATokenMapping: Record<Address, BookType> = {
   [aArbARBWrapper]: AaveV3Arbitrum.ASSETS.ARB,
   [aLinWeETHWrapper]: AaveV3Linea.ASSETS.weETH,
   [aEthUSDeWrapperPlasma]: AaveV3Plasma.ASSETS.USDe,
-  [aETHPYUSDWrapper]: AaveV3Ethereum.ASSETS.PYUSD,
+  [aEthPYUSDWrapper]: AaveV3Ethereum.ASSETS.PYUSD,
 };
 
 export const wrapperUnderlyingTokenMapping: Record<Address, BookType> = {
