@@ -1,12 +1,14 @@
 import { Router } from 'express';
 
-import { getStatus, GlobalStatus } from '@/lib/status/status.js';
+import { IncentivesService } from '@/services/incentives.service.js';
+import { GlobalStatus } from '@/types/index.js';
 
 export function createStatusRoute() {
   const router = Router();
 
   router.get('/', async (_req, res) => {
-    const status = await getStatus();
+    const incentivesService = new IncentivesService();
+    const status = await incentivesService.getProvidersStatus();
 
     const statusStyles = {
       [GlobalStatus.HEALTHY]: 'color: #2ecc71;',

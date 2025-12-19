@@ -9,7 +9,7 @@ import { createAciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
-import { createStatusDataRoute } from './routes/status-data.route.js';
+import { router as providersStatus } from './routes/status-data.route.js';
 import { router as wrapperTokenMap } from './routes/wrapper-token-map.js';
 import { router as wrapperTokenResolution } from './routes/wrapper-token-resolution.js';
 import { ApiErrorResponse } from './types/index.js';
@@ -43,7 +43,7 @@ app.use('/ping', pingRoute);
 // ACI Addresses
 app.use('/aci-addresses', createAciAddressesRoute());
 
-app.use('/status-data', createStatusDataRoute());
+app.use('/status-data', providersStatus);
 
 // Wrapper Tokens
 app.use('/wrapper-token-map', wrapperTokenMap);

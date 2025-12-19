@@ -18,6 +18,4 @@ router.get(
   controller.getAllIncentives.bind(controller),
 );
 
-router.get('/health', controller.getHealthStatus.bind(controller));
-
 export { router };

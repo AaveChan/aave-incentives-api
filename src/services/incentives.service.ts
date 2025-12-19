@@ -16,9 +16,11 @@ import {
 } from '@/providers/index.js';
 import {
   CampaignConfig,
+  GlobalStatus,
   Incentive,
   IncentiveSource,
   IncentiveType,
+  ProvidersStatus,
   RawIncentive,
   Status,
   Token,
@@ -64,6 +66,34 @@ export class IncentivesService {
     allIncentives = this.sort(allIncentives);
 
     return allIncentives;
+  }
+
+  async getProvidersStatus(): Promise<ProvidersStatus> {
+    const providersStatus: Record<string, boolean> = {};
+
+    await Promise.all(
+      this.providers.map(async (provider) => {
+        try {
+          const healthy = await provider.isHealthy();
+          providersStatus[provider.name] = healthy;
+        } catch {
+          providersStatus[provider.name] = false;
+        }
+      }),
+    );
+
+    const values = Object.values(providersStatus);
+
+    const isHealthy = values.every(Boolean);
+    const isUnhealthy = values.every((v) => !v);
+
+    const globalStatus = isHealthy
+      ? GlobalStatus.HEALTHY
+      : isUnhealthy
+      ? GlobalStatus.DOWN
+      : GlobalStatus.DEGRADED;
+
+    return { status: globalStatus, providersStatus };
   }
 
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
@@ -259,24 +289,6 @@ export class IncentivesService {
     }
 
     return token;
-  }
-
-  async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
-    const healthChecks = await Promise.allSettled(
-      this.providers.map(async (provider) => ({
-        source: provider.incentiveSource,
-        healthy: await provider.isHealthy(),
-      })),
-    );
-
-    const status: Partial<Record<IncentiveSource, boolean>> = {};
-    healthChecks.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        status[result.value.source] = result.value.healthy;
-      }
-    });
-
-    return status;
   }
 
   private gatherEqualIncentives = (incentives: Incentive[]): Incentive[] => {
