@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger.js';
-import { createAciAddressesRoute } from './routes/aci-addresses.route.js';
+import { router as aciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
@@ -41,7 +41,7 @@ app.use('/incentives', incentivesRoutes);
 app.use('/ping', pingRoute);
 
 // ACI Addresses
-app.use('/aci-addresses', createAciAddressesRoute());
+app.use('/aci-addresses', aciAddressesRoute);
 
 app.use('/status-data', providersStatus);
 
