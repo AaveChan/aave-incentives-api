@@ -3,12 +3,8 @@ import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
 import { createLogger } from '@/config/logger.js';
-import {
-  AaveInstanceEntries,
-  AaveInstanceName,
-  AaveTokenType,
-  getAaveToken,
-} from '@/lib/aave/aave-tokens.js';
+import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
+import { AaveInstanceName, AaveTokenType, getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   AaveUiIncentiveService,
@@ -65,7 +61,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
   private async fetchIncentives(fetchOptions?: FetchOptions) {
     const allIncentives: RawIncentive[] = [];
 
-    for (const [instanceName, aaveInstanceBook] of Object.entries(AaveInstanceEntries)) {
+    for (const [instanceName, aaveInstanceBook] of Object.entries(aaveInstanceEntries)) {
       const aaveInstanceName = instanceName as AaveInstanceName;
       // optimize fetching only for enabled instances
       if (!INSTANCES_ENABLED.includes(aaveInstanceName)) {

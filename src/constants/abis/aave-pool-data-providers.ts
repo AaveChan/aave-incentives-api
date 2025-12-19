@@ -2,12 +2,12 @@ export const uiPoolDataProviderAbi = [
   {
     inputs: [
       {
-        internalType: 'contract IEACAggregatorProxy',
+        internalType: 'contract AggregatorInterface',
         name: '_networkBaseTokenPriceInUsdProxyAggregator',
         type: 'address',
       },
       {
-        internalType: 'contract IEACAggregatorProxy',
+        internalType: 'contract AggregatorInterface',
         name: '_marketReferenceCurrencyPriceInUsdProxyAggregator',
         type: 'address',
       },
@@ -15,6 +15,7 @@ export const uiPoolDataProviderAbi = [
     stateMutability: 'nonpayable',
     type: 'constructor',
   },
+  { inputs: [], name: 'InvalidReserveIndex', type: 'error' },
   {
     inputs: [],
     name: 'ETH_CURRENCY_UNIT',
@@ -53,6 +54,7 @@ export const uiPoolDataProviderAbi = [
               { internalType: 'uint128', name: 'collateralBitmap', type: 'uint128' },
               { internalType: 'string', name: 'label', type: 'string' },
               { internalType: 'uint128', name: 'borrowableBitmap', type: 'uint128' },
+              { internalType: 'uint128', name: 'ltvzeroBitmap', type: 'uint128' },
             ],
             internalType: 'struct DataTypes.EModeCategory',
             name: 'eMode',
@@ -106,7 +108,6 @@ export const uiPoolDataProviderAbi = [
           { internalType: 'bool', name: 'isPaused', type: 'bool' },
           { internalType: 'bool', name: 'isSiloedBorrowing', type: 'bool' },
           { internalType: 'uint128', name: 'accruedToTreasury', type: 'uint128' },
-          { internalType: 'uint128', name: 'unbacked', type: 'uint128' },
           { internalType: 'uint128', name: 'isolationModeTotalDebt', type: 'uint128' },
           { internalType: 'bool', name: 'flashLoanEnabled', type: 'bool' },
           { internalType: 'uint256', name: 'debtCeiling', type: 'uint256' },
@@ -114,8 +115,8 @@ export const uiPoolDataProviderAbi = [
           { internalType: 'uint256', name: 'borrowCap', type: 'uint256' },
           { internalType: 'uint256', name: 'supplyCap', type: 'uint256' },
           { internalType: 'bool', name: 'borrowableInIsolation', type: 'bool' },
-          { internalType: 'bool', name: 'virtualAccActive', type: 'bool' },
           { internalType: 'uint128', name: 'virtualUnderlyingBalance', type: 'uint128' },
+          { internalType: 'uint128', name: 'deficit', type: 'uint128' },
         ],
         internalType: 'struct IUiPoolDataProviderV3.AggregatedReserveData[]',
         name: '',
@@ -171,14 +172,14 @@ export const uiPoolDataProviderAbi = [
   {
     inputs: [],
     name: 'marketReferenceCurrencyPriceInUsdProxyAggregator',
-    outputs: [{ internalType: 'contract IEACAggregatorProxy', name: '', type: 'address' }],
+    outputs: [{ internalType: 'contract AggregatorInterface', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },
   {
     inputs: [],
     name: 'networkBaseTokenPriceInUsdProxyAggregator',
-    outputs: [{ internalType: 'contract IEACAggregatorProxy', name: '', type: 'address' }],
+    outputs: [{ internalType: 'contract AggregatorInterface', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },

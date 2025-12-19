@@ -1,7 +1,8 @@
 import { getViemClient } from '@/clients/viem.js';
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { uiIncentiveDataProviderAbi, uiPoolDataProviderAbi } from '@/constants/abis/index.js';
-import { AaveInstanceBook, AaveInstanceEntries } from '@/lib/aave/aave-tokens.js';
+import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
+import { AaveInstanceBook } from '@/lib/aave/aave-tokens.js';
 import { withCache } from '@/lib/utils/cache.js';
 
 // UI Incentives Types
@@ -21,7 +22,7 @@ export type vTokenInfo = vIncentivesData['rewardsTokenInformation'][number];
 export class AaveUiIncentiveService {
   getUiIncentivesDataByChainId = async (chainId: number) => {
     const allIncentives: IncentivesData[] = [];
-    Object.entries(AaveInstanceEntries).forEach(async ([, aaveInstanceBook]) => {
+    Object.entries(aaveInstanceEntries).forEach(async ([, aaveInstanceBook]) => {
       if (aaveInstanceBook.CHAIN_ID === chainId) {
         const incentives = await this.getUiIncentivesData(aaveInstanceBook, chainId);
         allIncentives.push(incentives);
