@@ -10,6 +10,8 @@ import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
 import { createStatusDataRoute } from './routes/status-data.route.js';
+import { router as wrapperTokenMap } from './routes/wrapper-token-map.js';
+import { router as wrapperTokenResolution } from './routes/wrapper-token-resolution.js';
 import { ApiErrorResponse } from './types/index.js';
 
 const PORT: number = 5050;
@@ -42,6 +44,10 @@ app.use('/ping', pingRoute);
 app.use('/aci-addresses', createAciAddressesRoute());
 
 app.use('/status-data', createStatusDataRoute());
+
+// Wrapper Tokens
+app.use('/wrapper-token-map', wrapperTokenMap);
+app.use('/wrapper-token-resolution', wrapperTokenResolution);
 
 // --- Pages ---
 

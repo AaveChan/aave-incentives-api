@@ -40,9 +40,8 @@ const USDCSonicWrapper: Address = '0xb542b71Bf6A5e907d7A1B34553b47a25cab47F3e'; 
 const USDtbMainnetWrapper: Address = '0xA74CaB633214C16808Eb0b6F499C98036b227B8a'; // withdraw wrapper
 
 // wrapper aToken || withdraw wrapper token address => book
-export const tokenWrapperMapping: Record<Address, BookType> = {
+export const wrapperATokenMapping: Record<Address, BookType> = {
   [aEthUSDtbWrapper]: AaveV3Ethereum.ASSETS.USDtb,
-  [USDtbMainnetWrapper]: AaveV3Ethereum.ASSETS.USDtb,
   [aEthUSDeWrapper]: AaveV3Ethereum.ASSETS.USDe,
   [aScrSCRWrapper]: AaveV3Scroll.ASSETS.SCR,
   [aHorRwaRLUSDWrapper]: AaveV3EthereumHorizon.ASSETS.RLUSD,
@@ -52,15 +51,39 @@ export const tokenWrapperMapping: Record<Address, BookType> = {
   [aLinWeETHWrapper]: AaveV3Linea.ASSETS.weETH,
   [aEthUSDeWrapperPlasma]: AaveV3Plasma.ASSETS.USDe,
   [aETHPYUSDWrapper]: AaveV3Ethereum.ASSETS.PYUSD,
+};
+
+export const wrapperUnderlyingTokenMapping: Record<Address, BookType> = {
   [EURCWrapper]: AaveV3Ethereum.ASSETS.EURC,
   [EURCBaseWrapper]: AaveV3Base.ASSETS.EURC,
   [USDCSonicWrapper]: AaveV3Sonic.ASSETS.USDC,
+  [USDtbMainnetWrapper]: AaveV3Ethereum.ASSETS.USDtb,
+};
+
+export const wrapperTokenMappingBook: Record<Address, BookType> = {
+  ...wrapperATokenMapping,
+  ...wrapperUnderlyingTokenMapping,
 };
 
 // wrapper aToken || withdraw wrapper token => aToken from tokenWrapperMapping mapping
-export const mapping: Record<Address, Address> = Object.fromEntries(
-  Object.entries(tokenWrapperMapping).map(([wrapperAddress, book]) => [
-    wrapperAddress,
-    book.A_TOKEN,
+export const wrapperTokenMappingRecord: Record<Address, Address> = {
+  ...Object.fromEntries(
+    Object.entries(wrapperATokenMapping).map(([wrapperAddress, book]) => [
+      wrapperAddress,
+      book.A_TOKEN,
+    ]),
+  ),
+  ...Object.fromEntries(
+    Object.entries(wrapperUnderlyingTokenMapping).map(([wrapperAddress, book]) => [
+      wrapperAddress,
+      book.UNDERLYING,
+    ]),
+  ),
+};
+
+export const wrapperTokenMapping = new Map<Address, Address>(
+  Object.entries(wrapperTokenMappingRecord).map(([wrapperAddress, resolvedAddress]) => [
+    wrapperAddress as Address,
+    resolvedAddress,
   ]),
 );
