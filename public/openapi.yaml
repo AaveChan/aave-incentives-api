@@ -45,8 +45,9 @@ paths:
         - $ref: '#/components/parameters/Source'
         - $ref: '#/components/parameters/Type'
         - $ref: '#/components/parameters/Status'
-        - $ref: '#/components/parameters/RewardedTokenAddress'
         - $ref: '#/components/parameters/RewardTokenAddress'
+        - $ref: '#/components/parameters/RewardedTokenAddress'
+        - $ref: '#/components/parameters/InvolvedTokenAddress'
       responses:
         '200':
           description: Successfully retrieved incentives
@@ -165,6 +166,21 @@ components:
           value: 'LIVE,SOON'
           summary: Live and upcoming campaigns
 
+    RewardTokenAddress:
+      name: rewardTokenAddress
+      in: query
+      description: Filter by reward token contract address(es). Supports single value or comma-separated list.
+      schema:
+        type: string
+        pattern: '^0x[a-fA-F0-9]{40}$'
+      examples:
+        single:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+          summary: Single reward token
+        multiple:
+          value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
+          summary: Multiple reward tokens
+
     RewardedTokenAddress:
       name: rewardedTokenAddress
       in: query
@@ -180,20 +196,20 @@ components:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
           summary: Multiple token addresses
 
-    RewardTokenAddress:
-      name: rewardTokenAddress
+    InvolvedTokenAddress:
+      name: involvedTokenAddress
       in: query
-      description: Filter by reward token contract address(es). Supports single value or comma-separated list.
+      description: Filter by involved token contract address(es). Supports single value or comma-separated list.
       schema:
         type: string
-        pattern: '^0x[a-fA-F0-9]{40}(,0x[a-fA-F0-9]{40})*$'
+        pattern: '^0x[a-fA-F0-9]{40}$'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
-          summary: Single reward token
+          summary: Single token address
         multiple:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2,0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
-          summary: Multiple reward tokens
+          summary: Multiple token addresses
 
   schemas:
     ApiResponse:
@@ -272,7 +288,8 @@ components:
       required:
         - name
         - chainId
-        - rewardedTokens
+        - rewardedToken
+        - involvedTokens
         - type
         - source
         - status
@@ -281,14 +298,16 @@ components:
       properties:
         id:
           type: string
-          description: Unique identifier (based on chainId-rewardedTokens-rewardTokenAddress|point.name)
+          description: Unique identifier (based on chainId-involvedTokens-rewardTokenAddress|point.name)
         name:
           type: string
           example: 'Supply WETH on Ethereum Core'
         chainId:
           type: integer
           example: 1
-        rewardedTokens:
+        rewardedToken:
+          $ref: '#/components/schemas/Token'
+        involvedTokens:
           type: array
           minItems: 1
           items:
