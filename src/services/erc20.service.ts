@@ -2,12 +2,13 @@ import { Address, erc20Abi } from 'viem';
 
 import { getViemClient } from '@/clients/viem.js';
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
+import { normalizeAddress } from '@/lib/address/address.js';
 import { withCache } from '@/lib/utils/cache.js';
 
 export class ERC20Service {
   getTotalSupply = withCache(
     this._getTotalSupply.bind(this),
-    ({ chainId, tokenAddress }) => `totalSupply:${chainId}:${tokenAddress.toLowerCase()}`,
+    ({ chainId, tokenAddress }) => `totalSupply:${chainId}:${normalizeAddress(tokenAddress)}`,
     CACHE_TTLS.TOTAL_SUPPLY,
   );
 

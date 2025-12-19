@@ -1,3 +1,5 @@
+import { normalizeAddress } from '@/lib/address/address.js';
+
 import { ProgramPointIncentives } from '../types.js';
 import { pointPrograms, programPointIncentives } from './data.js';
 
@@ -19,7 +21,7 @@ function validateNoDuplicates(programPointIncentives: ProgramPointIncentives): v
     for (const incentive of pointIncentives) {
       for (const rewardedTokenAddress of incentive.rewardedTokenAddresses) {
         const chainId = incentive.chainId;
-        const key = `${programId}:${chainId}:${rewardedTokenAddress.toLowerCase()}`;
+        const key = `${programId}:${chainId}:${normalizeAddress(rewardedTokenAddress)}`;
 
         if (seen.has(key)) {
           duplicates.push({

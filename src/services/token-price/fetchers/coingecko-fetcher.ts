@@ -1,12 +1,19 @@
 import { Address } from 'viem';
 import { arbitrum, avalanche, base, mainnet, polygon, sonic } from 'viem/chains';
 
+import { Brand } from '@/lib/utils/brand-type.js';
 import { Token } from '@/types/index.js';
 
 import { TokenPriceFetcherBase } from '../token-price-fetcher-base.js';
 
+export type NormalizedCoingeckoTokenAddress = Brand<Address, 'NormalizedCoingeckoTokenAddress'>;
+
+export const normalizeAddress = (address: Address): NormalizedCoingeckoTokenAddress => {
+  return address.toLowerCase() as NormalizedCoingeckoTokenAddress;
+};
+
 type CoingeckoTokenPrice = {
-  [address: Address]: {
+  [address: NormalizedCoingeckoTokenAddress]: {
     usd: number | undefined;
   };
 };
@@ -80,7 +87,7 @@ export class CoingeckoTokenPriceFetcher extends TokenPriceFetcherBase {
       return null;
     }
 
-    const price = coingeckoTokenPrice[tokenAddress.toLowerCase() as Address];
+    const price = coingeckoTokenPrice[normalizeAddress(tokenAddress)];
 
     if (!price) {
       return null;

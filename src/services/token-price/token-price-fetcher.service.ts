@@ -4,6 +4,7 @@ import { Address } from 'viem';
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { GHO } from '@/constants/tokens/index.js';
+import { normalizeAddress } from '@/lib/address/address.js';
 import { compareTokens, tokenToString } from '@/lib/token/token.js';
 import { withCache } from '@/lib/utils/cache.js';
 import { Token } from '@/types/index.js';
@@ -34,7 +35,7 @@ export class TokenPriceFetcherService {
 
   private readonly getTokenPriceCached = withCache(
     this._getTokenPrice.bind(this),
-    ({ token }) => `tokenPrice:${token.chainId}:${token.address.toLowerCase()}`, // we could also just use symbol (but address + chainId is safer/more accurate)
+    ({ token }) => `tokenPrice:${token.chainId}:${normalizeAddress(token.address)}`, // we could also just use symbol (but address + chainId is safer/more accurate)
     CACHE_TTLS.TOKEN_PRICE,
   );
 
