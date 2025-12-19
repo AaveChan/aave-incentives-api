@@ -104,6 +104,83 @@ paths:
                       OnchainProvider: true
                       ExternalPointsProvider: true
 
+  /wrapper-token-map:
+    get:
+      tags:
+        - Wrapper Tokens
+      summary: Get wrapper tokens mapping
+      description: |
+        Returns the full mapping of wrapper token addresses to the token addresses
+        that users effectively receive when claiming rewards.
+
+        Wrapper tokens are an internal abstraction and are not intended to be displayed
+        directly to users. This endpoint allows clients to resolve wrapper tokens to
+        user-facing tokens (aTokens or underlying tokens) for correct display of names,
+        symbols, and icons.
+
+        This endpoint is intended for clients that prefer to cache the full resolution
+        map and perform token resolution locally.
+      operationId: getWrapperTokenMap
+      responses:
+        '200':
+          description: Wrapper token map retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: string
+                  pattern: '^0x[a-fA-F0-9]{40}$'
+              example:
+                '0xA74CaB633214C16808Eb0b6F499C98036b227B8a': '0xc139190f447e929f090edeb554d95abb8b18ac1c'
+                '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019': '0x0C0d01AbF3e6aDfcA0989eBbA9d6e85dD58EaB1E'
+
+  /wrapper-token-resolution:
+    get:
+      tags:
+        - Wrapper Tokens
+      summary: Resolve wrapper token
+      description: |
+        Incentives campaigns may use wrapper tokens instead of directly distributing
+        the underlying token or aToken.
+
+        When a user claims a wrapper token reward, the wrapper is burned and one of the
+        following actions is performed:
+          - If the wrapper represents an aToken, the corresponding aToken is transferred
+            to the user.
+          - If the wrapper represents an underlying token, the underlying token is withdrawn
+            from the pool and transferred to the user.
+
+        This endpoint resolves a wrapper token address to the token address that the user
+        effectively receives when claiming rewards.
+
+        If the provided address is not a known wrapper token, the endpoint returns null,
+        allowing clients to safely call this endpoint for any token.
+      operationId: getWrapperTokenResolution
+      parameters:
+        - name: wrapperTokenAddress
+          in: query
+          required: true
+          description: The wrapper token address to resolve.
+          schema:
+            type: string
+            pattern: '^0x[a-fA-F0-9]{40}$'
+          example: '0xA74CaB633214C16808Eb0b6F499C98036b227B8a'
+      responses:
+        '200':
+          description: Wrapper token resolution retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wrapperTokenAddress:
+                    type: string
+                    pattern: '^0x[a-fA-F0-9]{40}$'
+                    nullable: true
+              example:
+                resolvedAddress: '0xc139190f447e929f090edeb554d95abb8b18ac1c'
+
 components:
   parameters:
     ChainId:
