@@ -83,7 +83,7 @@ describe('ExternalPointsProvider - mapPointIncentiveToIncentives', () => {
 
     expect(rawPointIncentive.type).toBe(IncentiveType.POINT);
 
-    expect(rawPointIncentive.rewardedTokens[0]).toEqual(mockToken);
+    expect(rawPointIncentive.rewardedToken).toEqual(mockToken);
 
     expect(rawPointIncentive.pointValue).toBe(10);
 

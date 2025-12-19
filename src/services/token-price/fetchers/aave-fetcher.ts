@@ -1,6 +1,7 @@
 import { formatUnits } from 'viem';
 
 import { getViemClient } from '@/clients/viem.js';
+import { createLogger } from '@/config/logger.js';
 import { uiPoolDataProviderAbi } from '@/constants/abis/index.js';
 import { getAaveInstancesBookByChainId } from '@/lib/aave/aave-tokens.js';
 import { Token } from '@/types/index.js';
@@ -8,6 +9,8 @@ import { Token } from '@/types/index.js';
 import { TokenPriceFetcherBase } from '../token-price-fetcher-base.js';
 
 export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
+  logger = createLogger('AaveTokenPriceFetcher');
+
   constructor() {
     super('Aave');
   }
@@ -21,13 +24,21 @@ export class AaveTokenPriceFetcher extends TokenPriceFetcherBase {
       const poolDataProvider = aaveInstance.UI_POOL_DATA_PROVIDER;
       const poolAddressesProvider = aaveInstance.POOL_ADDRESSES_PROVIDER;
 
-      const uiPoolData = await client.readContract({
-        address: poolDataProvider,
-        abi: uiPoolDataProviderAbi,
-        functionName: 'getReservesData',
-        args: [poolAddressesProvider],
-        blockNumber,
-      });
+      let uiPoolData;
+      try {
+        uiPoolData = await client.readContract({
+          address: poolDataProvider,
+          abi: uiPoolDataProviderAbi,
+          functionName: 'getReservesData',
+          args: [poolAddressesProvider],
+          blockNumber,
+        });
+      } catch (e) {
+        this.logger.error('Failed to read contract data, continuing to next instance');
+        this.logger.error(e);
+        continue;
+      }
+
       const assetsData = uiPoolData[0];
       const marketData = uiPoolData[1];
 

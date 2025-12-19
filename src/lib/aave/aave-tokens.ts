@@ -1,25 +1,4 @@
-import {
-  AaveSafetyModule,
-  AaveV3Arbitrum,
-  AaveV3Avalanche,
-  AaveV3Base,
-  AaveV3BNB,
-  AaveV3Celo,
-  AaveV3Ethereum,
-  AaveV3EthereumEtherFi,
-  AaveV3EthereumHorizon,
-  AaveV3EthereumLido,
-  AaveV3Gnosis,
-  AaveV3InkWhitelabel,
-  AaveV3Linea,
-  AaveV3Metis,
-  AaveV3Optimism,
-  AaveV3Plasma,
-  AaveV3Polygon,
-  AaveV3Scroll,
-  AaveV3Sonic,
-  AaveV3ZkSync,
-} from '@bgd-labs/aave-address-book';
+import { AaveSafetyModule, AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, zeroAddress } from 'viem';
 import { ink } from 'viem/chains';
 
@@ -27,6 +6,7 @@ import { createLogger } from '@/config/logger.js';
 import { Token } from '@/types/index.js';
 
 import { getChain } from '../utils/chains.js';
+import { aaveInstanceEntries, AaveInstanceType } from './aave-instances.js';
 
 export type BookType = {
   decimals: number;
@@ -50,13 +30,6 @@ export enum AaveTokenType {
   NOT_LISTED = 'NOT_LISTED',
 }
 
-export enum AaveInstanceType {
-  CORE = 'Core',
-  PRIME = 'Prime',
-  ETHERFI = 'EtherFi',
-  HORIZON_RWA = 'Horizon RWA',
-}
-
 export type AaveTokenInfo = Token & {
   type: AaveTokenType;
   book: BookType;
@@ -64,28 +37,6 @@ export type AaveTokenInfo = Token & {
   instanceType: AaveInstanceType | null;
   underlyingTokenAddress: Address;
 };
-
-export const AaveInstanceEntries = {
-  AaveV3Arbitrum: AaveV3Arbitrum,
-  AaveV3Avalanche: AaveV3Avalanche,
-  AaveV3Base: AaveV3Base,
-  AaveV3BNB: AaveV3BNB,
-  AaveV3Celo: AaveV3Celo,
-  AaveV3Ethereum: AaveV3Ethereum,
-  AaveV3EthereumEtherFi: AaveV3EthereumEtherFi,
-  AaveV3EthereumLido: AaveV3EthereumLido,
-  AaveV3Gnosis: AaveV3Gnosis,
-  AaveV3InkWhitelabel: AaveV3InkWhitelabel,
-  AaveV3Linea: AaveV3Linea,
-  AaveV3Metis: AaveV3Metis,
-  AaveV3Optimism: AaveV3Optimism,
-  AaveV3Plasma: AaveV3Plasma,
-  AaveV3Polygon: AaveV3Polygon,
-  AaveV3Scroll: AaveV3Scroll,
-  AaveV3Sonic: AaveV3Sonic,
-  AaveV3ZkSync: AaveV3ZkSync,
-  AaveV3EthereumHorizon: AaveV3EthereumHorizon,
-} as const;
 
 const safetyModuleTokens: Address[] = [
   AaveSafetyModule.STK_GHO,
@@ -96,16 +47,16 @@ const safetyModuleTokens: Address[] = [
 const abpt = '0x41A08648C3766F9F9d85598fF102a08f4ef84F84';
 const twentywstETHEightyAAVE = '0x3de27EFa2F1AA663Ae5D458857e731c129069F29';
 
-export type AaveInstanceName = keyof typeof AaveInstanceEntries;
+export type AaveInstanceName = keyof typeof aaveInstanceEntries;
 
-export type AaveInstanceBook = (typeof AaveInstanceEntries)[AaveInstanceName];
+export type AaveInstanceBook = (typeof aaveInstanceEntries)[AaveInstanceName];
 
-const AllAddressBooksAssets = Object.fromEntries(
-  Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, { ...instance.ASSETS }]),
+const allAddressBooksAssets = Object.fromEntries(
+  Object.entries(aaveInstanceEntries).map(([key, instance]) => [key, { ...instance.ASSETS }]),
 );
 
-const AllAddressBooksChainIds = Object.fromEntries(
-  Object.entries(AaveInstanceEntries).map(([key, instance]) => [key, instance.CHAIN_ID]),
+const allAddressBooksChainIds = Object.fromEntries(
+  Object.entries(aaveInstanceEntries).map(([key, instance]) => [key, instance.CHAIN_ID]),
 );
 
 export const getAaveToken = ({
@@ -241,8 +192,8 @@ export const getAaveTokenAllData = ({
     }
   }
 
-  for (const [addressBookKey, assets] of Object.entries(AllAddressBooksAssets)) {
-    const chainIdOfBook = AllAddressBooksChainIds[addressBookKey];
+  for (const [addressBookKey, assets] of Object.entries(allAddressBooksAssets)) {
+    const chainIdOfBook = allAddressBooksChainIds[addressBookKey];
 
     // If the chainId or instanceName don't match, skip this book
     if (chainIdOfBook !== chainId || (instanceName && addressBookKey !== instanceName)) {
@@ -330,12 +281,12 @@ export const getAaveTokenAllData = ({
 };
 
 export const getAaveInstanceBook = (aaveInstanceName: AaveInstanceName) => {
-  return AaveInstanceEntries[aaveInstanceName];
+  return aaveInstanceEntries[aaveInstanceName];
 };
 
 export const getAaveInstancesBookByChainId = (chainId: number) => {
   const instances: AaveInstanceBook[] = [];
-  for (const instance of Object.values(AaveInstanceEntries)) {
+  for (const instance of Object.values(aaveInstanceEntries)) {
     if (instance.CHAIN_ID === chainId) {
       instances.push(instance);
     }

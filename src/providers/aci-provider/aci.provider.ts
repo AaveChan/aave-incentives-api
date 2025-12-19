@@ -51,16 +51,17 @@ export class ACIProvider extends BaseIncentiveProvider {
 
       const description = action.info.wholeDescriptionString;
 
-      const rawRewardedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
-      let rewardedTokens: NonEmptyTokens;
+      const rawInvolvedTokens = action.actionTokens.map(this.aciInfraTokenToIncentiveToken);
+      let involvedTokens: NonEmptyTokens;
       try {
-        rewardedTokens = toNonEmpty(rawRewardedTokens);
+        involvedTokens = toNonEmpty(rawInvolvedTokens);
       } catch {
         this.logger.error(
           `No valid rewarded tokens for action ${action.displayName} on chain ${action.chainId}`,
         );
         continue;
       }
+      const rewardedToken = involvedTokens[0];
 
       const rewardToken = this.aciInfraTokenToIncentiveToken(action.rewardToken);
 
@@ -71,7 +72,8 @@ export class ACIProvider extends BaseIncentiveProvider {
         chainId: action.chainId,
         type: this.incentiveType,
         source: this.incentiveSource,
-        rewardedTokens,
+        rewardedToken,
+        involvedTokens,
         rewardToken: rewardToken,
         currentApr: action.apr,
         currentCampaignConfig,
