@@ -11,6 +11,7 @@ import {
 import { Address } from 'viem';
 
 import { BookType } from '@/lib/aave/aave-tokens.js';
+import { normalizeAddress, NormalizedAddress } from '@/lib/address/address.js';
 
 const aEthUSDtbWrapper: Address = '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0';
 
@@ -81,9 +82,9 @@ export const wrapperTokenMappingRecord: Record<Address, Address> = {
   ),
 };
 
-export const wrapperTokenMapping = new Map<Address, Address>(
+export const wrapperTokenMapping = new Map<NormalizedAddress, NormalizedAddress>(
   Object.entries(wrapperTokenMappingRecord).map(([wrapperAddress, resolvedAddress]) => [
-    wrapperAddress as Address,
-    resolvedAddress,
+    normalizeAddress(wrapperAddress as Address),
+    normalizeAddress(resolvedAddress),
   ]),
 );

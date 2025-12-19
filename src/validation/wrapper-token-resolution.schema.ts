@@ -4,7 +4,7 @@ import { address } from './parsers.js';
 
 export const ResolveWrapperTokenQuerySchema = z
   .object({
-    wrapperToken: address,
+    wrapperTokenAddress: address,
   })
   .strict();
 
