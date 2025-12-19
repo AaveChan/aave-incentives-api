@@ -64,9 +64,11 @@ export const GetIncentivesQuerySchema = z
 
     status: enumList(Status).optional(),
 
+    rewardTokenAddress: addressesList.optional(),
+
     rewardedTokenAddress: addressesList.optional(),
 
-    rewardTokenAddress: addressesList.optional(),
+    involvedTokenAddress: addressesList.optional(),
   })
   .strict();
 

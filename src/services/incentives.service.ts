@@ -43,7 +43,7 @@ export class IncentivesService {
       const id = this.generateIncentiveId({
         source: incentive.source,
         chainId: incentive.chainId,
-        rewardedTokenAddresses: incentive.involvedTokens.map((t) => t.address),
+        involvedTokensAddresses: incentive.involvedTokens.map((t) => t.address),
         reward:
           incentive.type === IncentiveType.TOKEN
             ? incentive.rewardToken.address
@@ -104,15 +104,15 @@ export class IncentivesService {
   private generateIncentiveId({
     source,
     chainId,
-    rewardedTokenAddresses,
+    involvedTokensAddresses,
     reward,
   }: {
     source: IncentiveSource;
     chainId: number;
-    rewardedTokenAddresses: Address[];
+    involvedTokensAddresses: Address[];
     reward: Address | string; // rewardToken or point name
   }): string {
-    const normalizedRewarded = rewardedTokenAddresses.join('-').toLowerCase().replace('0x', '');
+    const normalizedRewarded = involvedTokensAddresses.join('-').toLowerCase().replace('0x', '');
     const normalizedReward = reward.toLowerCase().replace('0x', '');
 
     const uniqueString = `${source}:${chainId}:${normalizedRewarded}:${normalizedReward}`;
@@ -125,18 +125,6 @@ export class IncentivesService {
   private applyFilters(incentives: Incentive[], filters: FetchOptions): Incentive[] {
     let incentivesFiltered = [...incentives];
 
-    // Rewarded token addresses filter
-    if (filters.rewardedTokenAddress !== undefined) {
-      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
-        address.toLowerCase(),
-      );
-      incentivesFiltered = incentivesFiltered.filter((i) =>
-        i.involvedTokens.some((t) =>
-          rewardedTokenAddressesNormalized.includes(t.address.toLowerCase()),
-        ),
-      );
-    }
-
     // Reward token addresses filter
     if (filters.rewardTokenAddress !== undefined) {
       const rewardedTokenAddressesNormalized = filters.rewardTokenAddress.map((address) =>
@@ -146,6 +134,28 @@ export class IncentivesService {
         (i) =>
           i.type === IncentiveType.TOKEN &&
           rewardedTokenAddressesNormalized.includes(i.rewardToken.address.toLowerCase()),
+      );
+    }
+
+    // Rewarded token addresses filter
+    if (filters.rewardedTokenAddress !== undefined) {
+      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter((i) =>
+        rewardedTokenAddressesNormalized.includes(i.rewardedToken.address.toLowerCase()),
+      );
+    }
+
+    // Involved token addresses filter
+    if (filters.involvedTokenAddress !== undefined) {
+      const involvedTokenAddressesNormalized = filters.involvedTokenAddress.map((address) =>
+        address.toLowerCase(),
+      );
+      incentivesFiltered = incentivesFiltered.filter((i) =>
+        i.involvedTokens.some((t) =>
+          involvedTokenAddressesNormalized.includes(t.address.toLowerCase()),
+        ),
       );
     }
 
