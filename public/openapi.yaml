@@ -123,17 +123,21 @@ paths:
       operationId: getWrapperTokenMap
       responses:
         '200':
-          description: Wrapper token map retrieved successfully
+          description: Wrapper tokens map retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties:
-                  type: string
-                  pattern: '^0x[a-fA-F0-9]{40}$'
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/EthereumAddress'
               example:
-                '0xA74CaB633214C16808Eb0b6F499C98036b227B8a': '0xc139190f447e929f090edeb554d95abb8b18ac1c'
-                '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019': '0x0C0d01AbF3e6aDfcA0989eBbA9d6e85dD58EaB1E'
+                '1':
+                  '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0': '0xEc4ef66D4fCeEba34aBB4dE69dB391Bc5476ccc8'
+                  '0x3a4de44B29995a3D8Cd02d46243E1563E55bCc8b': '0x4F5923Fc5FD4a93352581b38B7cD26943012DECF'
+                '8453':
+                  '0x917770964387999bd938e6CA033cfFc0A5798757': '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42'
 
   /wrapper-token-resolution:
     get:
@@ -158,14 +162,20 @@ paths:
         allowing clients to safely call this endpoint for any token.
       operationId: getWrapperTokenResolution
       parameters:
+        - name: chainId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: The chainId of the wrapper token address to resolve.
+          example: 1
         - name: wrapperTokenAddress
           in: query
           required: true
           description: The wrapper token address to resolve.
           schema:
-            type: string
-            pattern: '^0x[a-fA-F0-9]{40}$'
-          example: '0xA74CaB633214C16808Eb0b6F499C98036b227B8a'
+            $ref: '#/components/schemas/EthereumAddress'
+          example: '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0'
       responses:
         '200':
           description: Wrapper token resolution retrieved successfully
@@ -174,12 +184,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  wrapperTokenAddress:
-                    type: string
-                    pattern: '^0x[a-fA-F0-9]{40}$'
+                  resolvedTokenAddress:
+                    $ref: '#/components/schemas/EthereumAddress'
+                    description: The token address resolved.
                     nullable: true
-              example:
-                resolvedAddress: '0xc139190f447e929f090edeb554d95abb8b18ac1c'
+                    example: '0xEc4ef66D4fCeEba34aBB4dE69dB391Bc5476ccc8'
 
 components:
   parameters:
@@ -289,6 +298,11 @@ components:
           summary: Multiple token addresses
 
   schemas:
+    EthereumAddress:
+      type: string
+      description: Ethereum address
+      pattern: '^0x[a-fA-F0-9]{40}$'
+
     ApiResponse:
       type: object
       required:
