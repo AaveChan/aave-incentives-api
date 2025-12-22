@@ -261,7 +261,7 @@ export class IncentivesService {
     }
 
     // Wrapper tokens
-    const tokenBook = wrapperTokenMappingBook[token.address];
+    const tokenBook = wrapperTokenMappingBook[token.chainId]?.[token.address];
     if (tokenBook) {
       token = {
         ...token,
