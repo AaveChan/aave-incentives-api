@@ -3,8 +3,9 @@ import { Address } from 'viem';
 
 import { createLogger } from '@/config/logger.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
-import { tokenWrapperMapping } from '@/constants/wrapper-address.js';
+import { wrapperTokenMappingBook } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { normalizeAddress } from '@/lib/address/address.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import {
   ACIProvider,
@@ -16,9 +17,11 @@ import {
 } from '@/providers/index.js';
 import {
   CampaignConfig,
+  GlobalStatus,
   Incentive,
   IncentiveSource,
   IncentiveType,
+  ProvidersStatus,
   RawIncentive,
   Status,
   Token,
@@ -64,6 +67,34 @@ export class IncentivesService {
     allIncentives = this.sort(allIncentives);
 
     return allIncentives;
+  }
+
+  async getProvidersStatus(): Promise<ProvidersStatus> {
+    const providersStatus: Record<string, boolean> = {};
+
+    await Promise.all(
+      this.providers.map(async (provider) => {
+        try {
+          const healthy = await provider.isHealthy();
+          providersStatus[provider.name] = healthy;
+        } catch {
+          providersStatus[provider.name] = false;
+        }
+      }),
+    );
+
+    const values = Object.values(providersStatus);
+
+    const isHealthy = values.every(Boolean);
+    const isUnhealthy = values.every((v) => !v);
+
+    const globalStatus = isHealthy
+      ? GlobalStatus.HEALTHY
+      : isUnhealthy
+      ? GlobalStatus.DOWN
+      : GlobalStatus.DEGRADED;
+
+    return { status: globalStatus, providersStatus };
   }
 
   async fetchIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
@@ -127,34 +158,28 @@ export class IncentivesService {
 
     // Reward token addresses filter
     if (filters.rewardTokenAddress !== undefined) {
-      const rewardedTokenAddressesNormalized = filters.rewardTokenAddress.map((address) =>
-        address.toLowerCase(),
-      );
+      const rewardedTokenAddressesNormalized = filters.rewardTokenAddress.map(normalizeAddress);
       incentivesFiltered = incentivesFiltered.filter(
         (i) =>
           i.type === IncentiveType.TOKEN &&
-          rewardedTokenAddressesNormalized.includes(i.rewardToken.address.toLowerCase()),
+          rewardedTokenAddressesNormalized.includes(normalizeAddress(i.rewardToken.address)),
       );
     }
 
     // Rewarded token addresses filter
     if (filters.rewardedTokenAddress !== undefined) {
-      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map((address) =>
-        address.toLowerCase(),
-      );
+      const rewardedTokenAddressesNormalized = filters.rewardedTokenAddress.map(normalizeAddress);
       incentivesFiltered = incentivesFiltered.filter((i) =>
-        rewardedTokenAddressesNormalized.includes(i.rewardedToken.address.toLowerCase()),
+        rewardedTokenAddressesNormalized.includes(normalizeAddress(i.rewardedToken.address)),
       );
     }
 
     // Involved token addresses filter
     if (filters.involvedTokenAddress !== undefined) {
-      const involvedTokenAddressesNormalized = filters.involvedTokenAddress.map((address) =>
-        address.toLowerCase(),
-      );
+      const involvedTokenAddressesNormalized = filters.involvedTokenAddress.map(normalizeAddress);
       incentivesFiltered = incentivesFiltered.filter((i) =>
         i.involvedTokens.some((t) =>
-          involvedTokenAddressesNormalized.includes(t.address.toLowerCase()),
+          involvedTokenAddressesNormalized.includes(normalizeAddress(t.address)),
         ),
       );
     }
@@ -236,7 +261,7 @@ export class IncentivesService {
     }
 
     // Wrapper tokens
-    const tokenBook = tokenWrapperMapping[token.address];
+    const tokenBook = wrapperTokenMappingBook[token.chainId]?.[token.address];
     if (tokenBook) {
       token = {
         ...token,
@@ -259,24 +284,6 @@ export class IncentivesService {
     }
 
     return token;
-  }
-
-  async getHealthStatus(): Promise<Partial<Record<IncentiveSource, boolean>>> {
-    const healthChecks = await Promise.allSettled(
-      this.providers.map(async (provider) => ({
-        source: provider.incentiveSource,
-        healthy: await provider.isHealthy(),
-      })),
-    );
-
-    const status: Partial<Record<IncentiveSource, boolean>> = {};
-    healthChecks.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        status[result.value.source] = result.value.healthy;
-      }
-    });
-
-    return status;
   }
 
   private gatherEqualIncentives = (incentives: Incentive[]): Incentive[] => {

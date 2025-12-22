@@ -1,15 +1,11 @@
 import { Router } from 'express';
 
-import { getStatus } from '@/lib/status/status.js';
+import { IncentivesController } from '@/controllers/controller.js';
 
-export function createStatusDataRoute() {
-  const router = Router();
+const router = Router();
 
-  router.get('/', async (_req, res) => {
-    const status = await getStatus();
+const controller = new IncentivesController();
 
-    res.json(status);
-  });
+router.get('/', controller.getProvidersStatus.bind(controller));
 
-  return router;
-}
+export { router };

@@ -43,13 +43,10 @@ export class IncentivesController {
     }
   }
 
-  async getHealthStatus(_req: Request, res: Response) {
+  async getProvidersStatus(_req: Request, res: Response) {
     try {
-      const healthStatus = await this.incentivesService.getHealthStatus();
-      res.json({
-        success: true,
-        data: { providers: healthStatus },
-      });
+      const healthStatus = await this.incentivesService.getProvidersStatus();
+      return res.json(healthStatus);
     } catch {
       res.status(500).json({
         success: false,

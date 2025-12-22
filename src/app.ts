@@ -5,47 +5,57 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger.js';
-import { createAciAddressesRoute } from './routes/aci-addresses.route.js';
+import { router as aciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
-import { createStatusDataRoute } from './routes/status-data.route.js';
+import { router as providersStatusRoute } from './routes/status-data.route.js';
+import { router as wrapperTokensRoute } from './routes/wrapper-tokens.js';
 import { ApiErrorResponse } from './types/index.js';
 
-const PORT: number = 5050;
+// -----------------------------------------------------------------------------
+// Config
+// -----------------------------------------------------------------------------
+
+const PORT = 5050;
 
 const logger = createLogger('Server');
-
 const app: Application = express();
+
+// -----------------------------------------------------------------------------
+// Middleware
+// -----------------------------------------------------------------------------
 
 app.use(cors());
 
-// Serve static files from the 'public' directory
+// Static files
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 app.use(express.static(path.resolve(__dirname, '../public')));
 
-// Not mandatory (cause index.html is served by default), but explicit route for clarity or if needed later
+// Explicit root route (index.html is already served by default)
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// --- Routes ---
+// -----------------------------------------------------------------------------
+// API Routes
+// -----------------------------------------------------------------------------
 
-// Incentives
-app.use('/incentives', incentivesRoutes);
-
-// Ping
 app.use('/ping', pingRoute);
+app.use('/incentives', incentivesRoutes);
+app.use('/aci-addresses', aciAddressesRoute);
+app.use('/status-data', providersStatusRoute);
 
-// ACI Addresses
-app.use('/aci-addresses', createAciAddressesRoute());
+// Wrapper tokens
+app.use('/wrapper-tokens', wrapperTokensRoute);
 
-app.use('/status-data', createStatusDataRoute());
+// -----------------------------------------------------------------------------
+// Pages
+// -----------------------------------------------------------------------------
 
-// --- Pages ---
-
-// Docs page
+// API Docs
 app.use(
   '/docs',
   apiReference({
@@ -62,6 +72,10 @@ app.use(
 // Status page
 app.use('/status', createStatusRoute());
 
+// -----------------------------------------------------------------------------
+// Fallback / Errors
+// -----------------------------------------------------------------------------
+
 const apiErrorResponse: ApiErrorResponse = {
   success: false,
   error: {
@@ -70,11 +84,15 @@ const apiErrorResponse: ApiErrorResponse = {
   },
 };
 
-app.use('/', (_req: Request, res: Response): void => {
-  res.status(404).send(apiErrorResponse);
+app.use((_req: Request, res: Response): void => {
+  res.status(404).json(apiErrorResponse);
 });
 
-app.listen(PORT, (): void => {
+// -----------------------------------------------------------------------------
+// Bootstrap
+// -----------------------------------------------------------------------------
+
+app.listen(PORT, () => {
   logger.info(`Server is running on ${PORT}...`);
 });
 

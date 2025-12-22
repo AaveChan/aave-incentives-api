@@ -28,6 +28,8 @@ tags:
     description: Endpoints for fetching and filtering incentives
   - name: Status
     description: API health and monitoring
+  - name: Wrapper Tokens
+    description: Endpoints for resolving wrapper tokens
 
 paths:
   /incentives:
@@ -104,6 +106,94 @@ paths:
                       OnchainProvider: true
                       ExternalPointsProvider: true
 
+  /wrapper-tokens:
+    get:
+      tags:
+        - Wrapper Tokens
+      summary: Get wrapper tokens mapping
+      description: |
+        Returns the full mapping of wrapper token addresses to the token addresses
+        that users effectively receive when claiming rewards.
+
+        Wrapper tokens are an internal abstraction and are not intended to be displayed
+        directly to users. This endpoint allows clients to resolve wrapper tokens to
+        user-facing tokens (aTokens or underlying tokens) for correct display of names,
+        symbols, and icons.
+
+        This endpoint is intended for clients that prefer to cache the full resolution
+        map and perform token resolution locally.
+      operationId: getWrapperTokenMap
+      responses:
+        '200':
+          description: Wrapper tokens map retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    $ref: '#/components/schemas/EthereumAddress'
+              example:
+                '1':
+                  '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0': '0xEc4ef66D4fCeEba34aBB4dE69dB391Bc5476ccc8'
+                  '0x3a4de44B29995a3D8Cd02d46243E1563E55bCc8b': '0x4F5923Fc5FD4a93352581b38B7cD26943012DECF'
+                '8453':
+                  '0x917770964387999bd938e6CA033cfFc0A5798757': '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42'
+
+  /wrapper-tokens/{wrapperTokenAddress}/resolved-token:
+    get:
+      tags:
+        - Wrapper Tokens
+      summary: Get wrapper token resolved
+      description: |
+        Incentives campaigns may use wrapper tokens instead of directly distributing
+        the underlying token or aToken.
+
+        When a user claims a wrapper token reward, the wrapper is burned and one of the
+        following actions is performed:
+          - If the wrapper represents an aToken, the corresponding aToken is transferred
+            to the user.
+          - If the wrapper represents an underlying token, the underlying token is withdrawn
+            from the pool and transferred to the user.
+
+        This endpoint resolves a wrapper token address to the token address that the user
+        effectively receives when claiming rewards.
+
+        If the provided address is not a known wrapper token, the endpoint returns null,
+        allowing clients to safely call this endpoint for any token.
+      operationId: getWrapperTokenResolution
+      parameters:
+        - name: wrapperTokenAddress
+          in: path
+          required: true
+          description: The wrapper token address to resolve.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EthereumAddress'
+          example: '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0'
+        - name: chainId
+          in: query
+          required: true
+          schema:
+            type: integer
+          description: The chainId of the wrapper token address to resolve.
+          example: 1
+      responses:
+        '200':
+          description: Wrapper token resolution retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resolvedTokenAddress:
+                    allOf:
+                      - $ref: '#/components/schemas/EthereumAddress'
+                    description: The token address resolved.
+                    nullable: true
+                    example: '0xEc4ef66D4fCeEba34aBB4dE69dB391Bc5476ccc8'
+
 components:
   parameters:
     ChainId:
@@ -171,8 +261,7 @@ components:
       in: query
       description: Filter by reward token contract address(es). Supports single value or comma-separated list.
       schema:
-        type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -186,8 +275,7 @@ components:
       in: query
       description: Filter by rewarded token contract address(es). Supports single value or comma-separated list.
       schema:
-        type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -202,7 +290,7 @@ components:
       description: Filter by involved token contract address(es). Supports single value or comma-separated list.
       schema:
         type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -212,6 +300,10 @@ components:
           summary: Multiple token addresses
 
   schemas:
+    EthereumAddress:
+      type: string
+      pattern: '^0x[a-fA-F0-9]{40}$'
+
     ApiResponse:
       type: object
       required:
@@ -430,8 +522,8 @@ components:
           type: string
           example: 'WETH'
         address:
-          type: string
-          pattern: '^0x[a-fA-F0-9]{40}$'
+          allOf:
+            - $ref: '#/components/schemas/EthereumAddress'
           example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
         chainId:
           type: integer
@@ -445,8 +537,8 @@ components:
           example: 4250.75
           description: Current price in USD
         priceFeed:
-          type: string
-          pattern: '^0x[a-fA-F0-9]{40}$'
+          allOf:
+            - $ref: '#/components/schemas/EthereumAddress'
           example: '0x5424384B256154046E9667dDFaaa5e550145215e'
           description: Chainlink price feed address
 

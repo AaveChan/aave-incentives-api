@@ -2,12 +2,10 @@ import { Router } from 'express';
 
 import { aciAddressesPerFeeType } from '@/constants/aci-addresses.js';
 
-export function createAciAddressesRoute() {
-  const router = Router();
+const router = Router();
 
-  router.get('/', async (_req, res) => {
-    res.json(aciAddressesPerFeeType);
-  });
+router.get('/', async (_req, res) => {
+  res.json(aciAddressesPerFeeType);
+});
 
-  return router;
-}
+export { router };

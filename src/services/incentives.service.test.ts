@@ -4,11 +4,13 @@ import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { FetchOptions, IncentiveProvider } from '@/providers/index.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import {
+  GlobalStatus,
   Incentive,
   IncentiveSource,
   IncentiveType,
   Point,
   ProviderName,
+  ProvidersStatus,
   RawPointIncentive,
   RawTokenIncentive,
   Status,
@@ -24,7 +26,7 @@ vi.mock('@/constants/price-feeds/index', () => ({
 }));
 
 vi.mock('@/constants/wrapper-address', () => ({
-  tokenWrapperMapping: {
+  wrapperTokenMappingRecord: {
     '0xWrapperToken': { ORACLE: '0xWrapperOracle' },
   },
 }));
@@ -180,20 +182,25 @@ describe('IncentivesService', () => {
     expect(merged[1]!.allCampaignsConfigs).toHaveLength(1);
   });
 
-  test('getHealthStatus() should return provider health map', async () => {
+  test('getProvidersStatus()', async () => {
     const provider1 = new MockProvider([], true);
     const provider2 = new MockProvider([], false);
-    provider2.incentiveSource = IncentiveSource.ACI_MASIV_API;
+    provider2.name = ProviderName.ACI;
 
     const service = new IncentivesService();
     service.providers = [provider1, provider2];
 
-    const result = await service.getHealthStatus();
+    const result = await service.getProvidersStatus();
 
-    expect(result).toEqual({
-      [IncentiveSource.MERKL_API]: true,
-      [IncentiveSource.ACI_MASIV_API]: false,
-    });
+    const expectedResult: ProvidersStatus = {
+      status: GlobalStatus.DEGRADED,
+      providersStatus: {
+        [ProviderName.Merkl]: true,
+        [ProviderName.ACI]: false,
+      },
+    };
+
+    expect(result).toEqual(expectedResult);
   });
 
   test('getIncentives() should run full pipeline (enrich, filter, merge, sort)', async () => {

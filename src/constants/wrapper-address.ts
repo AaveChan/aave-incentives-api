@@ -9,8 +9,15 @@ import {
   AaveV3Sonic,
 } from '@bgd-labs/aave-address-book';
 import { Address } from 'viem';
+import { arbitrum, base, linea, mainnet, plasma, scroll, sonic } from 'viem/chains';
 
 import { BookType } from '@/lib/aave/aave-tokens.js';
+import { normalizeAddress, NormalizedAddress } from '@/lib/address/address.js';
+import { mergeByKey } from '@/lib/utils/object.js';
+
+type WrapperMapping<K extends PropertyKey, V> = Record<number, Record<K, V>>;
+type WrapperMappingBook = WrapperMapping<Address, BookType>;
+type WrapperMappingAddress = WrapperMapping<Address, Address>;
 
 const aEthUSDtbWrapper: Address = '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0';
 
@@ -29,7 +36,7 @@ const aArbARBWrapper: Address = '0x2c63f9da936624Ac7313b972251D340260A4bF08';
 
 const aLinWeETHWrapper: Address = '0xDcC1bcC6eCD1E63cBA178C289bC1dA9f757a2eF4';
 
-const aETHPYUSDWrapper: Address = '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019';
+const aEthPYUSDWrapper: Address = '0x0f1eb8D5568E9C1ee72E6dE7B5a9e2837A530019';
 
 const EURCWrapper: Address = '0x82a5530942263645dD3B8101740c2a0Ac30c7919'; // withdraw wrapper
 
@@ -40,27 +47,100 @@ const USDCSonicWrapper: Address = '0xb542b71Bf6A5e907d7A1B34553b47a25cab47F3e'; 
 const USDtbMainnetWrapper: Address = '0xA74CaB633214C16808Eb0b6F499C98036b227B8a'; // withdraw wrapper
 
 // wrapper aToken || withdraw wrapper token address => book
-export const tokenWrapperMapping: Record<Address, BookType> = {
-  [aEthUSDtbWrapper]: AaveV3Ethereum.ASSETS.USDtb,
-  [USDtbMainnetWrapper]: AaveV3Ethereum.ASSETS.USDtb,
-  [aEthUSDeWrapper]: AaveV3Ethereum.ASSETS.USDe,
-  [aScrSCRWrapper]: AaveV3Scroll.ASSETS.SCR,
-  [aHorRwaRLUSDWrapper]: AaveV3EthereumHorizon.ASSETS.RLUSD,
-  [aHorRwaUSDCWrapper]: AaveV3EthereumHorizon.ASSETS.USDC,
-  [aEthRLUSDWrapper]: AaveV3Ethereum.ASSETS.RLUSD,
-  [aArbARBWrapper]: AaveV3Arbitrum.ASSETS.ARB,
-  [aLinWeETHWrapper]: AaveV3Linea.ASSETS.weETH,
-  [aEthUSDeWrapperPlasma]: AaveV3Plasma.ASSETS.USDe,
-  [aETHPYUSDWrapper]: AaveV3Ethereum.ASSETS.PYUSD,
-  [EURCWrapper]: AaveV3Ethereum.ASSETS.EURC,
-  [EURCBaseWrapper]: AaveV3Base.ASSETS.EURC,
-  [USDCSonicWrapper]: AaveV3Sonic.ASSETS.USDC,
+export const wrapperATokenMapping: WrapperMappingBook = {
+  [mainnet.id]: {
+    [aEthUSDtbWrapper]: AaveV3Ethereum.ASSETS.USDtb,
+    [aEthUSDeWrapper]: AaveV3Ethereum.ASSETS.USDe,
+    [aHorRwaRLUSDWrapper]: AaveV3EthereumHorizon.ASSETS.RLUSD,
+    [aHorRwaUSDCWrapper]: AaveV3EthereumHorizon.ASSETS.USDC,
+    [aEthRLUSDWrapper]: AaveV3Ethereum.ASSETS.RLUSD,
+    [aEthPYUSDWrapper]: AaveV3Ethereum.ASSETS.PYUSD,
+  },
+  [scroll.id]: {
+    [aScrSCRWrapper]: AaveV3Scroll.ASSETS.SCR,
+  },
+  [arbitrum.id]: {
+    [aArbARBWrapper]: AaveV3Arbitrum.ASSETS.ARB,
+  },
+  [linea.id]: {
+    [aLinWeETHWrapper]: AaveV3Linea.ASSETS.weETH,
+  },
+  [plasma.id]: {
+    [aEthUSDeWrapperPlasma]: AaveV3Plasma.ASSETS.USDe,
+  },
 };
 
-// wrapper aToken || withdraw wrapper token => aToken from tokenWrapperMapping mapping
-export const mapping: Record<Address, Address> = Object.fromEntries(
-  Object.entries(tokenWrapperMapping).map(([wrapperAddress, book]) => [
-    wrapperAddress,
-    book.A_TOKEN,
-  ]),
+export const wrapperUnderlyingTokenMapping: WrapperMappingBook = {
+  [mainnet.id]: {
+    [EURCWrapper]: AaveV3Ethereum.ASSETS.EURC,
+    [USDtbMainnetWrapper]: AaveV3Ethereum.ASSETS.USDtb,
+  },
+  [base.id]: {
+    [EURCBaseWrapper]: AaveV3Base.ASSETS.EURC,
+  },
+  [sonic.id]: {
+    [USDCSonicWrapper]: AaveV3Sonic.ASSETS.USDC,
+  },
+};
+
+export const wrapperATokenMappingAddress: WrapperMappingAddress = {
+  ...Object.fromEntries(
+    Object.entries(wrapperATokenMapping).map(([chainId, mapping]) => [
+      parseInt(chainId),
+      Object.fromEntries(
+        Object.entries(mapping).map(([wrapperAddress, book]) => [wrapperAddress, book.A_TOKEN]),
+      ),
+    ]),
+  ),
+};
+
+const wrapperUnderlyingTokenMappingAddress: WrapperMappingAddress = {
+  ...Object.fromEntries(
+    Object.entries(wrapperUnderlyingTokenMapping).map(([chainId, mapping]) => [
+      parseInt(chainId),
+      Object.fromEntries(
+        Object.entries(mapping).map(([wrapperAddress, book]) => [wrapperAddress, book.UNDERLYING]),
+      ),
+    ]),
+  ),
+};
+
+export function mergeWrapperMappings<K extends PropertyKey, V>(
+  ...mappings: WrapperMapping<K, V>[]
+): WrapperMapping<K, V> {
+  const result: WrapperMapping<K, V> = {};
+
+  for (const mapping of mappings) {
+    for (const chainId in mapping) {
+      result[chainId] = mergeByKey(
+        (result[chainId] ?? {}) as Record<K, V>,
+        (mapping[chainId] ?? {}) as Record<K, V>,
+      );
+    }
+  }
+
+  return result;
+}
+
+export const wrapperTokenMappingBook: WrapperMappingBook = mergeWrapperMappings(
+  wrapperATokenMapping,
+  wrapperUnderlyingTokenMapping,
 );
+
+export const wrapperTokenMappingAddress: WrapperMappingAddress = mergeWrapperMappings(
+  wrapperATokenMappingAddress,
+  wrapperUnderlyingTokenMappingAddress,
+);
+
+export const wrapperTokenMappingAddressNormalized: WrapperMapping<NormalizedAddress, Address> =
+  Object.fromEntries(
+    Object.entries(wrapperTokenMappingAddress).map(([chainId, mapping]) => [
+      parseInt(chainId),
+      Object.fromEntries(
+        Object.entries(mapping).map(([wrapperAddress, address]) => [
+          normalizeAddress(wrapperAddress as Address),
+          address,
+        ]),
+      ),
+    ]),
+  );
