@@ -10,10 +10,10 @@ export const ResolveWrapperTokenQuerySchema = z
 
 export type ResolveWrapperTokenQuery = z.infer<typeof ResolveWrapperTokenQuerySchema>;
 
-export const ResolveWrapperTokenPathSchema = z
+export const ResolveWrapperTokenParamsSchema = z
   .object({
     wrapperTokenAddress: address,
   })
   .strict();
 
-export type ResolveWrapperTokenPath = z.infer<typeof ResolveWrapperTokenPathSchema>;
+export type ResolveWrapperTokenParams = z.infer<typeof ResolveWrapperTokenParamsSchema>;

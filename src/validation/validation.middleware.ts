@@ -1,22 +1,29 @@
 import { NextFunction, Request, Response } from 'express';
-import z from 'zod';
+import { ZodError, type ZodType } from 'zod';
 
 import { ApiErrorResponse } from '@/types/api.js';
 
-export function validateQuery<S extends z.ZodSchema>(schema: S) {
+type RequestSource = 'query' | 'params' | 'body' | 'headers';
+
+export function validate<T>(
+  source: RequestSource,
+  schema: ZodType<T>,
+  errorMessage = 'Invalid request parameters',
+) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      const queryValidated = schema.parse(req.query);
+      const data = schema.parse(req[source]);
 
-      res.locals.validatedQuery = queryValidated;
+      res.locals.validated ??= {};
+      res.locals.validated[source] = data;
 
       next();
     } catch (error) {
-      if (error instanceof z.ZodError) {
+      if (error instanceof ZodError) {
         const errResponse: ApiErrorResponse = {
           success: false,
           error: {
-            message: 'Invalid query parameters',
+            message: errorMessage,
             code: 'VALIDATION_ERROR',
             details: error.issues.map((err) => ({
               field: err.path.join('.'),
@@ -24,10 +31,19 @@ export function validateQuery<S extends z.ZodSchema>(schema: S) {
             })),
           },
         };
+
         return res.status(400).json(errResponse);
       }
 
       next(error);
     }
   };
+}
+
+export function validateQuery<T>(schema: ZodType<T>) {
+  return validate('query', schema, 'Invalid query parameters');
+}
+
+export function validateParams<T>(schema: ZodType<T>) {
+  return validate('params', schema, 'Invalid path parameters');
 }
