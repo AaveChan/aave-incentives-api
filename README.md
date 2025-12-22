@@ -1,5 +1,6 @@
 <div align="center"> 
   <h1> Aave Incentives API </h1>
+    <p> ➡️ Live on <a href="https://aave-incentives-api.vercel.app">https://aave-incentives-api.vercel.app</a> </p>
 </div>
 
 # Abstract
@@ -23,29 +24,33 @@ cp .example.env .env
 pnpm run dev
 ```
 
-The API will be available at `http://localhost:5050`.
+The API will be available at `http://localhost:3000`
 
-## Endpoints
+## API Docs
 
-```
-GET /incentives
+This API is fully documented using OpenAPI:
 
-Parameters:
-- chainId (optional): number
-- status (optional): PAST, LIVE, SOON
-- incentiveType (optional): ONCHAIN, OFFCHAIN, EXTERNAL
-- rewardType (optional): TOKEN, POINTS
-```
+- 📘 Docs: https://aave-incentives-api.vercel.app/docs
+- 📄 [OpenAPI file](public/openapi.yaml)
+
+## API Overview
+
+The API exposes a REST interface to query Aave incentives data.
+
+- GET /incentives: Retrieve a list of incentives with optional filters for chain ID, status, incentive type, and reward type
+- GET /status-data: Check the health status of the API
+- GET /wrapper-tokens: Retrieve the list of all supported wrapper tokens and their underlying assets
+- GET /wrapper-tokens/:wrapperTokenAddress: Resolve the underlying asset for a given wrapper token address
 
 ## Features
 
-- Express REST API
+- Node.js Express REST API
 - Fetch incentives across multiple sources:
-  - ACI infra incentives
-  - Merkl infra incentives
-  - Onchain incentives
-  - External Points incentives
-- Support all Aave V3 instances.
+  - [ACI infra incentives](https://apps.aavechan.com/merit)
+  - [Merkl infra incentives](https://app.merkl.xyz/)
+  - [Onchain incentives](https://search.onaave.com/?q=DEFAULT_INCENTIVES_CONTROLLER)
+  - [External Points incentives](src/providers/external-points-provider/config/data.ts)
+- Support all Aave V3 instances
 
 ## License
 
