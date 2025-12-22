@@ -10,8 +10,7 @@ import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
 import { router as providersStatusRoute } from './routes/status-data.route.js';
-import { router as wrapperTokenMapRoute } from './routes/wrapper-token-map.js';
-import { router as wrapperTokenResolutionRoute } from './routes/wrapper-token-resolution.js';
+import { router as wrapperTokensRoute } from './routes/wrapper-tokens.js';
 import { ApiErrorResponse } from './types/index.js';
 
 // -----------------------------------------------------------------------------
@@ -50,8 +49,7 @@ app.use('/aci-addresses', aciAddressesRoute);
 app.use('/status-data', providersStatusRoute);
 
 // Wrapper tokens
-app.use('/wrapper-token-map', wrapperTokenMapRoute);
-app.use('/wrapper-token-resolution', wrapperTokenResolutionRoute);
+app.use('/wrapper-tokens', wrapperTokensRoute);
 
 // -----------------------------------------------------------------------------
 // Pages

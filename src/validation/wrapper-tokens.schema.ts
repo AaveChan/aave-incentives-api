@@ -5,8 +5,15 @@ import { address } from './parsers.js';
 export const ResolveWrapperTokenQuerySchema = z
   .object({
     chainId: z.string().transform((val) => parseInt(val)),
-    wrapperTokenAddress: address,
   })
   .strict();
 
 export type ResolveWrapperTokenQuery = z.infer<typeof ResolveWrapperTokenQuerySchema>;
+
+export const ResolveWrapperTokenPathSchema = z
+  .object({
+    wrapperTokenAddress: address,
+  })
+  .strict();
+
+export type ResolveWrapperTokenPath = z.infer<typeof ResolveWrapperTokenPathSchema>;

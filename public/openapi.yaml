@@ -28,6 +28,8 @@ tags:
     description: Endpoints for fetching and filtering incentives
   - name: Status
     description: API health and monitoring
+  - name: Wrapper Tokens
+    description: Endpoints for resolving wrapper tokens
 
 paths:
   /incentives:
@@ -104,7 +106,7 @@ paths:
                       OnchainProvider: true
                       ExternalPointsProvider: true
 
-  /wrapper-token-map:
+  /wrapper-tokens:
     get:
       tags:
         - Wrapper Tokens
@@ -139,7 +141,7 @@ paths:
                 '8453':
                   '0x917770964387999bd938e6CA033cfFc0A5798757': '0x60a3E35Cc302bFA44Cb288Bc5a4F316Fdb1adb42'
 
-  /wrapper-token-resolution:
+  /wrapper-tokens/{wrapperTokenAddress}/resolved-token:
     get:
       tags:
         - Wrapper Tokens
@@ -162,6 +164,14 @@ paths:
         allowing clients to safely call this endpoint for any token.
       operationId: getWrapperTokenResolution
       parameters:
+        - name: wrapperTokenAddress
+          in: path
+          required: true
+          description: The wrapper token address to resolve.
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/EthereumAddress'
+          example: '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0'
         - name: chainId
           in: query
           required: true
@@ -169,14 +179,6 @@ paths:
             type: integer
           description: The chainId of the wrapper token address to resolve.
           example: 1
-        - name: wrapperTokenAddress
-          in: query
-          required: true
-          description: The wrapper token address to resolve.
-          schema:
-            allOf:
-              - $ref: '#/components/schemas/EthereumAddress'
-          example: '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0'
       responses:
         '200':
           description: Wrapper token resolution retrieved successfully
