@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { apiReference } from '@scalar/express-api-reference';
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
@@ -17,7 +19,7 @@ import { ApiErrorResponse } from './types/index.js';
 // Config
 // -----------------------------------------------------------------------------
 
-const PORT = 5050;
+const PORT = process.env.PORT || 3000;
 
 const logger = createLogger('Server');
 const app: Application = express();
