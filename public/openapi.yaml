@@ -174,7 +174,8 @@ paths:
           required: true
           description: The wrapper token address to resolve.
           schema:
-            $ref: '#/components/schemas/EthereumAddress'
+            allOf:
+              - $ref: '#/components/schemas/EthereumAddress'
           example: '0x04EADd7B10ea9a484c60860aea7A7C0AEc09B9F0'
       responses:
         '200':
@@ -185,7 +186,8 @@ paths:
                 type: object
                 properties:
                   resolvedTokenAddress:
-                    $ref: '#/components/schemas/EthereumAddress'
+                    allOf:
+                      - $ref: '#/components/schemas/EthereumAddress'
                     description: The token address resolved.
                     nullable: true
                     example: '0xEc4ef66D4fCeEba34aBB4dE69dB391Bc5476ccc8'
@@ -257,8 +259,7 @@ components:
       in: query
       description: Filter by reward token contract address(es). Supports single value or comma-separated list.
       schema:
-        type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -272,8 +273,7 @@ components:
       in: query
       description: Filter by rewarded token contract address(es). Supports single value or comma-separated list.
       schema:
-        type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -288,7 +288,7 @@ components:
       description: Filter by involved token contract address(es). Supports single value or comma-separated list.
       schema:
         type: string
-        pattern: '^0x[a-fA-F0-9]{40}$'
+        $ref: '#/components/schemas/EthereumAddress'
       examples:
         single:
           value: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
@@ -300,7 +300,6 @@ components:
   schemas:
     EthereumAddress:
       type: string
-      description: Ethereum address
       pattern: '^0x[a-fA-F0-9]{40}$'
 
     ApiResponse:
@@ -521,8 +520,8 @@ components:
           type: string
           example: 'WETH'
         address:
-          type: string
-          pattern: '^0x[a-fA-F0-9]{40}$'
+          allOf:
+            - $ref: '#/components/schemas/EthereumAddress'
           example: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
         chainId:
           type: integer
@@ -536,8 +535,8 @@ components:
           example: 4250.75
           description: Current price in USD
         priceFeed:
-          type: string
-          pattern: '^0x[a-fA-F0-9]{40}$'
+          allOf:
+            - $ref: '#/components/schemas/EthereumAddress'
           example: '0x5424384B256154046E9667dDFaaa5e550145215e'
           description: Chainlink price feed address
 
