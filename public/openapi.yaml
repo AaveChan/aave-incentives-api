@@ -145,7 +145,7 @@ paths:
     get:
       tags:
         - Wrapper Tokens
-      summary: Resolve wrapper token
+      summary: Get wrapper token resolved
       description: |
         Incentives campaigns may use wrapper tokens instead of directly distributing
         the underlying token or aToken.
