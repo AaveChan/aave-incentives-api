@@ -3,6 +3,7 @@ import { ink } from 'viem/chains';
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
+import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { tokenToString } from '@/lib/token/token.js';
 import { uniqueArray } from '@/lib/utils/array.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
@@ -348,7 +349,7 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.apiUrl}`);
+      const response = await fetchWithTimeout(this.apiUrl);
       return response.ok;
     } catch {
       return false;

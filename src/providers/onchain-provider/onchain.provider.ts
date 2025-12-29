@@ -2,6 +2,7 @@ import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
+import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
 import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
 import { AaveInstanceName, AaveTokenType, getAaveToken } from '@/lib/aave/aave-tokens.js';
@@ -289,10 +290,15 @@ export class OnchainProvider extends BaseIncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const incentivesData = await this.aaveUIIncentiveService.getUiIncentivesData(
-        AaveV3Ethereum,
-        mainnet.id,
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), HTTP_CONFIG.HEALTH_CHECK_TIMEOUT_MS),
       );
+
+      const incentivesData = await Promise.race([
+        this.aaveUIIncentiveService.getUiIncentivesData(AaveV3Ethereum, mainnet.id),
+        timeoutPromise,
+      ]);
+
       return incentivesData.length > 0;
     } catch {
       return false;

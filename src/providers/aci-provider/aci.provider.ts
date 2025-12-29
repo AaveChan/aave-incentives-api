@@ -1,4 +1,5 @@
 import { createLogger } from '@/config/logger.js';
+import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
@@ -155,7 +156,7 @@ export class ACIProvider extends BaseIncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.apiUrl}`);
+      const response = await fetchWithTimeout(this.apiUrl);
       return response.ok;
     } catch {
       return false;
