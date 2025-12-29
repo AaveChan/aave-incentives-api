@@ -1,12 +1,14 @@
 import crypto from 'crypto';
 import { Address } from 'viem';
 
+import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
 import { wrapperTokenMappingBook } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { normalizeAddress } from '@/lib/address/address.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
+import { withTimeout } from '@/lib/utils/timeout.js';
 import {
   ACIProvider,
   ExternalPointsProvider,
@@ -115,7 +117,13 @@ export class IncentivesService {
 
     // Fetch from all providers in parallel
     const results = await Promise.allSettled(
-      providersFiltered.map((provider) => provider.getIncentives(fetchOptions)),
+      providersFiltered.map((provider) =>
+        withTimeout(
+          provider.getIncentives(fetchOptions),
+          HTTP_CONFIG.PROVIDER_TIMEOUT_MS,
+          `Provider ${provider.incentiveSource} timeout`,
+        ),
+      ),
     );
 
     results.forEach((result, index) => {
