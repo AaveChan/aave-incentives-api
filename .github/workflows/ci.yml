@@ -22,16 +22,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Format check
-        run: npm run format:check
+        run: pnpm run format:check
         continue-on-error: true
 
   # Security audit
@@ -47,17 +47,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Run security audit
-        run: npm audit --audit-level=high
+        run: pnpm audit --audit-level=high
         continue-on-error: true
 
       - name: Check for outdated dependencies
-        run: npm outdated || true
+        run: pnpm outdated || true
         continue-on-error: true
 
   # Build
@@ -74,13 +74,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
   # Unit tests with coverage
   unit-tests:
@@ -96,13 +96,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Run unit tests
-        run: npm run test:unit:coverage
+        run: pnpm run test:unit:coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -126,13 +126,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm ci
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: pnpm run test:e2e
         env:
           NODE_ENV: test
 
