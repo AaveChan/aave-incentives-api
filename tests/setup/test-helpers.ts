@@ -11,7 +11,7 @@ const logger = createLogger('e2e Tests');
 
 /**
  * Start the test server on a random port
- * @returns The API URL (e.g., http://localhost:3000)
+ * @returns The API URL (e.g., http://localhost:8000)
  */
 export async function startTestServer(): Promise<string> {
   if (server) {
