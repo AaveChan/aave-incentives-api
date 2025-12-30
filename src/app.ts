@@ -19,7 +19,7 @@ import { ApiErrorResponse } from './types/index.js';
 // Config
 // -----------------------------------------------------------------------------
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 const logger = createLogger('Server');
 const app: Application = express();
