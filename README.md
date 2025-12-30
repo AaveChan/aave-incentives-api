@@ -38,7 +38,7 @@ This API is fully documented using OpenAPI:
 The API exposes a REST interface to query Aave incentives data.
 
 - GET /incentives: Retrieve a list of incentives with optional filters for chain ID, status, incentive type, and reward type
-- GET /status-data: Check the health status of the API
+- GET /health: Check the health status of the API
 - GET /wrapper-tokens: Retrieve the list of all supported wrapper tokens and their underlying assets
 - GET /wrapper-tokens/:wrapperTokenAddress: Resolve the underlying asset for a given wrapper token address
 

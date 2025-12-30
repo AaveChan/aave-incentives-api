@@ -26,7 +26,7 @@ servers:
 tags:
   - name: Incentives
     description: Endpoints for fetching and filtering incentives
-  - name: Status
+  - name: Health
     description: API health and monitoring
   - name: Wrapper Tokens
     description: Endpoints for resolving wrapper tokens
@@ -70,16 +70,16 @@ paths:
         '500':
           $ref: '#/components/responses/InternalErrorResponse'
 
-  /status-data:
+  /health:
     get:
       tags:
-        - Status
-      summary: Get API status
-      description: Returns global + providers health status
+        - Health
+      summary: Get API health
+      description: Returns global + providers health
       operationId: getStatus
       responses:
         '200':
-          description: Health status retrieved successfully
+          description: Health retrieved successfully
           content:
             application/json:
               schema:

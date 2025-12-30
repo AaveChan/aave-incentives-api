@@ -6,11 +6,18 @@
   "type": "module",
   "scripts": {
     "test": "pnpm exec vitest",
+    "test:unit": "pnpm exec vitest --config vitest.config.ts",
+    "test:unit:coverage": "pnpm exec vitest --config vitest.config.ts --coverage",
+    "test:e2e": "pnpm exec vitest --config vitest.e2e.config.ts",
+    "test:e2e:coverage": "pnpm exec vitest --config vitest.e2e.config.ts --coverage",
+    "test:all": "pnpm run test:unit && npm run test:e2e",
     "dev": "nodemon --exec tsx -r tsconfig-paths/register ./src/app.ts",
     "start": "tsx -r tsconfig-paths/register ./src/app.ts",
     "build": "tsc && tsc-alias",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": "",
@@ -36,6 +43,7 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
     "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "4.0.15",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
