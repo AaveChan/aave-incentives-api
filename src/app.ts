@@ -8,10 +8,10 @@ import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger.js';
 import { router as aciAddressesRoute } from './routes/aci-addresses.route.js';
+import { router as providersStatusRoute } from './routes/health.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
-import { router as providersStatusRoute } from './routes/status-data.route.js';
 import { router as wrapperTokensRoute } from './routes/wrapper-tokens.js';
 import { ApiErrorResponse } from './types/index.js';
 
@@ -48,7 +48,7 @@ app.get('/', (_req, res) => {
 app.use('/ping', pingRoute);
 app.use('/incentives', incentivesRoutes);
 app.use('/aci-addresses', aciAddressesRoute);
-app.use('/status-data', providersStatusRoute);
+app.use('/health', providersStatusRoute);
 
 // Wrapper tokens
 app.use('/wrapper-tokens', wrapperTokensRoute);

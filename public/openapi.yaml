@@ -70,7 +70,7 @@ paths:
         '500':
           $ref: '#/components/responses/InternalErrorResponse'
 
-  /status-data:
+  /health:
     get:
       tags:
         - Status
