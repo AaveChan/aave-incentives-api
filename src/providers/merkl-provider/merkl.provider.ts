@@ -63,7 +63,7 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   private logger = createLogger(this.name);
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
     const chainIds = fetchOptions?.chainId;

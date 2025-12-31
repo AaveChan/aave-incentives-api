@@ -27,7 +27,7 @@ export class ACIProvider extends BaseIncentiveProvider {
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
 
-  async getIncentives(): Promise<RawIncentive[]> {
+  async _getIncentives(): Promise<RawIncentive[]> {
     const aciIncentives = await this.fetchIncentives();
 
     const incentives: RawIncentive[] = [];

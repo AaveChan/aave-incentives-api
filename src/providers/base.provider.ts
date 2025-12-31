@@ -1,3 +1,5 @@
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
+import { withCache } from '@/lib/utils/cache.js';
 import { AaveUiIncentiveService } from '@/services/aave-ui-incentive.service.js';
 import { ERC20Service } from '@/services/erc20.service.js';
 import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
@@ -10,13 +12,23 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
   abstract incentiveSource: IncentiveSource;
   incentiveType?: IncentiveType;
   // Providers must implement this
-  abstract getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]>;
+  protected abstract _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]>;
   abstract isHealthy(): Promise<boolean>;
 
   // Shared services
   tokenPriceFetcherService = new TokenPriceFetcherService();
   erc20Service = new ERC20Service();
   aaveUIIncentiveService = new AaveUiIncentiveService();
+
+  getIncentives = withCache(
+    this._getIncentives.bind(this),
+    (opts?: FetchOptions) => this.getCacheKey(opts), // use child overriden function (if any)
+    CACHE_TTLS.PROVIDER_FETCH,
+  );
+
+  getCacheKey(_fetchOptions?: FetchOptions): string {
+    return `provider:${this.name}`;
+  }
 
   // protected generateIncentiveId({
   //   source,

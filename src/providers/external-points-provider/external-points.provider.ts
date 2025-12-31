@@ -31,7 +31,7 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
 
   private logger = createLogger(this.name);
 
-  async getIncentives(): Promise<RawIncentive[]> {
+  async _getIncentives(): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
     for (const [programId, pointIncentives] of Object.entries(programPointIncentives)) {

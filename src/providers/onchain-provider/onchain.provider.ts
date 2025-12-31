@@ -53,10 +53,14 @@ export class OnchainProvider extends BaseIncentiveProvider {
   erc20Service = new ERC20Service();
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
 
     return incentives;
+  }
+
+  getCacheKey(fetchOptions?: FetchOptions): string {
+    return `provider:${this.name}:${fetchOptions?.chainId?.join(',') ?? 'all'}`;
   }
 
   private async fetchIncentives(fetchOptions?: FetchOptions) {
