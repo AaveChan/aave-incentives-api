@@ -73,7 +73,7 @@ export class MerklProvider extends BaseIncentiveProvider {
       : [DEFAULT_PROTOCOL];
     protocolIds = uniqueArray(protocolIds);
 
-    const merklOpportunities = await this.fetchIncentives(protocolIds, fetchOptions);
+    const merklOpportunities = await this.fetchIncentives(protocolIds);
 
     for (const opportunity of merklOpportunities) {
       const rewardedMerklTokens = opportunity.tokens;
@@ -184,14 +184,11 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   private async fetchIncentives(
     mainProtocolIds: MainProtocolId[],
-    fetchOptions?: FetchOptions,
   ): Promise<MerklOpportunityWithCampaign[]> {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
-      chainId: fetchOptions?.chainId?.join(','),
-      status: fetchOptions?.status?.join(','),
       mainProtocolId: mainProtocolIds.join(','),
     };
 
