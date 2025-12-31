@@ -8,14 +8,11 @@ import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
 import { AaveInstanceName, AaveTokenType, getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
-  AaveUiIncentiveService,
   aIncentivesData,
   aTokenInfo,
   vIncentivesData,
   vTokenInfo,
 } from '@/services/aave-ui-incentive.service.js';
-import { ERC20Service } from '@/services/erc20.service.js';
-import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
 import {
   CampaignConfig,
   IncentiveSource,
@@ -44,14 +41,10 @@ const INSTANCES_ENABLED: string[] = [
 export class OnchainProvider extends BaseIncentiveProvider {
   name = ProviderName.Onchain;
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
-  incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
+  override incentiveType = IncentiveType.TOKEN as const;
 
   private logger = createLogger(this.name);
-
-  tokenPriceFetcherService = new TokenPriceFetcherService();
-  erc20Service = new ERC20Service();
-  aaveUIIncentiveService = new AaveUiIncentiveService();
 
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
@@ -59,7 +52,7 @@ export class OnchainProvider extends BaseIncentiveProvider {
     return incentives;
   }
 
-  getCacheKey(fetchOptions?: FetchOptions): string {
+  override getCacheKey(fetchOptions?: FetchOptions): string {
     return `provider:${this.name}:${fetchOptions?.chainId?.join(',') ?? 'all'}`;
   }
 

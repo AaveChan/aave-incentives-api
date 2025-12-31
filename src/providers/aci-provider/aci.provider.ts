@@ -20,7 +20,7 @@ import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 export class ACIProvider extends BaseIncentiveProvider {
   name = ProviderName.ACI;
   incentiveSource = IncentiveSource.ACI_MASIV_API;
-  incentiveType = IncentiveType.TOKEN as const;
+  override incentiveType = IncentiveType.TOKEN as const;
 
   logger = createLogger(this.name);
 
