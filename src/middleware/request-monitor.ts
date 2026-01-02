@@ -15,7 +15,6 @@ setInterval(() => {
 }, WINDOW_MS);
 
 function getClientIp(req: Request): string {
-  console.log('req.headers', req);
   console.log('req.headers', req.headers);
   console.log('req.ip', req.ip);
   console.log('req.ips', req.ips);
