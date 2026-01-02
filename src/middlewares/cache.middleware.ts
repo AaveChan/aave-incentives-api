@@ -17,7 +17,7 @@ export class HttpCacheMiddleware {
   private logger = createLogger('HttpCacheMiddleware');
   private cache: NodeCache;
 
-  constructor(ttl: number = CACHE_TTLS.REQUEST_CACHE) {
+  constructor(ttl: number = CACHE_TTLS.REQUEST) {
     this.cache = new NodeCache({
       stdTTL: ttl,
       checkperiod: ttl * 0.4,
