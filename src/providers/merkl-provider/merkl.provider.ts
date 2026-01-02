@@ -1,5 +1,6 @@
 import { ink } from 'viem/chains';
 
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
@@ -63,7 +64,11 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   private logger = createLogger(this.name);
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.MERKL);
+  }
+
+  async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
     const chainIds = fetchOptions?.chainId;
@@ -73,7 +78,7 @@ export class MerklProvider extends BaseIncentiveProvider {
       : [DEFAULT_PROTOCOL];
     protocolIds = uniqueArray(protocolIds);
 
-    const merklOpportunities = await this.fetchIncentives(protocolIds, fetchOptions);
+    const merklOpportunities = await this.fetchIncentives(protocolIds);
 
     for (const opportunity of merklOpportunities) {
       const rewardedMerklTokens = opportunity.tokens;
@@ -184,14 +189,11 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   private async fetchIncentives(
     mainProtocolIds: MainProtocolId[],
-    fetchOptions?: FetchOptions,
   ): Promise<MerklOpportunityWithCampaign[]> {
     const url = new URL(this.apiUrl);
 
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
-      chainId: fetchOptions?.chainId?.join(','),
-      status: fetchOptions?.status?.join(','),
       mainProtocolId: mainProtocolIds.join(','),
     };
 

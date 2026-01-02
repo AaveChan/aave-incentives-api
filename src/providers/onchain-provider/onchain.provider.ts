@@ -2,20 +2,18 @@ import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
 import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
 import { AaveInstanceName, AaveTokenType, getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { BASE_TIMESTAMP, getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
-  AaveUiIncentiveService,
   aIncentivesData,
   aTokenInfo,
   vIncentivesData,
   vTokenInfo,
 } from '@/services/aave-ui-incentive.service.js';
-import { ERC20Service } from '@/services/erc20.service.js';
-import { TokenPriceFetcherService } from '@/services/token-price/token-price-fetcher.service.js';
 import {
   CampaignConfig,
   IncentiveSource,
@@ -44,19 +42,23 @@ const INSTANCES_ENABLED: string[] = [
 export class OnchainProvider extends BaseIncentiveProvider {
   name = ProviderName.Onchain;
   incentiveSource = IncentiveSource.ONCHAIN_RPC;
-  incentiveType = IncentiveType.TOKEN as const;
   claimLink = 'https://app.aave.com/';
+  override incentiveType = IncentiveType.TOKEN as const;
 
   private logger = createLogger(this.name);
 
-  tokenPriceFetcherService = new TokenPriceFetcherService();
-  erc20Service = new ERC20Service();
-  aaveUIIncentiveService = new AaveUiIncentiveService();
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.ONCHAIN);
+  }
 
-  async getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
+  async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);
 
     return incentives;
+  }
+
+  override getCacheKey(fetchOptions?: FetchOptions): string {
+    return `provider:${this.name}:${fetchOptions?.chainId?.join(',') ?? 'all'}`;
   }
 
   private async fetchIncentives(fetchOptions?: FetchOptions) {

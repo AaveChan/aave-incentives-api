@@ -1,3 +1,4 @@
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
@@ -20,14 +21,18 @@ import { Actions, Campaign, Token as AciInfraToken } from './types.js';
 export class ACIProvider extends BaseIncentiveProvider {
   name = ProviderName.ACI;
   incentiveSource = IncentiveSource.ACI_MASIV_API;
-  incentiveType = IncentiveType.TOKEN as const;
+  override incentiveType = IncentiveType.TOKEN as const;
 
   logger = createLogger(this.name);
 
   claimLink = 'https://apps.aavechan.com/merit';
   apiUrl = 'https://apps.aavechan.com/api/merit/all-actions-data';
 
-  async getIncentives(): Promise<RawIncentive[]> {
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.ACI);
+  }
+
+  async _getIncentives(): Promise<RawIncentive[]> {
     const aciIncentives = await this.fetchIncentives();
 
     const incentives: RawIncentive[] = [];

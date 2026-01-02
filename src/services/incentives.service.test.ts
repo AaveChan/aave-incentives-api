@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
-import { FetchOptions, IncentiveProvider } from '@/providers/index.js';
+import { BaseIncentiveProvider } from '@/providers/base.provider.js';
+import { FetchOptions } from '@/providers/index.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import {
   GlobalStatus,
@@ -31,15 +32,18 @@ vi.mock('@/constants/wrapper-address', () => ({
   },
 }));
 
-class MockProvider implements IncentiveProvider {
+class MockProvider extends BaseIncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
-
   name = ProviderName.Merkl;
-  incentiveType?: IncentiveType | undefined;
 
-  constructor(private incentives: Incentive[] = [], private healthy = true) {}
+  constructor(
+    private incentives: Incentive[] = [],
+    private healthy = true,
+  ) {
+    super(60);
+  }
 
-  async getIncentives() {
+  async _getIncentives() {
     return this.incentives;
   }
 
