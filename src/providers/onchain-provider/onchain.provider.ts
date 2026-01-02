@@ -2,6 +2,7 @@ import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
 import { Address, formatUnits } from 'viem';
 import { mainnet } from 'viem/chains';
 
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
 import { aaveInstanceEntries } from '@/lib/aave/aave-instances.js';
@@ -45,6 +46,10 @@ export class OnchainProvider extends BaseIncentiveProvider {
   override incentiveType = IncentiveType.TOKEN as const;
 
   private logger = createLogger(this.name);
+
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.ONCHAIN);
+  }
 
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const incentives = await this.fetchIncentives(fetchOptions);

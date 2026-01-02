@@ -1,3 +1,4 @@
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { getAaveToken } from '@/lib/aave/aave-tokens.js';
 import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
@@ -30,6 +31,10 @@ export class ExternalPointsProvider extends BaseIncentiveProvider {
   incentiveSource = IncentiveSource.LOCAL_CONFIG;
 
   private logger = createLogger(this.name);
+
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.EXTERNAL_POINTS);
+  }
 
   async _getIncentives(): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];

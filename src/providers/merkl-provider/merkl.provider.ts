@@ -1,5 +1,6 @@
 import { ink } from 'viem/chains';
 
+import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
@@ -62,6 +63,10 @@ export class MerklProvider extends BaseIncentiveProvider {
   claimLink = 'https://app.merkl.xyz/';
 
   private logger = createLogger(this.name);
+
+  constructor() {
+    super(CACHE_TTLS.PROVIDER.MERKL);
+  }
 
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];

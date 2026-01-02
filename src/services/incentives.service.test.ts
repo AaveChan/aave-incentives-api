@@ -34,11 +34,13 @@ vi.mock('@/constants/wrapper-address', () => ({
 
 class MockProvider extends BaseIncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
-
   name = ProviderName.Merkl;
 
-  constructor(private incentives: Incentive[] = [], private healthy = true) {
-    super();
+  constructor(
+    private incentives: Incentive[] = [],
+    private healthy = true,
+  ) {
+    super(60);
   }
 
   async _getIncentives() {
