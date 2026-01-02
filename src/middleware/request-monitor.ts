@@ -13,13 +13,6 @@ setInterval(() => {
 }, WINDOW_MS);
 
 function getClientIp(req: Request): string {
-  console.log('req.headers', req.headers);
-  console.log('req.ip', req.ip);
-  console.log('req.ips', req.ips);
-  console.log('realIp', req.headers['x-vercel-forwarded-for']);
-  console.log('realIp', req.headers['x-real-ip']);
-  console.log('forwarded', req.headers['x-forwarded-for']);
-
   // Vercel's guaranteed header (can't be overwritten by upstream proxies)
   const vercelIp = req.headers['x-vercel-forwarded-for'];
   if (typeof vercelIp === 'string') {
