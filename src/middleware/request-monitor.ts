@@ -4,12 +4,10 @@ import { createLogger } from '@/config/logger.js';
 
 const logger = createLogger('RequestMonitor');
 
-// Track requests per IP (resets every WINDOW_MS)
 const requestCounts = new Map<string, number>();
 const WINDOW_MS = 60 * 1000; // 1 minute window
 const WARN_THRESHOLD = 100; // Warn if >100 requests per minute
 
-// Reset counts periodically
 setInterval(() => {
   requestCounts.clear();
 }, WINDOW_MS);
@@ -18,16 +16,23 @@ function getClientIp(req: Request): string {
   console.log('req.headers', req.headers);
   console.log('req.ip', req.ip);
   console.log('req.ips', req.ips);
+  console.log('realIp', req.headers['x-vercel-forwarded-for']);
   console.log('realIp', req.headers['x-real-ip']);
   console.log('forwarded', req.headers['x-forwarded-for']);
 
-  // Vercel sets x-real-ip to the actual client IP
+  // Vercel's guaranteed header (can't be overwritten by upstream proxies)
+  const vercelIp = req.headers['x-vercel-forwarded-for'];
+  if (typeof vercelIp === 'string') {
+    return vercelIp.split(',')[0]?.trim() ?? 'unknown';
+  }
+
+  // Fallback: x-real-ip
   const realIp = req.headers['x-real-ip'];
   if (typeof realIp === 'string') {
     return realIp;
   }
 
-  // Fallback: last IP in x-forwarded-for (rightmost = closest to server = real)
+  // Fallback: last IP in x-forwarded-for
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string') {
     const ips = forwarded.split(',').map((ip) => ip.trim());
@@ -39,7 +44,6 @@ function getClientIp(req: Request): string {
 
 export function requestMonitor(req: Request, _res: Response, next: NextFunction) {
   const ip = getClientIp(req);
-  console.log('Client IP:', ip);
   const count = (requestCounts.get(ip) ?? 0) + 1;
   requestCounts.set(ip, count);
 
