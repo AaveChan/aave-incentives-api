@@ -15,6 +15,13 @@ setInterval(() => {
 }, WINDOW_MS);
 
 function getClientIp(req: Request): string {
+  console.log('req.headers', req);
+  console.log('req.headers', req.headers);
+  console.log('req.ip', req.ip);
+  console.log('req.ips', req.ips);
+  console.log('realIp', req.headers['x-real-ip']);
+  console.log('forwarded', req.headers['x-forwarded-for']);
+
   // Vercel sets x-real-ip to the actual client IP
   const realIp = req.headers['x-real-ip'];
   if (typeof realIp === 'string') {
@@ -27,12 +34,6 @@ function getClientIp(req: Request): string {
     const ips = forwarded.split(',').map((ip) => ip.trim());
     return ips[ips.length - 1] ?? 'unknown';
   }
-
-  console.log('req.headers', req);
-  console.log('req.ip', req.ip);
-  console.log('req.ips', req.ips);
-  console.log('req.headers', req.headers);
-  console.log('forwarded', forwarded);
 
   return req.ip ?? 'unknown';
 }
