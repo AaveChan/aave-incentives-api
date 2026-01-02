@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { createLogger } from './config/logger.js';
+import { requestMonitor } from './middleware/request-monitor.js';
 import { router as aciAddressesRoute } from './routes/aci-addresses.route.js';
 import { router as providersStatusRoute } from './routes/health.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
@@ -29,6 +30,7 @@ const app: Application = express();
 // -----------------------------------------------------------------------------
 
 app.use(cors());
+app.use(requestMonitor);
 
 // Static files
 const __filename = fileURLToPath(import.meta.url);
