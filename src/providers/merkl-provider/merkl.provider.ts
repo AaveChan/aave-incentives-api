@@ -71,13 +71,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
 
-    const chainIds = fetchOptions?.chainId;
-
-    let protocolIds = chainIds
-      ? chainIds.map((chainId) => this.getProtocolId(chainId))
-      : [DEFAULT_PROTOCOL];
-    protocolIds = uniqueArray(protocolIds);
-
+    const protocolIds = this.getProtocolIds(fetchOptions);
     const merklOpportunities = await this.fetchIncentives(protocolIds);
 
     for (const opportunity of merklOpportunities) {
@@ -166,6 +160,7 @@ export class MerklProvider extends BaseIncentiveProvider {
               protocol: protocolId,
             },
           };
+          console.log('pointIncentive', pointIncentive);
           allIncentives.push(pointIncentive);
         }
         if (rewardType == IncentiveType.TOKEN) {
@@ -185,6 +180,19 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   private getProtocolId(chainId: number): MainProtocolId {
     return chainProtocolMap[chainId] || DEFAULT_PROTOCOL;
+  }
+
+  private getProtocolIds(fetchOptions?: FetchOptions): MainProtocolId[] {
+    const chainIds = fetchOptions?.chainId;
+    const protocolIds = chainIds
+      ? chainIds.map((chainId) => this.getProtocolId(chainId))
+      : [DEFAULT_PROTOCOL];
+    return uniqueArray(protocolIds);
+  }
+
+  override getCacheKey(fetchOptions?: FetchOptions): string {
+    const protocolIds = this.getProtocolIds(fetchOptions);
+    return `provider:${this.name}:${protocolIds.sort().join(',')}`;
   }
 
   private async fetchIncentives(
