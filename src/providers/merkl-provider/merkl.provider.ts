@@ -160,7 +160,6 @@ export class MerklProvider extends BaseIncentiveProvider {
               protocol: protocolId,
             },
           };
-          console.log('pointIncentive', pointIncentive);
           allIncentives.push(pointIncentive);
         }
         if (rewardType == IncentiveType.TOKEN) {
