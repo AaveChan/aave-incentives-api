@@ -93,8 +93,8 @@ export class IncentivesService {
     const globalStatus = isHealthy
       ? GlobalStatus.HEALTHY
       : isUnhealthy
-      ? GlobalStatus.DOWN
-      : GlobalStatus.DEGRADED;
+        ? GlobalStatus.DOWN
+        : GlobalStatus.DEGRADED;
 
     return { status: globalStatus, providersStatus };
   }
