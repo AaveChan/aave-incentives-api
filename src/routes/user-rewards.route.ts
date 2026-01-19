@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import { ApiController } from '@/controllers/api.controller.js';
 import { HttpCacheMiddleware } from '@/middlewares/cache.middleware.js';
-import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
+import { GetUserRewardsQuerySchema } from '@/validation/incentives.schema.js';
 import { validateQuery } from '@/validation/validation.middleware.js';
 
 const router = Router();
@@ -13,9 +13,9 @@ const httpCache = new HttpCacheMiddleware();
 
 router.get(
   '/',
-  validateQuery(GetIncentivesQuerySchema),
+  validateQuery(GetUserRewardsQuerySchema),
   httpCache.cacheResponse(),
-  controller.getAllIncentives.bind(controller),
+  controller.getUserRewards.bind(controller),
 );
 
 export { router };
