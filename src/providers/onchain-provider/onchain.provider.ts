@@ -163,22 +163,16 @@ export class OnchainProvider extends BaseIncentiveProvider {
           chainId,
         });
 
-        const rewardTokenFromRpc = {
-          name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
+        const rewardToken = {
+          name: rewardTokenInfo.rewardTokenSymbol,
           symbol: rewardTokenInfo.rewardTokenSymbol,
           address: rewardTokenInfo.rewardTokenAddress,
           chainId,
           decimals: rewardTokenInfo.rewardTokenDecimals,
           priceFeed: rewardTokenInfo.rewardOracleAddress,
           price: priceFormatted,
+          ...rewardTokenFromAave, // will replace every field if defined
         };
-
-        let rewardToken: Token;
-        if (rewardTokenFromAave) {
-          rewardToken = rewardTokenFromAave;
-        } else {
-          rewardToken = rewardTokenFromRpc;
-        }
 
         const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs({
           chainId,
