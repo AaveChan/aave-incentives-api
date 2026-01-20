@@ -158,14 +158,20 @@ export class OnchainProvider extends BaseIncentiveProvider {
           formatUnits(rewardTokenInfo.rewardPriceFeed, rewardTokenInfo.priceFeedDecimals),
         );
 
-        const rewardToken: Token = {
-          name: rewardTokenInfo.rewardTokenSymbol, // TODO: fetch name onchain? or fetch the token from all aave tokens and if it's not part of it find it in a cache hardcoded in the project?
+        const rewardTokenFromAave = getAaveToken({
+          tokenAddress: rewardTokenInfo.rewardTokenAddress,
+          chainId,
+        });
+
+        const rewardToken = {
+          name: rewardTokenInfo.rewardTokenSymbol,
           symbol: rewardTokenInfo.rewardTokenSymbol,
           address: rewardTokenInfo.rewardTokenAddress,
           chainId,
           decimals: rewardTokenInfo.rewardTokenDecimals,
           priceFeed: rewardTokenInfo.rewardOracleAddress,
           price: priceFormatted,
+          ...rewardTokenFromAave, // will replace every field if defined
         };
 
         const { apr, currentCampaignConfig, allCampaignsConfigs } = await this.getCampaignConfigs({
