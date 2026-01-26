@@ -182,10 +182,6 @@ export class OnchainProvider extends BaseIncentiveProvider {
           rewardTokenInfo,
         });
 
-        // console.log(
-        //   `Generated incentive ID: ${id} for rewardedToken ${rewardedToken.address} and rewardToken ${rewardToken.address} on chain ${chainId}`,
-        // );
-
         const incentive: RawTokenIncentive = {
           name: this.getIncentiveName(underlyingToken, type),
           description: this.getIncentiveDescription(
