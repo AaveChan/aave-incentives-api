@@ -73,7 +73,7 @@ export class ACIProvider extends BaseIncentiveProvider {
 
       const incentive: RawTokenIncentive = {
         name: action.displayName,
-        description: description ? description : '',
+        description: description ?? '',
         claimLink: this.claimLink,
         chainId: action.chainId,
         type: this.incentiveType,

@@ -272,9 +272,7 @@ export const getAaveTokenAllData = ({
 
   const logger = createLogger('getAaveTokenAllData');
   logger.verbose(
-    `Token ${tokenAddress} not found on chain ${chainId} ${
-      instanceName ? `for instance ${instanceName}` : ''
-    }`,
+    `Token ${tokenAddress} not found on chain ${chainId}${instanceName ? ` for instance ${instanceName}` : ''}`,
   );
 
   return null;

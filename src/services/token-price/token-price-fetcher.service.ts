@@ -89,7 +89,5 @@ export class TokenPriceFetcherService {
 
 const getTokenFullInfo = (token: Token, tokenRequested?: Token) => {
   const displayTokenRequested = tokenRequested && !compareTokens(token, tokenRequested);
-  return `${tokenToString(token)} ${
-    displayTokenRequested ? `(on behalf of ${tokenRequested.symbol})` : ''
-  }`;
+  return `${tokenToString(token)}${displayTokenRequested ? ` (on behalf of ${tokenRequested.symbol})` : ''}`;
 };
