@@ -153,7 +153,7 @@ export class ACIProvider extends BaseIncentiveProvider {
       startTimestamp: Number(campaign.startTimestamp),
       endTimestamp: Number(campaign.endTimestamp),
       budget,
-      apr: campaign.fixedApr ? campaign.fixedApr.apr : undefined,
+      apr: campaign.fixedApr?.apr,
     };
 
     return campaignConfig;
