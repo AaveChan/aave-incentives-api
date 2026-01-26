@@ -150,7 +150,7 @@ export class MerklProvider extends BaseIncentiveProvider {
           status: opportunity.status,
         };
 
-        if (rewardType == IncentiveType.POINT) {
+        if (rewardType === IncentiveType.POINT) {
           const protocolId = this.getProtocolId(opportunity.chainId);
           const pointIncentive: RawPointWithoutValueIncentive = {
             ...baseIncentive,
@@ -162,7 +162,7 @@ export class MerklProvider extends BaseIncentiveProvider {
           };
           allIncentives.push(pointIncentive);
         }
-        if (rewardType == IncentiveType.TOKEN) {
+        if (rewardType === IncentiveType.TOKEN) {
           const pointIncentive: RawTokenIncentive = {
             ...baseIncentive,
             type: IncentiveType.TOKEN,

@@ -124,10 +124,10 @@ export class ACIProvider extends BaseIncentiveProvider {
     const currentTimestamp = getCurrentTimestamp();
     const currentCampaign = campaigns.find((campaign) => {
       return (
-        (status == Status.LIVE &&
+        (status === Status.LIVE &&
           currentTimestamp >= Number(campaign.startTimestamp) &&
           currentTimestamp <= Number(campaign.endTimestamp)) ||
-        (status == Status.SOON && currentTimestamp < Number(campaign.startTimestamp))
+        (status === Status.SOON && currentTimestamp < Number(campaign.startTimestamp))
       );
     });
 

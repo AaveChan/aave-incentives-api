@@ -307,7 +307,7 @@ const getAaveInstanceFromInstanceFullName = (instanceFullName: string) => {
 const getSymbolPrefix = (chainName: string, instanceType?: AaveInstanceType) => {
   if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
     return 'HorRwa';
-  } else if (chainName == ink.name) {
+  } else if (chainName === ink.name) {
     return 'InkWl';
   }
 
@@ -324,7 +324,7 @@ const getSymbolPrefix = (chainName: string, instanceType?: AaveInstanceType) => 
 const getNamePrefix = (chainName: string, instanceType?: AaveInstanceType) => {
   if (instanceType && instanceType === AaveInstanceType.HORIZON_RWA) {
     return AaveInstanceType.HORIZON_RWA;
-  } else if (chainName == ink.name) {
+  } else if (chainName === ink.name) {
     return 'InkWhitelabel';
   } else if (instanceType && instanceType !== AaveInstanceType.CORE) {
     return `${chainName} ${instanceType}`;
