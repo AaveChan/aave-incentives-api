@@ -73,7 +73,7 @@ export class ACIProvider extends BaseIncentiveProvider {
 
       const incentive: RawTokenIncentive = {
         name: action.displayName,
-        description: description ? description : '',
+        description: description ?? '',
         claimLink: this.claimLink,
         chainId: action.chainId,
         type: this.incentiveType,
@@ -124,10 +124,10 @@ export class ACIProvider extends BaseIncentiveProvider {
     const currentTimestamp = getCurrentTimestamp();
     const currentCampaign = campaigns.find((campaign) => {
       return (
-        (status == Status.LIVE &&
+        (status === Status.LIVE &&
           currentTimestamp >= Number(campaign.startTimestamp) &&
           currentTimestamp <= Number(campaign.endTimestamp)) ||
-        (status == Status.SOON && currentTimestamp < Number(campaign.startTimestamp))
+        (status === Status.SOON && currentTimestamp < Number(campaign.startTimestamp))
       );
     });
 
@@ -153,7 +153,7 @@ export class ACIProvider extends BaseIncentiveProvider {
       startTimestamp: Number(campaign.startTimestamp),
       endTimestamp: Number(campaign.endTimestamp),
       budget,
-      apr: campaign.fixedApr ? campaign.fixedApr.apr : undefined,
+      apr: campaign.fixedApr?.apr,
     };
 
     return campaignConfig;
