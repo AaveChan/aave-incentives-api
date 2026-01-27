@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { createLogger } from '@/config/logger.js';
+import { convertBigIntToString } from '@/lib/utils/serialization.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import { UserRewardsService } from '@/services/user-rewards.service.js';
 import { GetIncentivesResponse } from '@/types/index.js';
@@ -73,17 +74,7 @@ export class ApiController {
       });
 
       // Serialize BigInt values to strings for JSON compatibility
-      const serializedResult = {
-        ...result,
-        rewards: result.rewards.map((reward) => ({
-          ...reward,
-          totalAmountRaw: reward.totalAmountRaw.toString(),
-          incentives: reward.incentives.map((breakdown) => ({
-            ...breakdown,
-            amountRaw: breakdown.amountRaw.toString(),
-          })),
-        })),
-      };
+      const serializedResult = convertBigIntToString(result);
 
       const response = {
         success: true,

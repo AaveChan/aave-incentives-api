@@ -1,5 +1,7 @@
+import { Address } from 'viem';
 import z from 'zod';
 
+import { ClaimData, FetchUserRewardsOptions, UserReward } from '@/services/user-rewards.service.js';
 import { IncentiveSource, IncentiveType, ProviderName, RawIncentive } from '@/types/index.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 
@@ -12,6 +14,15 @@ export interface IncentiveProvider {
   isHealthy(): Promise<boolean>;
   incentiveSource: IncentiveSource;
   incentiveType?: IncentiveType;
+}
+
+export interface RewardsProvider {
+  name: ProviderName;
+  incentiveSource: IncentiveSource;
+  getRewards(
+    address: Address,
+    options?: FetchUserRewardsOptions,
+  ): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }>;
 }
 
 export * from './aci-provider/aci.provider.js';

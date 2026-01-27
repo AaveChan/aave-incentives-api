@@ -158,6 +158,7 @@ export class MerklProvider extends BaseIncentiveProvider {
             point: {
               name: rewardToken.name,
               protocol: protocolId,
+              token: rewardToken,
             },
           };
           allIncentives.push(pointIncentive);

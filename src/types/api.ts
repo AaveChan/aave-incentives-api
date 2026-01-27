@@ -84,6 +84,7 @@ export interface Point {
   name: string;
   protocol: string;
   tgePrice?: number;
+  token?: Token;
 }
 
 export type CampaignConfig = {
@@ -120,29 +121,3 @@ export enum ProviderName {
   ExternalPoints = 'ExternalPointsProvider',
   Onchain = 'OnchainProvider',
 }
-
-// Claim data types
-export type ClaimTxData = {
-  chainId: number;
-  contractAddress: Address;
-  functionName: string;
-  abi: readonly object[]; // Minimal ABI with just the function we need
-  args: unknown[];
-  value?: string; // Optional ETH value to send with the transaction
-};
-
-export type RewardClaimInfo = {
-  token: Token;
-  claimableAmount: string; // Human readable amount
-  claimableAmountRaw: string; // Raw amount in wei/smallest unit
-  source: IncentiveSource;
-  chainId: number;
-};
-
-export type ClaimData = {
-  source: IncentiveSource;
-  chainId: number;
-  rewards: RewardClaimInfo[];
-  totalValueUsd?: number; // Optional: total USD value of all rewards
-  txData: ClaimTxData;
-};
