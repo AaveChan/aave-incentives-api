@@ -36,8 +36,8 @@ export class UserRewardsService {
     address: Address,
     options?: FetchUserRewardsOptions,
   ): Promise<GetUserRewardsResult> {
-    const rewardsBySource: Partial<Record<IncentiveSource, UserReward[]>> = {};
-    const claimDataBySource: Partial<Record<IncentiveSource, ClaimData[]>> = {};
+    const allRewards: UserReward[] = [];
+    const allClaimData: ClaimData[] = [];
 
     // fetch all providers in parallel
     const rewardsPromises = this.providers.map(async (provider) => {
@@ -51,32 +51,19 @@ export class UserRewardsService {
     const rewardsResults = await Promise.all(rewardsPromises);
 
     for (const result of rewardsResults) {
-      const rewards = rewardsBySource[result.source] || [];
-      rewardsBySource[result.source] = [...rewards, ...result.rewardsResults.rewards];
-
-      const claimData = claimDataBySource[result.source] || [];
-      claimDataBySource[result.source] = [...claimData, ...(result.rewardsResults.claimData || [])];
+      allRewards.push(...result.rewardsResults.rewards);
+      allClaimData.push(...result.rewardsResults.claimData);
     }
-
-    const allRewards: UserReward[] = Object.values(rewardsBySource).flat();
 
     // Filter by source if specified
     let filteredRewards = allRewards;
     if (options?.source) {
-      filteredRewards = filteredRewards.filter((reward) => {
-        // Check if the normalized source matches the filter
-        const normalizedSourceMatches = options.source?.includes(reward.source);
-        // Also check if any incentive's original source matches
-        const originalSourceMatches = reward.incentives.some((incentive) =>
-          options.source?.includes(incentive.source),
-        );
-        return normalizedSourceMatches || originalSourceMatches;
-      });
+      filteredRewards = filteredRewards.filter((reward) => options.source?.includes(reward.source));
     }
 
     // Filter zero balances unless explicitly requested
     if (!options?.includeZeroBalance) {
-      filteredRewards = filteredRewards.filter((reward) => BigInt(reward.claimableAmount) > 0n);
+      filteredRewards = filteredRewards.filter((reward) => reward.claimableAmount > 0n);
     }
 
     // Calculate total value
@@ -86,24 +73,16 @@ export class UserRewardsService {
     const summary = this.generateSummary(filteredRewards);
 
     // Filter claim data by source and chain if needed
-    let filteredClaimData: Partial<Record<IncentiveSource, ClaimData[]>> = {};
-    if (options?.source || options?.chainId) {
-      for (const [source, claimDataArray] of Object.entries(claimDataBySource)) {
-        if (options?.source && !options.source.includes(source as IncentiveSource)) {
-          continue; // Skip this source
-        }
-        const filteredArray = claimDataArray.filter((claimData) => {
-          if (options?.chainId) {
-            return options.chainId.includes(claimData.chainId);
-          }
-          return true;
-        });
-        if (filteredArray.length > 0) {
-          filteredClaimData[source as IncentiveSource] = filteredArray;
-        }
-      }
-    } else {
-      filteredClaimData = claimDataBySource;
+    let filteredClaimData = allClaimData;
+    if (options?.source) {
+      filteredClaimData = filteredClaimData.filter((claimData) =>
+        options.source?.includes(claimData.source),
+      );
+    }
+    if (options?.chainId) {
+      filteredClaimData = filteredClaimData.filter((claimData) =>
+        options.chainId?.includes(claimData.chainId),
+      );
     }
 
     return {
@@ -117,6 +96,8 @@ export class UserRewardsService {
   }
 
   private calculateTotalValue(rewards: UserReward[]): number | undefined {
+    // TODO: Decide if this should calculate total accumulated value (totalAmount)
+    // or only claimable value (claimableAmount). Currently uses totalAmount.
     let totalValue = 0;
     let hasAnyPrice = false;
 

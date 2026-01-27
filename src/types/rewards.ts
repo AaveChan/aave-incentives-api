@@ -5,10 +5,9 @@ import { Incentive, IncentiveSource, Status, Token } from '@/types/index.js';
 export type UserReward = {
   token: Token;
   source: IncentiveSource;
-  claimableAmount: bigint; // Human readable amount
-  claimableAmountFormatted: number; // Raw amount in wei/smallest unit
-  totalAmount?: bigint; // Total amount across all incentives (string for JSON safety)
-  totalClaimed?: bigint; // Total claimed across all incentives
+  claimableAmount: bigint;
+  claimableAmountFormatted: number;
+  totalAmount?: bigint; // Total amount across all campaigns
   claimLink: string; // Link to claim rewards (same for all campaigns from same source)
   incentives: Incentive[]; // Breakdown by incentive/campaign
 };
@@ -20,6 +19,7 @@ export type UserRewardsSummary = {
 };
 
 export type ClaimData = {
+  source: IncentiveSource;
   chainId: number;
   contractAddress: Address;
   functionName: string;
@@ -33,7 +33,7 @@ export type GetUserRewardsResult = {
   totalCount: number;
   totalValueUsd?: number;
   lastUpdated: string;
-  claimData: Partial<Record<IncentiveSource, ClaimData[]>>; // Claim transaction data grouped by chain+source
+  claimData: ClaimData[]; // Claim transaction data
   summary: UserRewardsSummary;
 };
 

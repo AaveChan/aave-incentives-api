@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 
 import { createLogger } from '@/config/logger.js';
-import { convertBigIntToString } from '@/lib/utils/serialization.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import { UserRewardsService } from '@/services/user-rewards.service.js';
 import { GetIncentivesResponse } from '@/types/index.js';
@@ -73,12 +72,9 @@ export class ApiController {
         includeZeroBalance: query.includeZeroBalance,
       });
 
-      // Serialize BigInt values to strings for JSON compatibility
-      const serializedResult = convertBigIntToString(result);
-
       const response = {
         success: true,
-        data: serializedResult,
+        data: result,
       };
 
       this.logger.silly('Response:', response);

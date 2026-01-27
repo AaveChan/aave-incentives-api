@@ -89,6 +89,8 @@ export type IncentiveRewardBreakdown = {
 export class MerklRewardsProvider implements RewardsProvider {
   incentiveSource = IncentiveSource.MERKL_API;
   name = ProviderName.Merkl;
+  merklApiUrl = 'https://api.merkl.xyz/v4/users';
+  claimLink = 'https://app.merkl.xyz/';
   private logger = createLogger('UserRewardsService');
   private incentivesService = new IncentivesService();
 
@@ -171,9 +173,8 @@ export class MerklRewardsProvider implements RewardsProvider {
             claimableAmountFormatted: Number(
               formatUnits(BigInt(merklReward.pending), token.decimals),
             ),
-            totalClaimed: BigInt(merklReward.claimed),
             totalAmount: BigInt(merklReward.amount),
-            claimLink: 'https://app.merkl.xyz/',
+            claimLink: this.claimLink,
             incentives,
           };
 
@@ -185,6 +186,7 @@ export class MerklRewardsProvider implements RewardsProvider {
           const distributorAddress = getMerklDistributorAddress(chainId);
 
           const claimData: ClaimData = {
+            source: IncentiveSource.MERKL_API,
             chainId,
             contractAddress: distributorAddress,
             functionName: 'claim',
@@ -211,112 +213,81 @@ export class MerklRewardsProvider implements RewardsProvider {
     address: Address,
     chainId: number,
   ): Promise<MerklUserRewardsChainResponse[]> {
-    const merklApiUrl = 'https://api.merkl.xyz/v4/users';
-    const allChainRewards: MerklUserRewardsChainResponse[] = [];
-    let page = 0;
-    const maxPages = 10; // Safety limit
+    // breakdownPage=0 is required by Merkl API (we don't paginate breakdowns)
+    const url = `${this.merklApiUrl}/${address}/rewards?chainId=${chainId}&breakdownPage=0`;
 
-    while (page < maxPages) {
-      const url = `${merklApiUrl}/${address}/rewards?chainId=${chainId}&breakdownPage=${page}`;
-      this.logger.debug(`Fetching Merkl rewards for ${address} on chain ${chainId}, page ${page}`);
+    this.logger.debug(`Fetching Merkl rewards for ${address} on chain ${chainId}`);
 
+    try {
+      const fetchResponse = await fetchWithTimeout(url);
+      const rawText = await fetchResponse.text();
+
+      // Parse JSON response
+      let responseData;
       try {
-        const fetchResponse = await fetchWithTimeout(url);
-        const rawText = await fetchResponse.text();
-
-        // Try to parse it
-        let responseData;
-        try {
-          responseData = JSON.parse(rawText);
-        } catch (parseError) {
-          this.logger.error(`Failed to parse JSON for chain ${chainId}, page ${page}:`, parseError);
-          break;
-        }
-
-        // Handle both array and object responses
-        let response: MerklUserRewardsChainResponse[];
-        if (Array.isArray(responseData)) {
-          response = responseData;
-        } else if (responseData && typeof responseData === 'object') {
-          // If it's an object, wrap it in an array
-          response = [responseData as MerklUserRewardsChainResponse];
-        } else {
-          // Invalid response, stop pagination
-          this.logger.warn(
-            `Unexpected response format for chain ${chainId}, page ${page}:`,
-            typeof responseData,
-          );
-          break;
-        }
-
-        if (!response || response.length === 0) {
-          // No more data for this chain
-          break;
-        }
-
-        // Validate each response item before adding
-        const validResponses = response.filter((item) => {
-          if (!item || typeof item !== 'object') {
-            this.logger.warn(`Invalid response item for chain ${chainId}, page ${page}`);
-            return false;
-          }
-          // Ensure rewards field exists and is an array
-          if (item.rewards && !Array.isArray(item.rewards)) {
-            this.logger.warn(
-              `Rewards field is not an array for chain ${chainId}, page ${page}:`,
-              typeof item.rewards,
-            );
-            return false;
-          }
-          return true;
-        });
-
-        allChainRewards.push(...validResponses);
-
-        // Check if we need to fetch more pages
-        // If response has rewards, there might be more pages
-        const hasRewards = response.some((chain) => chain.rewards && chain.rewards.length > 0);
-        if (!hasRewards) {
-          break;
-        }
-
-        page++;
-      } catch (error) {
-        this.logger.error(
-          `Failed to fetch Merkl user rewards for ${address} on chain ${chainId}, page ${page}:`,
-          error,
-        );
-        break;
+        responseData = JSON.parse(rawText);
+      } catch (parseError) {
+        this.logger.error(`Failed to parse JSON for chain ${chainId}`, parseError);
+        return [];
       }
-    }
 
-    return allChainRewards;
+      // Handle both array and object responses
+      let response: MerklUserRewardsChainResponse[];
+      if (Array.isArray(responseData)) {
+        response = responseData;
+      } else if (responseData && typeof responseData === 'object') {
+        // If it's an object, wrap it in an array
+        response = [responseData as MerklUserRewardsChainResponse];
+      } else {
+        // Invalid response format
+        this.logger.warn(`Unexpected response format for chain ${chainId}`, typeof responseData);
+        return [];
+      }
+
+      // Validate and filter response items
+      const validResponses = response.filter((item) => {
+        if (!item || typeof item !== 'object') {
+          this.logger.warn(`Invalid response item for chain ${chainId}`);
+          return false;
+        }
+        // Ensure rewards field exists and is an array
+        if (item.rewards && !Array.isArray(item.rewards)) {
+          this.logger.warn(
+            `Rewards field is not an array for chain ${chainId}`,
+            typeof item.rewards,
+          );
+          return false;
+        }
+        return true;
+      });
+
+      return validResponses;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch Merkl user rewards for ${address} on chain ${chainId}:`,
+        error,
+      );
+      return [];
+    }
   }
 
   private findMatchingIncentives(incentives: Incentive[], rewardToken: Token): Incentive[] {
     const matchingIncentives: Incentive[] = [];
     for (const incentive of incentives) {
-      // Check if reward token matches
-      let rewardMatches =
+      const tokenMatches =
         incentive.type === IncentiveType.TOKEN &&
         incentive.rewardToken.address.toLowerCase() === rewardToken.address.toLowerCase() &&
         incentive.rewardToken.chainId === rewardToken.chainId;
 
-      if (!rewardMatches) {
-        continue;
-      }
-
-      rewardMatches =
+      const pointMatches =
         incentive.type === IncentiveType.POINT_WITHOUT_VALUE &&
         !!incentive.point.token &&
         incentive.point.token.address.toLowerCase() === rewardToken.address.toLowerCase() &&
         incentive.point.token.chainId === rewardToken.chainId;
 
-      if (!rewardMatches) {
-        continue;
+      if (tokenMatches || pointMatches) {
+        matchingIncentives.push(incentive);
       }
-
-      matchingIncentives.push(incentive);
     }
 
     return matchingIncentives;
