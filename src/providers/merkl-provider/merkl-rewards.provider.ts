@@ -5,8 +5,16 @@ import { MERKL_DISTRIBUTOR_ABI } from '@/constants/abis/merkl-distributor.js';
 import { getMerklDistributorAddress } from '@/constants/merkl-distributors.js';
 import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { IncentivesService } from '@/services/incentives.service.js';
-import { ClaimData, FetchUserRewardsOptions, UserReward } from '@/services/user-rewards.service.js';
-import { Incentive, IncentiveSource, IncentiveType, ProviderName, Token } from '@/types/index.js';
+import {
+  ClaimData,
+  FetchUserRewardsOptions,
+  Incentive,
+  IncentiveSource,
+  IncentiveType,
+  ProviderName,
+  Token,
+  UserReward,
+} from '@/types/index.js';
 
 import { RewardsProvider } from '../index.js';
 

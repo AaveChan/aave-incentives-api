@@ -1,8 +1,15 @@
 import { Address } from 'viem';
 import z from 'zod';
 
-import { ClaimData, FetchUserRewardsOptions, UserReward } from '@/services/user-rewards.service.js';
-import { IncentiveSource, IncentiveType, ProviderName, RawIncentive } from '@/types/index.js';
+import {
+  ClaimData,
+  FetchUserRewardsOptions,
+  IncentiveSource,
+  IncentiveType,
+  ProviderName,
+  RawIncentive,
+  UserReward,
+} from '@/types/index.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 
 export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
