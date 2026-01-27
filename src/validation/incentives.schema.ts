@@ -24,10 +24,16 @@ export const GetIncentivesQuerySchema = z
 
 export type GetIncentivesQuery = z.infer<typeof GetIncentivesQuerySchema>;
 
-export const GetUserRewardsQuerySchema = z
+export const GetUserRewardsParamsSchema = z
   .object({
     address: address,
+  })
+  .strict();
 
+export type GetUserRewardsParams = z.infer<typeof GetUserRewardsParamsSchema>;
+
+export const GetUserRewardsQuerySchema = z
+  .object({
     chainId: chainIdList.optional(),
 
     source: enumList(IncentiveSource).optional(),

@@ -4,7 +4,11 @@ import { createLogger } from '@/config/logger.js';
 import { IncentivesService } from '@/services/incentives.service.js';
 import { UserRewardsService } from '@/services/user-rewards.service.js';
 import { GetIncentivesResponse } from '@/types/index.js';
-import { GetIncentivesQuerySchema, GetUserRewardsQuerySchema } from '@/validation/incentives.schema.js';
+import {
+  GetIncentivesQuerySchema,
+  GetUserRewardsParamsSchema,
+  GetUserRewardsQuerySchema,
+} from '@/validation/incentives.schema.js';
 
 export class ApiController {
   private logger = createLogger('ApiController');
@@ -58,10 +62,11 @@ export class ApiController {
   }
 
   async getUserRewards(req: Request, res: Response) {
+    const params = GetUserRewardsParamsSchema.parse(req.params);
     const query = GetUserRewardsQuerySchema.parse(req.query);
 
     try {
-      const result = await this.userRewardsService.getUserRewards(query.address, {
+      const result = await this.userRewardsService.getUserRewards(params.address, {
         chainId: query.chainId,
         source: query.source,
         includeZeroBalance: query.includeZeroBalance,
