@@ -16,9 +16,9 @@ export type UserRewardsSummary = {
   totalCount: number;
   totalAmountUsd?: number;
   totalClaimableAmountUsd?: number;
-  bySource: Record<IncentiveSource, { count: number; totalValue?: number }>;
+  bySource: Partial<Record<IncentiveSource, { count: number; totalValue?: number }>>;
   byChain: Record<number, { count: number; totalValue?: number }>;
-  byStatus: Record<Status, { count: number }>;
+  byStatus: Partial<Record<Status, { count: number; totalValue?: number }>>;
 };
 
 export type ClaimData = {

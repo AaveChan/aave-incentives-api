@@ -137,50 +137,49 @@ export class UserRewardsService {
   private generateSummary(rewards: UserReward[]): UserRewardsSummary {
     const totals = this.calculateTotalClaimableValue(rewards);
 
-    const bySource: Record<string, { count: number; totalValue?: number }> = {};
     const byChain: Record<number, { count: number; totalValue?: number }> = {};
-    const byStatus: Record<string, { count: number }> = {};
+    const bySource: Partial<Record<IncentiveSource, { count: number; totalValue?: number }>> = {};
+    const byStatus: Partial<Record<Status, { count: number; totalValue?: number }>> = {};
+
+    const addToGroup = <K extends string | number>(
+      group: Record<K, { count: number; totalValue?: number }>,
+      key: K,
+      value?: number,
+    ) => {
+      if (!group[key]) {
+        group[key] = { count: 0, totalValue: 0 };
+      }
+      group[key].count++;
+      if (value !== undefined) {
+        group[key].totalValue = (group[key].totalValue ?? 0) + value;
+      }
+    };
 
     for (const reward of rewards) {
-      const chainId = reward.token.chainId;
-
-      // Iterate through incentive breakdowns to count by source and status
-      for (const incentive of reward.incentives) {
-        const source = incentive.source;
-        const status = incentive.status;
-
-        // By source
-        if (!bySource[source]) {
-          bySource[source] = { count: 0, totalValue: 0 };
-        }
-        bySource[source].count++;
-
-        // By status
-        if (!byStatus[status]) {
-          byStatus[status] = { count: 0 };
-        }
-        byStatus[status].count++;
-      }
-
-      // By chain (count tokens, not breakdowns)
-      if (!byChain[chainId]) {
-        byChain[chainId] = { count: 0, totalValue: 0 };
-      }
-      byChain[chainId].count++;
-
-      // Add value if available
+      // Calculate value once per reward
       const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
+      const value =
+        price !== undefined && amount !== undefined && amount > 0n
+          ? (Number(amount) / 10 ** decimals) * price
+          : undefined;
 
-      if (price !== undefined && amount !== undefined && amount > 0n) {
-        const amountInUnits = Number(amount) / 10 ** decimals;
-        const value = amountInUnits * price;
+      // By chain (count rewards/tokens)
+      addToGroup(byChain, reward.token.chainId, value);
 
-        // Add value to chain
-        if (byChain[chainId].totalValue !== undefined) {
-          byChain[chainId].totalValue! += value;
-        }
+      // By source and status (count incentives)
+      for (const incentive of reward.incentives) {
+        addToGroup(
+          bySource as Record<IncentiveSource, { count: number; totalValue?: number }>,
+          incentive.source,
+          value,
+        );
+        addToGroup(
+          byStatus as Record<Status, { count: number; totalValue?: number }>,
+          incentive.status,
+          value,
+        );
       }
     }
 
@@ -188,9 +187,9 @@ export class UserRewardsService {
       totalCount: rewards.length,
       totalAmountUsd: totals?.totalAmountUsd,
       totalClaimableAmountUsd: totals?.totalClaimableAmountUsd,
-      bySource: bySource as Record<IncentiveSource, { count: number; totalValue?: number }>,
-      byChain: byChain as Record<number, { count: number; totalValue?: number }>,
-      byStatus: byStatus as Record<Status, { count: number }>,
+      bySource,
+      byChain,
+      byStatus,
     };
   }
 
