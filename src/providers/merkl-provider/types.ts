@@ -192,6 +192,7 @@ export type MerklRewardToken = {
   chainId: number;
   symbol: string;
   decimals: number;
+  price: number;
 };
 
 type MerklUserReward = {

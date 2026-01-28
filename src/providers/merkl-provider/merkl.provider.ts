@@ -346,6 +346,7 @@ export class MerklProvider extends BaseIncentiveProvider {
       symbol: merklToken.symbol,
       decimals: merklToken.decimals,
       chainId: merklToken.chainId,
+      price: merklToken.price,
     };
     return token;
   };
@@ -377,7 +378,11 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   // User Rewards Methods
 
-  override async getRewards(address: Address, chainIds: number[], _options?: FetchUserRewardsOptions) {
+  override async getRewards(
+    address: Address,
+    chainIds: number[],
+    _options?: FetchUserRewardsOptions,
+  ) {
     const userRewards: UserReward[] = [];
     const claimDataByChain: Map<number, ClaimData> = new Map();
 

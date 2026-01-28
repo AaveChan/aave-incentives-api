@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address, formatUnits } from 'viem';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { withCache } from '@/lib/utils/cache.js';
@@ -96,49 +96,47 @@ export class UserRewardsService {
       );
     }
 
-    const totalValueUsd = this.calculateTotalValue(filteredRewards);
     const summary = this.generateSummary(filteredRewards);
 
     return {
       rewards: filteredRewards,
-      totalCount: filteredRewards.length,
-      totalValueUsd,
       lastUpdated: new Date().toISOString(),
       summary,
       claimData: filteredClaimData,
     };
   }
 
-  private calculateTotalValue(rewards: UserReward[]): number | undefined {
-    // TODO: Decide if this should calculate total accumulated value (totalAmount)
-    // or only claimable value (claimableAmount). Currently uses totalAmount.
-    let totalValue = 0;
+  private calculateTotalClaimableValue(rewards: UserReward[]) {
+    let totalAmountUsd = 0;
+    let totalClaimableAmountUsd = 0;
     let hasAnyPrice = false;
 
     for (const reward of rewards) {
       const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
+      const claimableAmount = reward.claimableAmount ? BigInt(reward.claimableAmount) : undefined;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
 
-      console.log({
-        token: reward.token.symbol,
-        amount,
-        price,
-        decimals,
-      });
-
-      if (price !== undefined && amount !== undefined && amount > 0n) {
+      if (price !== undefined && amount !== undefined && claimableAmount !== undefined) {
         hasAnyPrice = true;
-        // Convert bigint to number: amount / 10^decimals * price
-        const amountInUnits = Number(amount) / 10 ** decimals;
-        totalValue += amountInUnits * price;
+        const amountInUnits = Number(formatUnits(amount, decimals));
+        const claimableAmountInUnits = Number(formatUnits(claimableAmount, decimals));
+        totalAmountUsd += amountInUnits * price;
+        totalClaimableAmountUsd += claimableAmountInUnits * price;
       }
     }
 
-    return hasAnyPrice ? totalValue : undefined;
+    return hasAnyPrice
+      ? {
+          totalAmountUsd,
+          totalClaimableAmountUsd,
+        }
+      : undefined;
   }
 
   private generateSummary(rewards: UserReward[]): UserRewardsSummary {
+    const totals = this.calculateTotalClaimableValue(rewards);
+
     const bySource: Record<string, { count: number; totalValue?: number }> = {};
     const byChain: Record<number, { count: number; totalValue?: number }> = {};
     const byStatus: Record<string, { count: number }> = {};
@@ -187,6 +185,9 @@ export class UserRewardsService {
     }
 
     return {
+      totalCount: rewards.length,
+      totalAmountUsd: totals?.totalAmountUsd,
+      totalClaimableAmountUsd: totals?.totalClaimableAmountUsd,
       bySource: bySource as Record<IncentiveSource, { count: number; totalValue?: number }>,
       byChain: byChain as Record<number, { count: number; totalValue?: number }>,
       byStatus: byStatus as Record<Status, { count: number }>,

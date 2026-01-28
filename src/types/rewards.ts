@@ -13,6 +13,9 @@ export type UserReward = {
 };
 
 export type UserRewardsSummary = {
+  totalCount: number;
+  totalAmountUsd?: number;
+  totalClaimableAmountUsd?: number;
   bySource: Record<IncentiveSource, { count: number; totalValue?: number }>;
   byChain: Record<number, { count: number; totalValue?: number }>;
   byStatus: Record<Status, { count: number }>;
@@ -30,11 +33,9 @@ export type ClaimData = {
 
 export type GetUserRewardsResult = {
   rewards: UserReward[];
-  totalCount: number;
-  totalValueUsd?: number;
-  lastUpdated: string;
   claimData: ClaimData[]; // Claim transaction data
   summary: UserRewardsSummary;
+  lastUpdated: string;
 };
 
 export type FetchUserRewardsOptions = {
