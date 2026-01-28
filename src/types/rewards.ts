@@ -38,7 +38,6 @@ export type GetUserRewardsResult = {
 };
 
 export type FetchUserRewardsOptions = {
-  chainId?: number[];
   source?: IncentiveSource[];
   includeZeroBalance?: boolean;
 };

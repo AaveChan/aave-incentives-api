@@ -150,3 +150,62 @@ export type Campaign = {
   parentCampaignId: string;
   childCampaignIds: string[];
 };
+
+// Merkl User Rewards
+
+type MerklChain = {
+  id: number;
+  name: string;
+  icon: string;
+  liveCampaigns: number;
+  endOfDisputePeriod: number;
+  explorers: {
+    type: string;
+    url: string;
+    chainId: number;
+  }[];
+  lastClaimsOnchainFetchTimestamp?: string;
+};
+
+type MerklCampaignStatus = {
+  computedUntil: string;
+  processingStarted: string;
+  status: string;
+  preComputeProcessingStarted?: string;
+  preComputeStatus?: string;
+  delay: number;
+  error: string;
+  details: null;
+};
+
+type MerklRewardBreakdown = {
+  reason: string;
+  amount: string;
+  claimed: string;
+  pending: string;
+  campaignId: string;
+  campaignStatus?: MerklCampaignStatus;
+};
+
+export type MerklRewardToken = {
+  address: Address;
+  chainId: number;
+  symbol: string;
+  decimals: number;
+};
+
+type MerklUserReward = {
+  root: string;
+  recipient: string;
+  proofs: string[];
+  token: MerklRewardToken;
+  breakdowns: MerklRewardBreakdown[];
+  claimed: string;
+  amount: string;
+  pending: string;
+};
+
+export type MerklUserRewardsChainResponse = {
+  chain: MerklChain;
+  rewards: MerklUserReward[];
+};

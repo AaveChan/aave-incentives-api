@@ -17,19 +17,15 @@ export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 export interface IncentiveProvider {
   name: ProviderName;
   getIncentives(options?: FetchOptions): Promise<RawIncentive[]>;
+  getRewards(
+    address: Address,
+    chainIds: number[],
+    options?: FetchUserRewardsOptions,
+  ): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }>;
   getCacheKey(options?: FetchOptions): string;
   isHealthy(): Promise<boolean>;
   incentiveSource: IncentiveSource;
   incentiveType?: IncentiveType;
-}
-
-export interface RewardsProvider {
-  name: ProviderName;
-  incentiveSource: IncentiveSource;
-  getRewards(
-    address: Address,
-    options?: FetchUserRewardsOptions,
-  ): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }>;
 }
 
 export * from './aci-provider/aci.provider.js';

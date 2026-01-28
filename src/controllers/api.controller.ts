@@ -66,8 +66,7 @@ export class ApiController {
     const query = GetUserRewardsQuerySchema.parse(req.query);
 
     try {
-      const result = await this.userRewardsService.getUserRewards(params.address, {
-        chainId: query.chainId,
+      const result = await this.userRewardsService.getUserRewards(params.address, query.chainId, {
         source: query.source,
         includeZeroBalance: query.includeZeroBalance,
       });

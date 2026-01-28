@@ -2,46 +2,60 @@ import { Address } from 'viem';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { withCache } from '@/lib/utils/cache.js';
-import { RewardsProvider } from '@/providers/index.js';
-import { MerklRewardsProvider } from '@/providers/merkl-provider/merkl-rewards.provider.js';
+import { IncentiveProvider, MerklProvider } from '@/providers/index.js';
 import {
   ClaimData,
   FetchUserRewardsOptions,
   GetUserRewardsResult,
+  Incentive,
   IncentiveSource,
+  IncentiveType,
   Status,
+  Token,
   UserReward,
   UserRewardsSummary,
 } from '@/types/index.js';
 
+import { IncentivesService } from './incentives.service.js';
+
 export class UserRewardsService {
-  public providers: RewardsProvider[] = [new MerklRewardsProvider()];
+  private providers: IncentiveProvider[] = [new MerklProvider()];
+  private incentivesService = new IncentivesService();
 
   constructor() {
-    // Bind cached method
     this.getUserRewards = withCache(
-      (address: Address, options?: FetchUserRewardsOptions) =>
-        this._getUserRewards(address, options),
-      (address: Address, options?: FetchUserRewardsOptions) => this.getCacheKey(address, options),
-      CACHE_TTLS.PROVIDER.MERKL, // Use same TTL as Merkl provider
+      (address: Address, chainIds?: number[], options?: FetchUserRewardsOptions) =>
+        this._getUserRewards(address, chainIds, options),
+      (address: Address, chainIds?: number[], options?: FetchUserRewardsOptions) =>
+        this.getCacheKey(address, chainIds, options),
+      CACHE_TTLS.PROVIDER.MERKL,
     );
   }
 
   getUserRewards: (
     address: Address,
+    chainIds?: number[],
     options?: FetchUserRewardsOptions,
   ) => Promise<GetUserRewardsResult>;
 
   private async _getUserRewards(
     address: Address,
+    chainIds?: number[],
     options?: FetchUserRewardsOptions,
   ): Promise<GetUserRewardsResult> {
+    // Get all incentives for matching (filtered by chainId if provided)
+    const allIncentives = await this.incentivesService.getIncentives({
+      chainId: chainIds,
+    });
+
+    // If no chainIds provided, derive from incentives
+    const effectiveChainIds =
+      chainIds ?? Array.from(new Set(allIncentives.map((incentive) => incentive.chainId)));
+
     const allRewards: UserReward[] = [];
     const allClaimData: ClaimData[] = [];
-
-    // fetch all providers in parallel
     const rewardsPromises = this.providers.map(async (provider) => {
-      const rewardsResults = await provider.getRewards(address, options);
+      const rewardsResults = await provider.getRewards(address, effectiveChainIds, options);
       return {
         source: provider.incentiveSource,
         rewardsResults,
@@ -55,35 +69,35 @@ export class UserRewardsService {
       allClaimData.push(...result.rewardsResults.claimData);
     }
 
-    // Filter by source if specified
-    let filteredRewards = allRewards;
+    // Match incentives to rewards
+    const rewardsWithIncentives = allRewards.map((reward) => ({
+      ...reward,
+      incentives: this.findMatchingIncentives(allIncentives, reward.token),
+    }));
+
+    // Apply filters
+    let filteredRewards = rewardsWithIncentives;
+    let filteredClaimData = allClaimData;
+
     if (options?.source) {
       filteredRewards = filteredRewards.filter((reward) => options.source?.includes(reward.source));
-    }
-
-    // Filter zero balances unless explicitly requested
-    if (!options?.includeZeroBalance) {
-      filteredRewards = filteredRewards.filter((reward) => reward.claimableAmount > 0n);
-    }
-
-    // Calculate total value
-    const totalValueUsd = this.calculateTotalValue(filteredRewards);
-
-    // Generate summary
-    const summary = this.generateSummary(filteredRewards);
-
-    // Filter claim data by source and chain if needed
-    let filteredClaimData = allClaimData;
-    if (options?.source) {
       filteredClaimData = filteredClaimData.filter((claimData) =>
         options.source?.includes(claimData.source),
       );
     }
-    if (options?.chainId) {
+
+    if (!options?.includeZeroBalance) {
+      filteredRewards = filteredRewards.filter((reward) => reward.claimableAmount > 0n);
+    }
+
+    if (effectiveChainIds.length > 0) {
       filteredClaimData = filteredClaimData.filter((claimData) =>
-        options.chainId?.includes(claimData.chainId),
+        effectiveChainIds.includes(claimData.chainId),
       );
     }
+
+    const totalValueUsd = this.calculateTotalValue(filteredRewards);
+    const summary = this.generateSummary(filteredRewards);
 
     return {
       rewards: filteredRewards,
@@ -105,6 +119,13 @@ export class UserRewardsService {
       const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
+
+      console.log({
+        token: reward.token.symbol,
+        amount,
+        price,
+        decimals,
+      });
 
       if (price !== undefined && amount !== undefined && amount > 0n) {
         hasAnyPrice = true;
@@ -172,9 +193,35 @@ export class UserRewardsService {
     };
   }
 
-  private getCacheKey(address: Address, options?: FetchUserRewardsOptions): string {
-    const chainIds = options?.chainId?.sort().join(',') || 'all';
+  private findMatchingIncentives(incentives: Incentive[], rewardToken: Token): Incentive[] {
+    const matchingIncentives: Incentive[] = [];
+    for (const incentive of incentives) {
+      const tokenMatches =
+        incentive.type === IncentiveType.TOKEN &&
+        incentive.rewardToken.address.toLowerCase() === rewardToken.address.toLowerCase() &&
+        incentive.rewardToken.chainId === rewardToken.chainId;
+
+      const pointMatches =
+        incentive.type === IncentiveType.POINT_WITHOUT_VALUE &&
+        !!incentive.point.token &&
+        incentive.point.token.address.toLowerCase() === rewardToken.address.toLowerCase() &&
+        incentive.point.token.chainId === rewardToken.chainId;
+
+      if (tokenMatches || pointMatches) {
+        matchingIncentives.push(incentive);
+      }
+    }
+
+    return matchingIncentives;
+  }
+
+  private getCacheKey(
+    address: Address,
+    chainIds?: number[],
+    options?: FetchUserRewardsOptions,
+  ): string {
+    const chainIdsKey = chainIds?.sort().join(',') || 'all';
     const sources = options?.source?.sort().join(',') || 'all';
-    return `user-rewards:${address}:${chainIds}:${sources}`;
+    return `user-rewards:${address}:${chainIdsKey}:${sources}`;
   }
 }

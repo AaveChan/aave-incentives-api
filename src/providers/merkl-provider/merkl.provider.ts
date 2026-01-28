@@ -1,8 +1,11 @@
+import { Address, formatUnits } from 'viem';
 import { ink } from 'viem/chains';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
+import { MERKL_DISTRIBUTOR_ABI } from '@/constants/abis/merkl-distributor.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
+import { getMerklDistributorAddress } from '@/constants/merkl-distributors.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { tokenToString } from '@/lib/token/token.js';
@@ -12,6 +15,8 @@ import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
+  ClaimData,
+  FetchUserRewardsOptions,
   IncentiveSource,
   IncentiveType,
   NonEmptyTokens,
@@ -20,6 +25,7 @@ import {
   RawPointWithoutValueIncentive,
   RawTokenIncentive,
   Token,
+  UserReward,
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
@@ -27,7 +33,9 @@ import { FetchOptions } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
+  MerklRewardToken,
   MerklToken,
+  MerklUserRewardsChainResponse,
   RewardTokenType as MerklRewardTokenType,
 } from './types.js';
 
@@ -60,6 +68,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   incentiveSource = IncentiveSource.MERKL_API;
 
   apiUrl = 'https://api.merkl.xyz/v4/opportunities';
+  userRewardsApiUrl = 'https://api.merkl.xyz/v4/users';
   claimLink = 'https://app.merkl.xyz/';
 
   private logger = createLogger(this.name);
@@ -330,9 +339,9 @@ export class MerklProvider extends BaseIncentiveProvider {
     }
   }
 
-  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken): Token => {
+  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken | MerklRewardToken): Token => {
     const token: Token = {
-      name: merklToken.name,
+      name: (merklToken as MerklToken).name ?? merklToken.symbol,
       address: merklToken.address,
       symbol: merklToken.symbol,
       decimals: merklToken.decimals,
@@ -363,6 +372,170 @@ export class MerklProvider extends BaseIncentiveProvider {
       return response.ok;
     } catch {
       return false;
+    }
+  }
+
+  // User Rewards Methods
+
+  override async getRewards(address: Address, chainIds: number[], _options?: FetchUserRewardsOptions) {
+    const userRewards: UserReward[] = [];
+    const claimDataByChain: Map<number, ClaimData> = new Map();
+
+    if (chainIds.length === 0) {
+      this.logger.warn('No chainIds specified for user rewards fetch');
+      return { rewards: [], claimData: [] };
+    }
+
+    // Fetch rewards for all chains in parallel
+    const chainRewardsPromises = chainIds.map((chainId) =>
+      this.fetchMerklUserRewardsForChain(address, chainId).catch((error) => {
+        this.logger.error(
+          `Failed to fetch rewards for chain ${chainId}, skipping:`,
+          error instanceof Error ? error.message : error,
+        );
+        return [];
+      }),
+    );
+
+    const allChainRewardsArrays = await Promise.all(chainRewardsPromises);
+
+    // Flatten and process all rewards
+    for (const chainRewards of allChainRewardsArrays) {
+      for (const chainData of chainRewards) {
+        // Ensure rewards is an array
+        if (!chainData.rewards || !Array.isArray(chainData.rewards)) {
+          this.logger.warn(
+            `Invalid rewards data for chain ${chainData.chain?.id || 'unknown'}, skipping`,
+          );
+          continue;
+        }
+
+        const chainId = chainData.chain.id;
+
+        // Prepare claim data collection for this chain
+        const claimTokenAddresses: Address[] = [];
+        const claimAmounts: string[] = [];
+        const claimProofs: string[][] = [];
+
+        for (const merklReward of chainData.rewards) {
+          const rewardToken = merklReward.token;
+
+          // Create Token object
+          const token: Token = this.merklInfraTokenToIncentiveToken(rewardToken);
+
+          // merklReward:
+          // amount: amount available to claim
+          // claimed: amount already claimed
+          // pending: amount pending (not yet claimable)
+
+          // Build claim data if there's unclaimed amount
+          const unclaimedAmount = BigInt(merklReward.amount) - BigInt(merklReward.claimed);
+          if (unclaimedAmount > 0n) {
+            claimTokenAddresses.push(token.address);
+            claimAmounts.push(merklReward.amount); // Use total amount for contract
+            claimProofs.push(merklReward.proofs);
+          }
+
+          const userReward: UserReward = {
+            token,
+            source: IncentiveSource.MERKL_API,
+            claimableAmount: unclaimedAmount,
+            claimableAmountFormatted: Number(formatUnits(unclaimedAmount, token.decimals)),
+            totalAmount: BigInt(merklReward.amount),
+            claimLink: this.claimLink,
+            incentives: [], // Empty array - matching will be done in service layer
+          };
+
+          userRewards.push(userReward);
+        }
+
+        // Build ClaimData for this chain if there are claimable rewards
+        if (claimTokenAddresses.length > 0 && claimAmounts.length > 0 && claimProofs.length > 0) {
+          const distributorAddress = getMerklDistributorAddress(chainId);
+
+          const claimData: ClaimData = {
+            source: IncentiveSource.MERKL_API,
+            chainId,
+            contractAddress: distributorAddress,
+            functionName: 'claim',
+            abi: MERKL_DISTRIBUTOR_ABI,
+            args: [
+              [address], // users array with single user
+              claimTokenAddresses,
+              claimAmounts,
+              claimProofs,
+            ],
+          };
+
+          claimDataByChain.set(chainId, claimData);
+        }
+      }
+    }
+
+    const claimData = Array.from(claimDataByChain.values());
+
+    return { rewards: userRewards, claimData };
+  }
+
+  private async fetchMerklUserRewardsForChain(
+    address: Address,
+    chainId: number,
+  ): Promise<MerklUserRewardsChainResponse[]> {
+    // breakdownPage=0 is required by Merkl API (we don't paginate breakdowns)
+    const url = `${this.userRewardsApiUrl}/${address}/rewards?chainId=${chainId}&breakdownPage=0`;
+
+    this.logger.debug(`Fetching Merkl rewards for ${address} on chain ${chainId}`);
+
+    try {
+      const fetchResponse = await fetchWithTimeout(url);
+      const rawText = await fetchResponse.text();
+
+      // Parse JSON response
+      let responseData;
+      try {
+        responseData = JSON.parse(rawText);
+      } catch (parseError) {
+        this.logger.error(`Failed to parse JSON for chain ${chainId}`, parseError);
+        return [];
+      }
+
+      // Handle both array and object responses
+      let response: MerklUserRewardsChainResponse[];
+      if (Array.isArray(responseData)) {
+        response = responseData;
+      } else if (responseData && typeof responseData === 'object') {
+        // If it's an object, wrap it in an array
+        response = [responseData as MerklUserRewardsChainResponse];
+      } else {
+        // Invalid response format
+        this.logger.warn(`Unexpected response format for chain ${chainId}`, typeof responseData);
+        return [];
+      }
+
+      // Validate and filter response items
+      const validResponses = response.filter((item) => {
+        if (!item || typeof item !== 'object') {
+          this.logger.warn(`Invalid response item for chain ${chainId}`);
+          return false;
+        }
+        // Ensure rewards field exists and is an array
+        if (item.rewards && !Array.isArray(item.rewards)) {
+          this.logger.warn(
+            `Rewards field is not an array for chain ${chainId}`,
+            typeof item.rewards,
+          );
+          return false;
+        }
+        return true;
+      });
+
+      return validResponses;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch Merkl user rewards for ${address} on chain ${chainId}:`,
+        error,
+      );
+      return [];
     }
   }
 }
