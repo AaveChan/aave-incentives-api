@@ -1,7 +1,8 @@
 import { Address, formatUnits } from 'viem';
 
-import { CACHE_TTLS } from '@/config/cache-ttls.js';
-import { withCache } from '@/lib/utils/cache.js';
+import { HTTP_CONFIG } from '@/config/http.js';
+import { createLogger } from '@/config/logger.js';
+import { withTimeout } from '@/lib/utils/timeout.js';
 import { IncentiveProvider, MerklProvider } from '@/providers/index.js';
 import {
   ClaimData,
@@ -22,23 +23,9 @@ export class UserRewardsService {
   private providers: IncentiveProvider[] = [new MerklProvider()];
   private incentivesService = new IncentivesService();
 
-  constructor() {
-    this.getUserRewards = withCache(
-      (address: Address, chainIds?: number[], options?: FetchUserRewardsOptions) =>
-        this._getUserRewards(address, chainIds, options),
-      (address: Address, chainIds?: number[], options?: FetchUserRewardsOptions) =>
-        this.getCacheKey(address, chainIds, options),
-      CACHE_TTLS.PROVIDER.MERKL,
-    );
-  }
+  private logger = createLogger('IncentivesService');
 
-  getUserRewards: (
-    address: Address,
-    chainIds?: number[],
-    options?: FetchUserRewardsOptions,
-  ) => Promise<GetUserRewardsResult>;
-
-  private async _getUserRewards(
+  async getUserRewards(
     address: Address,
     chainIds?: number[],
     options?: FetchUserRewardsOptions,
@@ -52,19 +39,33 @@ export class UserRewardsService {
 
     const allRewards: UserReward[] = [];
     const allClaimData: ClaimData[] = [];
-    const rewardsPromises = this.providers.map(async (provider) => {
-      const rewardsResults = await provider.getRewards(address, effectiveChainIds, options);
-      return {
-        source: provider.incentiveSource,
-        rewardsResults,
-      };
+
+    const rewardsResults: { rewards: UserReward[]; claimData: ClaimData[] }[] = [];
+    // Fetch from all providers in parallel
+    const results = await Promise.allSettled(
+      this.providers.map((provider) =>
+        withTimeout(
+          provider.getRewards(address, effectiveChainIds, options),
+          HTTP_CONFIG.PROVIDER_TIMEOUT_MS,
+          `Provider ${provider.incentiveSource} timeout`,
+        ),
+      ),
+    );
+
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled') {
+        rewardsResults.push(...(result.value ? [result.value] : []));
+      } else {
+        this.logger.error(
+          `Provider ${this.providers[index]?.incentiveSource} failed:`,
+          result.reason,
+        );
+      }
     });
 
-    const rewardsResults = await Promise.all(rewardsPromises);
-
     for (const result of rewardsResults) {
-      allRewards.push(...result.rewardsResults.rewards);
-      allClaimData.push(...result.rewardsResults.claimData);
+      allRewards.push(...result.rewards);
+      allClaimData.push(...result.claimData);
     }
 
     // Match incentives to rewards
@@ -210,15 +211,5 @@ export class UserRewardsService {
     }
 
     return matchingIncentives;
-  }
-
-  private getCacheKey(
-    address: Address,
-    chainIds?: number[],
-    options?: FetchUserRewardsOptions,
-  ): string {
-    const chainIdsKey = chainIds?.sort().join(',') || 'all';
-    const sources = options?.source?.sort().join(',') || 'all';
-    return `user-rewards:${address}:${chainIdsKey}:${sources}`;
   }
 }
