@@ -54,8 +54,8 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
     chainIds?: number[],
     options?: FetchUserRewardsOptions,
   ): string {
-    const chainIdsKey = chainIds?.sort().join(',') || 'all';
-    const sources = options?.source?.sort().join(',') || 'all';
+    const chainIdsKey = chainIds ? [...chainIds].sort().join(',') : 'all';
+    const sources = options?.source ? [...options.source].sort().join(',') : 'all';
     return `user-rewards:${address}:${chainIdsKey}:${sources}`;
   }
 

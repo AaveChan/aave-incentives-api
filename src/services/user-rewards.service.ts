@@ -23,7 +23,7 @@ export class UserRewardsService {
   private providers: IncentiveProvider[] = [new MerklProvider()];
   private incentivesService = new IncentivesService();
 
-  private logger = createLogger('IncentivesService');
+  private logger = createLogger('UserRewardsService');
 
   async getUserRewards(
     address: Address,
@@ -54,7 +54,7 @@ export class UserRewardsService {
 
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
-        rewardsResults.push(...(result.value ? [result.value] : []));
+        if (result.value) rewardsResults.push(result.value);
       } else {
         this.logger.error(
           `Provider ${this.providers[index]?.incentiveSource} failed:`,
@@ -111,12 +111,12 @@ export class UserRewardsService {
     let hasAnyPrice = false;
 
     for (const reward of rewards) {
-      const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
-      const claimableAmount = reward.claimableAmount ? BigInt(reward.claimableAmount) : undefined;
+      const amount = reward.totalAmount;
+      const claimableAmount = reward.claimableAmount;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
 
-      if (price !== undefined && amount !== undefined && claimableAmount !== undefined) {
+      if (price !== undefined && amount !== undefined) {
         hasAnyPrice = true;
         const amountInUnits = Number(formatUnits(amount, decimals));
         const claimableAmountInUnits = Number(formatUnits(claimableAmount, decimals));
@@ -155,7 +155,7 @@ export class UserRewardsService {
     };
 
     for (const reward of rewards) {
-      const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
+      const amount = reward.totalAmount;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
       const value =
