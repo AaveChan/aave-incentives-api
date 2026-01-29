@@ -13,6 +13,7 @@ import { router as providersStatusRoute } from './routes/health.route.js';
 import { router as incentivesRoutes } from './routes/incentives.route.js';
 import { router as pingRoute } from './routes/ping.route.js';
 import { createStatusRoute } from './routes/status.route.js';
+import { router as userRewardsRoute } from './routes/user-rewards.route.js';
 import { router as wrapperTokensRoute } from './routes/wrapper-tokens.js';
 import { ApiErrorResponse } from './types/index.js';
 
@@ -49,6 +50,7 @@ app.get('/', (_req, res) => {
 
 app.use('/ping', pingRoute);
 app.use('/incentives', incentivesRoutes);
+app.use('/user-rewards', userRewardsRoute);
 app.use('/aci-addresses', aciAddressesRoute);
 app.use('/health', providersStatusRoute);
 

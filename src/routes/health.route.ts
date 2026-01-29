@@ -1,10 +1,10 @@
 import { Router } from 'express';
 
-import { IncentivesController } from '@/controllers/controller.js';
+import { ApiController } from '@/controllers/api.controller.js';
 
 const router = Router();
 
-const controller = new IncentivesController();
+const controller = new ApiController();
 
 router.get('/', controller.getProvidersStatus.bind(controller));
 

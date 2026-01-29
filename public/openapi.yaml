@@ -26,6 +26,8 @@ servers:
 tags:
   - name: Incentives
     description: Endpoints for fetching and filtering incentives
+  - name: User Rewards
+    description: Endpoints for fetching user-specific rewards and claim data
   - name: Health
     description: API health and monitoring
   - name: Wrapper Tokens
@@ -105,6 +107,55 @@ paths:
                       MerklProvider: true
                       OnchainProvider: true
                       ExternalPointsProvider: true
+
+  /user-rewards/{address}:
+    get:
+      tags:
+        - User Rewards
+      summary: Get user rewards
+      description: |
+        Fetches all claimable rewards for a specific user address across multiple chains.
+
+        Returns reward balances, associated incentives, and transaction data needed to claim rewards.
+
+        If no chainId is specified, rewards are fetched for all chains that have active incentives.
+
+        Results are cached for 2 minutes for optimal performance.
+      operationId: getUserRewards
+      parameters:
+        - name: address
+          in: path
+          required: true
+          description: The user's Ethereum address to fetch rewards for.
+          schema:
+            $ref: '#/components/schemas/EthereumAddress'
+          example: '0x073DDCF59285989e89E58D9665617Ec6967FB85E'
+        - $ref: '#/components/parameters/ChainId'
+        - $ref: '#/components/parameters/Source'
+        - name: includeZeroBalance
+          in: query
+          description: Include rewards with zero claimable balance. Defaults to false.
+          schema:
+            type: string
+            enum: ['true', 'false']
+          example: 'false'
+      responses:
+        '200':
+          description: Successfully retrieved user rewards
+          headers:
+            X-Cache:
+              description: Indicates if response was served from cache
+              schema:
+                type: string
+                enum: [HIT, MISS]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserRewardsResponse'
+        '400':
+          $ref: '#/components/responses/ValidationErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalErrorResponse'
 
   /wrapper-tokens:
     get:
@@ -614,6 +665,190 @@ components:
         - LIVE: Campaign is currently active
         - PAST: Campaign has ended
         - SOON: Campaign will start in the future
+
+    GetUserRewardsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponse'
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              required:
+                - rewards
+                - claimData
+                - summary
+                - lastUpdated
+              properties:
+                rewards:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/UserReward'
+                  description: List of user rewards across all chains
+                claimData:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ClaimData'
+                  description: Transaction data for claiming rewards (one per chain with claimable rewards)
+                summary:
+                  $ref: '#/components/schemas/UserRewardsSummary'
+                lastUpdated:
+                  type: string
+                  format: date-time
+                  description: Timestamp of when data was last fetched
+                  example: '2025-01-15T10:30:00Z'
+
+    UserReward:
+      type: object
+      required:
+        - token
+        - source
+        - claimableAmount
+        - claimableAmountFormatted
+        - claimLink
+        - incentives
+      properties:
+        token:
+          $ref: '#/components/schemas/Token'
+        source:
+          $ref: '#/components/schemas/IncentiveSource'
+        claimableAmount:
+          type: string
+          description: Claimable amount in token's smallest unit (wei). Serialized bigint.
+          example: '1000000000000000000'
+        claimableAmountFormatted:
+          type: number
+          format: float
+          description: Claimable amount formatted with token decimals
+          example: 1.0
+        totalAmount:
+          type: string
+          description: Total accumulated amount in token's smallest unit (wei). Serialized bigint.
+          example: '5000000000000000000'
+        claimLink:
+          type: string
+          format: uri
+          description: Link to claim rewards
+          example: 'https://app.merkl.xyz/'
+        incentives:
+          type: array
+          items:
+            $ref: '#/components/schemas/Incentive'
+          description: Associated incentives/campaigns for this reward
+
+    ClaimData:
+      type: object
+      required:
+        - source
+        - chainId
+        - contractAddress
+        - functionName
+        - abi
+        - args
+      properties:
+        source:
+          $ref: '#/components/schemas/IncentiveSource'
+        chainId:
+          type: integer
+          description: Chain ID where the claim transaction should be executed
+          example: 1
+        contractAddress:
+          allOf:
+            - $ref: '#/components/schemas/EthereumAddress'
+          description: Address of the distributor contract
+          example: '0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae'
+        functionName:
+          type: string
+          description: Name of the function to call
+          example: 'claim'
+        abi:
+          type: array
+          items:
+            type: object
+          description: Minimal ABI containing only the claim function
+        args:
+          type: array
+          items: {}
+          description: Arguments to pass to the claim function
+        value:
+          type: string
+          description: Optional ETH value to send with the transaction (in wei)
+          example: '0'
+
+    UserRewardsSummary:
+      type: object
+      required:
+        - totalCount
+        - bySource
+        - byChain
+        - byStatus
+      properties:
+        totalCount:
+          type: integer
+          description: Total number of reward entries
+          example: 5
+        totalAmountUsd:
+          type: number
+          format: float
+          description: Total accumulated value in USD (if prices available)
+          example: 1250.50
+        totalClaimableAmountUsd:
+          type: number
+          format: float
+          description: Total claimable value in USD (if prices available)
+          example: 500.25
+        bySource:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/GroupSummary'
+          description: Summary grouped by incentive source
+          example:
+            MERKL_API:
+              count: 3
+              totalValue: 750.25
+            ACI_MASIV_API:
+              count: 2
+              totalValue: 500.25
+        byChain:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/GroupSummary'
+          description: Summary grouped by chain ID
+          example:
+            '1':
+              count: 2
+              totalValue: 800.00
+            '42161':
+              count: 3
+              totalValue: 450.50
+        byStatus:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/GroupSummary'
+          description: Summary grouped by incentive status
+          example:
+            LIVE:
+              count: 4
+              totalValue: 1000.00
+            PAST:
+              count: 1
+              totalValue: 250.50
+
+    GroupSummary:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          description: Number of items in this group
+          example: 3
+        totalValue:
+          type: number
+          format: float
+          description: Total USD value of items in this group
+          example: 500.25
 
   responses:
     ValidationErrorResponse:

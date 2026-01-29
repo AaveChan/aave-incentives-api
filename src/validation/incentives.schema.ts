@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { IncentiveSource, IncentiveType, Status } from '@/types/index.js';
 
-import { addressList, chainIdList, enumList } from './parsers.js';
+import { address, addressList, chainIdList, enumList } from './parsers.js';
 
 export const GetIncentivesQuerySchema = z
   .object({
@@ -23,3 +23,26 @@ export const GetIncentivesQuerySchema = z
   .strict();
 
 export type GetIncentivesQuery = z.infer<typeof GetIncentivesQuerySchema>;
+
+export const GetUserRewardsParamsSchema = z
+  .object({
+    address: address,
+  })
+  .strict();
+
+export type GetUserRewardsParams = z.infer<typeof GetUserRewardsParamsSchema>;
+
+export const GetUserRewardsQuerySchema = z
+  .object({
+    chainId: chainIdList.optional(),
+
+    source: enumList(IncentiveSource).optional(),
+
+    includeZeroBalance: z
+      .string()
+      .optional()
+      .transform((val) => val === 'true'),
+  })
+  .strict();
+
+export type GetUserRewardsQuery = z.infer<typeof GetUserRewardsQuerySchema>;
