@@ -7,9 +7,9 @@ export type UserReward = {
   source: IncentiveSource;
   claimableAmount: bigint;
   claimableAmountFormatted: number;
-  totalAmount?: bigint; // Total amount across all campaigns
-  claimLink: string; // Link to claim rewards (same for all campaigns from same source)
-  incentives: Incentive[]; // Breakdown by incentive/campaign
+  totalAmount?: bigint;
+  claimLink: string;
+  incentives: Incentive[];
 };
 
 export type UserRewardsSummary = {
@@ -33,7 +33,7 @@ export type ClaimData = {
 
 export type GetUserRewardsResult = {
   rewards: UserReward[];
-  claimData: ClaimData[]; // Claim transaction data
+  claimData: ClaimData[];
   summary: UserRewardsSummary;
   lastUpdated: string;
 };

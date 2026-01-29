@@ -67,8 +67,9 @@ export class MerklProvider extends BaseIncentiveProvider {
   name = ProviderName.Merkl;
   incentiveSource = IncentiveSource.MERKL_API;
 
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities';
-  userRewardsApiUrl = 'https://api.merkl.xyz/v4/users';
+  merklApiUrl = 'https://api.merkl.xyz/v4';
+  opportunityApiUrl = `${this.merklApiUrl}/opportunities`;
+  userRewardsApiUrl = `${this.merklApiUrl}/users`;
   claimLink = 'https://app.merkl.xyz/';
 
   private logger = createLogger(this.name);
@@ -76,6 +77,8 @@ export class MerklProvider extends BaseIncentiveProvider {
   constructor() {
     super(CACHE_TTLS.PROVIDER.MERKL);
   }
+
+  // INCENTIVES
 
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
@@ -207,7 +210,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   private async fetchIncentives(
     mainProtocolIds: MainProtocolId[],
   ): Promise<MerklOpportunityWithCampaign[]> {
-    const url = new URL(this.apiUrl);
+    const url = new URL(this.opportunityApiUrl);
 
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
@@ -339,18 +342,6 @@ export class MerklProvider extends BaseIncentiveProvider {
     }
   }
 
-  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken | MerklRewardToken): Token => {
-    const token: Token = {
-      name: (merklToken as MerklToken).name ?? merklToken.symbol,
-      address: merklToken.address,
-      symbol: merklToken.symbol,
-      decimals: merklToken.decimals,
-      chainId: merklToken.chainId,
-      price: merklToken.price,
-    };
-    return token;
-  };
-
   private filterMerklTokens = (tokens: MerklToken[]): MerklToken[] =>
     tokens.filter((token) => {
       const aaveTokenInfo = getAaveTokenInfo({
@@ -369,14 +360,14 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const response = await fetchWithTimeout(this.apiUrl);
+      const response = await fetchWithTimeout(this.opportunityApiUrl);
       return response.ok;
     } catch {
       return false;
     }
   }
 
-  // User Rewards Methods
+  // USER REWARDS
 
   override async getRewards(
     address: Address,
@@ -429,9 +420,9 @@ export class MerklProvider extends BaseIncentiveProvider {
           const token: Token = this.merklInfraTokenToIncentiveToken(rewardToken);
 
           // merklReward:
-          // amount: amount available to claim
-          // claimed: amount already claimed
-          // pending: amount pending (not yet claimable)
+          // - amount: amount available to claim
+          // - claimed: amount already claimed
+          // - pending: amount pending (not yet claimable, but soon to be)
 
           // Build claim data if there's unclaimed amount
           const unclaimedAmount = BigInt(merklReward.amount) - BigInt(merklReward.claimed);
@@ -492,49 +483,35 @@ export class MerklProvider extends BaseIncentiveProvider {
     this.logger.debug(`Fetching Merkl rewards for ${address} on chain ${chainId}`);
 
     try {
-      const fetchResponse = await fetchWithTimeout(url);
-      const rawText = await fetchResponse.text();
+      const response = await fetch(url);
+      const merklUserRewards = await response.json();
 
-      // Parse JSON response
-      let responseData;
-      try {
-        responseData = JSON.parse(rawText);
-      } catch (parseError) {
-        this.logger.error(`Failed to parse JSON for chain ${chainId}`, parseError);
-        return [];
-      }
-
-      // Handle both array and object responses
-      let response: MerklUserRewardsChainResponse[];
-      if (Array.isArray(responseData)) {
-        response = responseData;
-      } else if (responseData && typeof responseData === 'object') {
-        // If it's an object, wrap it in an array
-        response = [responseData as MerklUserRewardsChainResponse];
+      if (Array.isArray(merklUserRewards)) {
+        // Validate and filter response items
+        const merklUserRewardsFiltered = merklUserRewards.filter((item) => {
+          if (!item || typeof item !== 'object') {
+            this.logger.warn(`Invalid response item for chain ${chainId}`);
+            return false;
+          }
+          // Ensure rewards field exists and is an array
+          if (item.rewards && !Array.isArray(item.rewards)) {
+            this.logger.warn(
+              `Rewards field is not an array for chain ${chainId}`,
+              typeof item.rewards,
+            );
+            return false;
+          }
+          return true;
+        });
+        return merklUserRewardsFiltered;
       } else {
         // Invalid response format
-        this.logger.warn(`Unexpected response format for chain ${chainId}`, typeof responseData);
+        this.logger.warn(
+          `Unexpected response format for chain ${chainId}`,
+          typeof merklUserRewards,
+        );
         return [];
       }
-
-      // Validate and filter response items
-      const validResponses = response.filter((item) => {
-        if (!item || typeof item !== 'object') {
-          this.logger.warn(`Invalid response item for chain ${chainId}`);
-          return false;
-        }
-        // Ensure rewards field exists and is an array
-        if (item.rewards && !Array.isArray(item.rewards)) {
-          this.logger.warn(
-            `Rewards field is not an array for chain ${chainId}`,
-            typeof item.rewards,
-          );
-          return false;
-        }
-        return true;
-      });
-
-      return validResponses;
     } catch (error) {
       this.logger.error(
         `Failed to fetch Merkl user rewards for ${address} on chain ${chainId}:`,
@@ -543,4 +520,18 @@ export class MerklProvider extends BaseIncentiveProvider {
       return [];
     }
   }
+
+  // COMMON METHODS
+
+  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken | MerklRewardToken): Token => {
+    const token: Token = {
+      name: (merklToken as MerklToken).name ?? merklToken.symbol,
+      address: merklToken.address,
+      symbol: merklToken.symbol,
+      decimals: merklToken.decimals,
+      chainId: merklToken.chainId,
+      price: merklToken.price,
+    };
+    return token;
+  };
 }

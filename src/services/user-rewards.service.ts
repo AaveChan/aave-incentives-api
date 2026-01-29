@@ -43,12 +43,10 @@ export class UserRewardsService {
     chainIds?: number[],
     options?: FetchUserRewardsOptions,
   ): Promise<GetUserRewardsResult> {
-    // Get all incentives for matching (filtered by chainId if provided)
     const allIncentives = await this.incentivesService.getIncentives({
       chainId: chainIds,
     });
 
-    // If no chainIds provided, derive from incentives
     const effectiveChainIds =
       chainIds ?? Array.from(new Set(allIncentives.map((incentive) => incentive.chainId)));
 
@@ -156,7 +154,6 @@ export class UserRewardsService {
     };
 
     for (const reward of rewards) {
-      // Calculate value once per reward
       const amount = reward.totalAmount ? BigInt(reward.totalAmount) : undefined;
       const price = reward.token.price;
       const decimals = reward.token.decimals;
@@ -165,10 +162,10 @@ export class UserRewardsService {
           ? (Number(amount) / 10 ** decimals) * price
           : undefined;
 
-      // By chain (count rewards/tokens)
+      // By chain
       addToGroup(byChain, reward.token.chainId, value);
 
-      // By source and status (count incentives)
+      // By source and status
       for (const incentive of reward.incentives) {
         addToGroup(
           bySource as Record<IncentiveSource, { count: number; totalValue?: number }>,
