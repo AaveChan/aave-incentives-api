@@ -22,6 +22,15 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
   incentiveType?: IncentiveType;
 
   protected abstract _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]>;
+
+  protected _getRewards(
+    _address: Address,
+    _chainIds: number[],
+    _options?: FetchUserRewardsOptions,
+  ): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }> {
+    return Promise.resolve({ rewards: [], claimData: [] });
+  }
+
   abstract isHealthy(): Promise<boolean>;
 
   // Shared services
@@ -30,19 +39,38 @@ export abstract class BaseIncentiveProvider implements IncentiveProvider {
   aaveUIIncentiveService = new AaveUiIncentiveService();
 
   getIncentives: (opts?: FetchOptions) => Promise<RawIncentive[]>;
-
-  getRewards(_address: Address, _chainIds: number[], _options?: FetchUserRewardsOptions): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }> {
-    return Promise.resolve({ rewards: [], claimData: [] });
-  }
+  getRewards: (
+    address: Address,
+    chainIds: number[],
+    options?: FetchUserRewardsOptions,
+  ) => Promise<{ rewards: UserReward[]; claimData: ClaimData[] }>;
 
   getCacheKey(_fetchOptions?: FetchOptions): string {
     return `provider:${this.name}`;
+  }
+
+  getCacheKeyUserRewards(
+    address: Address,
+    chainIds?: number[],
+    options?: FetchUserRewardsOptions,
+  ): string {
+    const chainIdsKey = chainIds?.sort().join(',') || 'all';
+    const sources = options?.source?.sort().join(',') || 'all';
+    return `user-rewards:${address}:${chainIdsKey}:${sources}`;
   }
 
   constructor(protected readonly cacheTtl: number) {
     this.getIncentives = withCache(
       (opts?: FetchOptions) => this._getIncentives(opts),
       (opts?: FetchOptions) => this.getCacheKey(opts),
+      cacheTtl,
+    );
+
+    this.getRewards = withCache(
+      (address: Address, chainIds: number[], options?: FetchUserRewardsOptions) =>
+        this._getRewards(address, chainIds, options),
+      (address: Address, chainIds: number[], options?: FetchUserRewardsOptions) =>
+        this.getCacheKeyUserRewards(address, chainIds, options),
       cacheTtl,
     );
   }

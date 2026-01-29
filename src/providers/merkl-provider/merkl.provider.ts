@@ -70,6 +70,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   merklApiUrl = 'https://api.merkl.xyz/v4';
   opportunityApiUrl = `${this.merklApiUrl}/opportunities`;
   userRewardsApiUrl = `${this.merklApiUrl}/users`;
+
   claimLink = 'https://app.merkl.xyz/';
 
   private logger = createLogger(this.name);
@@ -369,7 +370,7 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   // USER REWARDS
 
-  override async getRewards(
+  protected override async _getRewards(
     address: Address,
     chainIds: number[],
     _options?: FetchUserRewardsOptions,
