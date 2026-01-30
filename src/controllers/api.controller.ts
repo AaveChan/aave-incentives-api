@@ -16,7 +16,7 @@ export class ApiController {
   private userRewardsService = new UserRewardsService();
 
   async getAllIncentives(req: Request, res: Response) {
-    // the middlewear doenst' mutate the req.query, so we either need to store the validated query in res.locals (1st option) or re-parse it here (2nd option)
+    // the middleware doesn't mutate the req.query, so we either need to store the validated query in res.locals (1st option) or re-parse it here (2nd option)
     // const query = res.locals.validatedQuery as z.infer<typeof GetIncentivesQuerySchema>; // 1st option (good but not super clean)
     const query = GetIncentivesQuerySchema.parse(req.query); // 2nd option (cleaner but we do the same validation twice)
 
