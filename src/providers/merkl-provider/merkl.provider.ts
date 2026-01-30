@@ -414,6 +414,12 @@ export class MerklProvider extends BaseIncentiveProvider {
         const claimTokenAddresses: Address[] = [];
         const claimAmounts: string[] = [];
         const claimProofs: string[][] = [];
+        const claimAbi = [
+          getAbiItem({
+            abi: MERKL_DISTRIBUTOR_ABI,
+            name: 'claim',
+          }),
+        ];
 
         for (const merklReward of chainData.rewards) {
           const rewardToken = merklReward.token;
@@ -452,19 +458,12 @@ export class MerklProvider extends BaseIncentiveProvider {
         if (claimTokenAddresses.length > 0 && claimAmounts.length > 0 && claimProofs.length > 0) {
           const distributorAddress = getMerklDistributorAddress(chainId);
 
-          const abiClaim = [
-            getAbiItem({
-              abi: MERKL_DISTRIBUTOR_ABI,
-              name: 'claim',
-            }),
-          ];
-
           const claimData: ClaimData = {
             source: IncentiveSource.MERKL_API,
             chainId,
             contractAddress: distributorAddress,
             functionName: 'claim',
-            abi: abiClaim,
+            abi: claimAbi,
             args: [
               claimUsers, // users array with single user
               claimTokenAddresses,
