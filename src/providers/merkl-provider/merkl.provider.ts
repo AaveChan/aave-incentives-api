@@ -410,6 +410,7 @@ export class MerklProvider extends BaseIncentiveProvider {
         const chainId = chainData.chain.id;
 
         // Prepare claim data collection for this chain
+        const claimUsers: Address[] = []; // Even if there is only one user, Merkl expects an array length equal to the number of tokens claimed
         const claimTokenAddresses: Address[] = [];
         const claimAmounts: string[] = [];
         const claimProofs: string[][] = [];
@@ -428,6 +429,7 @@ export class MerklProvider extends BaseIncentiveProvider {
           // Build claim data if there's unclaimed amount
           const unclaimedAmount = BigInt(merklReward.amount) - BigInt(merklReward.claimed);
           if (unclaimedAmount > 0n) {
+            claimUsers.push(address);
             claimTokenAddresses.push(token.address);
             claimAmounts.push(merklReward.amount); // Use total amount for contract
             claimProofs.push(merklReward.proofs);
@@ -457,7 +459,7 @@ export class MerklProvider extends BaseIncentiveProvider {
             functionName: 'claim',
             abi: MERKL_DISTRIBUTOR_ABI,
             args: [
-              [address], // users array with single user
+              claimUsers, // users array with single user
               claimTokenAddresses,
               claimAmounts,
               claimProofs,
