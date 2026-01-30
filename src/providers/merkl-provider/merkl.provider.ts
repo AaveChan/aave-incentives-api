@@ -1,8 +1,11 @@
+import { Address, formatUnits, getAbiItem } from 'viem';
 import { ink } from 'viem/chains';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
+import { MERKL_DISTRIBUTOR_ABI } from '@/constants/abis/merkl-distributor.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
+import { getMerklDistributorAddress } from '@/constants/merkl-distributors.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { tokenToString } from '@/lib/token/token.js';
@@ -12,6 +15,8 @@ import { getCurrentTimestamp } from '@/lib/utils/timestamp.js';
 import {
   BaseIncentive,
   CampaignConfig,
+  ClaimData,
+  FetchUserRewardsOptions,
   IncentiveSource,
   IncentiveType,
   NonEmptyTokens,
@@ -20,6 +25,7 @@ import {
   RawPointWithoutValueIncentive,
   RawTokenIncentive,
   Token,
+  UserReward,
 } from '@/types/index.js';
 
 import { BaseIncentiveProvider } from '../base.provider.js';
@@ -27,7 +33,9 @@ import { FetchOptions } from '../index.js';
 import {
   Campaign,
   MerklOpportunityWithCampaign,
+  MerklRewardToken,
   MerklToken,
+  MerklUserRewardsChainResponse,
   RewardTokenType as MerklRewardTokenType,
 } from './types.js';
 
@@ -59,7 +67,10 @@ export class MerklProvider extends BaseIncentiveProvider {
   name = ProviderName.Merkl;
   incentiveSource = IncentiveSource.MERKL_API;
 
-  apiUrl = 'https://api.merkl.xyz/v4/opportunities';
+  merklApiUrl = 'https://api.merkl.xyz/v4';
+  opportunityApiUrl = `${this.merklApiUrl}/opportunities`;
+  userRewardsApiUrl = `${this.merklApiUrl}/users`;
+
   claimLink = 'https://app.merkl.xyz/';
 
   private logger = createLogger(this.name);
@@ -67,6 +78,8 @@ export class MerklProvider extends BaseIncentiveProvider {
   constructor() {
     super(CACHE_TTLS.PROVIDER.MERKL);
   }
+
+  // INCENTIVES
 
   async _getIncentives(fetchOptions?: FetchOptions): Promise<RawIncentive[]> {
     const allIncentives: RawIncentive[] = [];
@@ -158,6 +171,7 @@ export class MerklProvider extends BaseIncentiveProvider {
             point: {
               name: rewardToken.name,
               protocol: protocolId,
+              token: rewardToken,
             },
           };
           allIncentives.push(pointIncentive);
@@ -197,7 +211,7 @@ export class MerklProvider extends BaseIncentiveProvider {
   private async fetchIncentives(
     mainProtocolIds: MainProtocolId[],
   ): Promise<MerklOpportunityWithCampaign[]> {
-    const url = new URL(this.apiUrl);
+    const url = new URL(this.opportunityApiUrl);
 
     const merklApiOptions: MerklApiOptions = {
       campaigns: true,
@@ -329,17 +343,6 @@ export class MerklProvider extends BaseIncentiveProvider {
     }
   }
 
-  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken): Token => {
-    const token: Token = {
-      name: merklToken.name,
-      address: merklToken.address,
-      symbol: merklToken.symbol,
-      decimals: merklToken.decimals,
-      chainId: merklToken.chainId,
-    };
-    return token;
-  };
-
   private filterMerklTokens = (tokens: MerklToken[]): MerklToken[] =>
     tokens.filter((token) => {
       const aaveTokenInfo = getAaveTokenInfo({
@@ -358,10 +361,186 @@ export class MerklProvider extends BaseIncentiveProvider {
 
   async isHealthy(): Promise<boolean> {
     try {
-      const response = await fetchWithTimeout(this.apiUrl);
+      const response = await fetchWithTimeout(this.opportunityApiUrl);
       return response.ok;
     } catch {
       return false;
     }
   }
+
+  // USER REWARDS
+
+  protected override async _getRewards(
+    address: Address,
+    chainIds: number[],
+    _options?: FetchUserRewardsOptions,
+  ) {
+    const userRewards: UserReward[] = [];
+    const claimDataByChain: Map<number, ClaimData> = new Map();
+
+    if (chainIds.length === 0) {
+      this.logger.warn('No chainIds specified for user rewards fetch');
+      return { rewards: [], claimData: [] };
+    }
+
+    // Fetch rewards for all chains in parallel
+    const chainRewardsPromises = chainIds.map((chainId) =>
+      this.fetchMerklUserRewardsForChain(address, chainId).catch((error) => {
+        this.logger.error(
+          `Failed to fetch rewards for chain ${chainId}, skipping:`,
+          error instanceof Error ? error.message : error,
+        );
+        return [];
+      }),
+    );
+
+    const allChainRewardsArrays = await Promise.all(chainRewardsPromises);
+
+    // Flatten and process all rewards
+    for (const chainRewards of allChainRewardsArrays) {
+      for (const chainData of chainRewards) {
+        // Ensure rewards is an array
+        if (!chainData.rewards || !Array.isArray(chainData.rewards)) {
+          this.logger.warn(
+            `Invalid rewards data for chain ${chainData.chain?.id || 'unknown'}, skipping`,
+          );
+          continue;
+        }
+
+        const chainId = chainData.chain.id;
+
+        // Prepare claim data collection for this chain
+        const claimUsers: Address[] = []; // Even if there is only one user, Merkl expects an array length equal to the number of tokens claimed
+        const claimTokenAddresses: Address[] = [];
+        const claimAmounts: string[] = [];
+        const claimProofs: string[][] = [];
+        const claimAbi = [
+          getAbiItem({
+            abi: MERKL_DISTRIBUTOR_ABI,
+            name: 'claim',
+          }),
+        ];
+
+        for (const merklReward of chainData.rewards) {
+          const rewardToken = merklReward.token;
+
+          // Create Token object
+          const token: Token = this.merklInfraTokenToIncentiveToken(rewardToken);
+
+          // merklReward:
+          // - amount: amount available to claim
+          // - claimed: amount already claimed
+          // - pending: amount pending (not yet claimable, but soon to be)
+
+          // Build claim data if there's unclaimed amount
+          const unclaimedAmount = BigInt(merklReward.amount) - BigInt(merklReward.claimed);
+          if (unclaimedAmount > 0n) {
+            claimUsers.push(address);
+            claimTokenAddresses.push(token.address);
+            claimAmounts.push(merklReward.amount); // Use total amount for contract
+            claimProofs.push(merklReward.proofs);
+          }
+
+          const userReward: UserReward = {
+            token,
+            source: IncentiveSource.MERKL_API,
+            claimableAmount: unclaimedAmount,
+            claimableAmountFormatted: Number(formatUnits(unclaimedAmount, token.decimals)),
+            totalAmount: BigInt(merklReward.amount),
+            claimLink: this.claimLink,
+            incentives: [], // Empty array - matching will be done in service layer
+          };
+
+          userRewards.push(userReward);
+        }
+
+        // Build ClaimData for this chain if there are claimable rewards
+        if (claimTokenAddresses.length > 0 && claimAmounts.length > 0 && claimProofs.length > 0) {
+          const distributorAddress = getMerklDistributorAddress(chainId);
+
+          const claimData: ClaimData = {
+            source: IncentiveSource.MERKL_API,
+            chainId,
+            contractAddress: distributorAddress,
+            functionName: 'claim',
+            abi: claimAbi,
+            args: [
+              claimUsers, // users array with single user
+              claimTokenAddresses,
+              claimAmounts,
+              claimProofs,
+            ],
+          };
+
+          claimDataByChain.set(chainId, claimData);
+        }
+      }
+    }
+
+    const claimData = Array.from(claimDataByChain.values());
+
+    return { rewards: userRewards, claimData };
+  }
+
+  private async fetchMerklUserRewardsForChain(
+    address: Address,
+    chainId: number,
+  ): Promise<MerklUserRewardsChainResponse[]> {
+    // breakdownPage=0 is required by Merkl API (we don't paginate breakdowns)
+    const url = `${this.userRewardsApiUrl}/${address}/rewards?chainId=${chainId}&breakdownPage=0`;
+
+    this.logger.debug(`Fetching Merkl rewards for ${address} on chain ${chainId}`);
+
+    try {
+      const response = await fetch(url);
+      const merklUserRewards = await response.json();
+
+      if (Array.isArray(merklUserRewards)) {
+        // Validate and filter response items
+        const merklUserRewardsFiltered = merklUserRewards.filter((item) => {
+          if (!item || typeof item !== 'object') {
+            this.logger.warn(`Invalid response item for chain ${chainId}`);
+            return false;
+          }
+          // Ensure rewards field exists and is an array
+          if (item.rewards && !Array.isArray(item.rewards)) {
+            this.logger.warn(
+              `Rewards field is not an array for chain ${chainId}`,
+              typeof item.rewards,
+            );
+            return false;
+          }
+          return true;
+        });
+        return merklUserRewardsFiltered;
+      } else {
+        // Invalid response format
+        this.logger.warn(
+          `Unexpected response format for chain ${chainId}`,
+          typeof merklUserRewards,
+        );
+        return [];
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch Merkl user rewards for ${address} on chain ${chainId}:`,
+        error,
+      );
+      return [];
+    }
+  }
+
+  // COMMON METHODS
+
+  private merklInfraTokenToIncentiveToken = (merklToken: MerklToken | MerklRewardToken): Token => {
+    const token: Token = {
+      name: (merklToken as MerklToken).name ?? merklToken.symbol,
+      address: merklToken.address,
+      symbol: merklToken.symbol,
+      decimals: merklToken.decimals,
+      chainId: merklToken.chainId,
+      price: merklToken.price,
+    };
+    return token;
+  };
 }

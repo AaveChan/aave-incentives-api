@@ -1,6 +1,15 @@
+import { Address } from 'viem';
 import z from 'zod';
 
-import { IncentiveSource, IncentiveType, ProviderName, RawIncentive } from '@/types/index.js';
+import {
+  ClaimData,
+  FetchUserRewardsOptions,
+  IncentiveSource,
+  IncentiveType,
+  ProviderName,
+  RawIncentive,
+  UserReward,
+} from '@/types/index.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 
 export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
@@ -8,6 +17,11 @@ export type FetchOptions = z.infer<typeof GetIncentivesQuerySchema>;
 export interface IncentiveProvider {
   name: ProviderName;
   getIncentives(options?: FetchOptions): Promise<RawIncentive[]>;
+  getRewards(
+    address: Address,
+    chainIds: number[],
+    options?: FetchUserRewardsOptions,
+  ): Promise<{ rewards: UserReward[]; claimData: ClaimData[] }>;
   getCacheKey(options?: FetchOptions): string;
   isHealthy(): Promise<boolean>;
   incentiveSource: IncentiveSource;

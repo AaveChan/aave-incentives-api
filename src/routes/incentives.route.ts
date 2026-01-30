@@ -1,13 +1,13 @@
 import { Router } from 'express';
 
-import { IncentivesController } from '@/controllers/controller.js';
+import { ApiController } from '@/controllers/api.controller.js';
 import { HttpCacheMiddleware } from '@/middlewares/cache.middleware.js';
 import { GetIncentivesQuerySchema } from '@/validation/incentives.schema.js';
 import { validateQuery } from '@/validation/validation.middleware.js';
 
 const router = Router();
 
-const controller = new IncentivesController();
+const controller = new ApiController();
 
 const httpCache = new HttpCacheMiddleware();
 

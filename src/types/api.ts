@@ -84,6 +84,7 @@ export interface Point {
   name: string;
   protocol: string;
   tgePrice?: number;
+  token?: Token;
 }
 
 export type CampaignConfig = {
