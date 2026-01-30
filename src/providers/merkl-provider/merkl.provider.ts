@@ -1,4 +1,4 @@
-import { Address, formatUnits } from 'viem';
+import { Address, formatUnits, getAbiItem } from 'viem';
 import { ink } from 'viem/chains';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
@@ -452,12 +452,19 @@ export class MerklProvider extends BaseIncentiveProvider {
         if (claimTokenAddresses.length > 0 && claimAmounts.length > 0 && claimProofs.length > 0) {
           const distributorAddress = getMerklDistributorAddress(chainId);
 
+          const abiClaim = [
+            getAbiItem({
+              abi: MERKL_DISTRIBUTOR_ABI,
+              name: 'claim',
+            }),
+          ];
+
           const claimData: ClaimData = {
             source: IncentiveSource.MERKL_API,
             chainId,
             contractAddress: distributorAddress,
             functionName: 'claim',
-            abi: MERKL_DISTRIBUTOR_ABI,
+            abi: abiClaim,
             args: [
               claimUsers, // users array with single user
               claimTokenAddresses,
