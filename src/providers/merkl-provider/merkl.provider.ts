@@ -149,9 +149,9 @@ export class MerklProvider extends BaseIncentiveProvider {
 
         const whitelisted = WHITELISTED_OPPORTUNITIES.has(opportunity.id);
         if (!whitelisted) {
-          // by default blacklist the campaign that have a whitelist
-          // example: For Kraken Earn Vaults on Ink we have a simple "Supply USDC" opportunity with a whitelist composed of the 2 kraken vaults addresses
-          // => we need to hide this opportunity because it does not concern Aave
+          // by default blacklist the campaigns that have a whitelist
+          // example: For Kraken Earn Vaults on Ink we have a simple "Supply USDC" campaign with a whitelist composed of the 2 kraken vaults addresses
+          // => we need to hide this campaign because it does not concern Aave
           campaigns = campaigns.filter((campaign) => campaign.params.whitelist.length === 0);
         }
 
