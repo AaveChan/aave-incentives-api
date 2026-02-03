@@ -26,7 +26,7 @@ vi.mock('@/constants/price-feeds/index', () => ({
   default: { 1: { '0xToken': '0xOraclePriceFeed' } },
 }));
 
-vi.mock('@/constants/wrapper-address', () => ({
+vi.mock('@/constants/merkl/wrapper-address', () => ({
   wrapperTokenMappingRecord: {
     '0xWrapperToken': { ORACLE: '0xWrapperOracle' },
   },

@@ -3,7 +3,7 @@ import { Router } from 'express';
 import {
   wrapperTokenMappingAddress,
   wrapperTokenMappingAddressNormalized,
-} from '@/constants/wrapper-address.js';
+} from '@/constants/merkl/wrapper-address.js';
 import { normalizeAddress } from '@/lib/address/address.js';
 import { validateParams, validateQuery } from '@/validation/validation.middleware.js';
 import {

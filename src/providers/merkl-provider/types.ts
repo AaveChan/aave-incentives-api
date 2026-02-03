@@ -98,6 +98,11 @@ export type Campaign = {
     creatorId: string;
   };
   params: {
+    url: string;
+    // hooks: [];
+    duration: number;
+    blacklist: Address[];
+    whitelist: Address[];
     distributionMethodParameters?: {
       distributionMethod: DistributionMethod;
       distributionSettings: {
@@ -108,6 +113,15 @@ export type Campaign = {
         targetTokenPricing: boolean;
         decimalsTargetToken: number;
       };
+    };
+    // forwarders: [];
+    targetToken: Address;
+    symbolRewardToken: string;
+    symbolTargetToken: string;
+    decimalsRewardToken: number;
+    decimalsTargetToken: number;
+    computeScoreParameters: {
+      computeMethod: string; // genericTimeWeighted
     };
   };
   description: string;

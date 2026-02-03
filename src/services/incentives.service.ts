@@ -3,8 +3,8 @@ import { Address } from 'viem';
 
 import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
+import { wrapperTokenMappingBook } from '@/constants/merkl/wrapper-address.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
-import { wrapperTokenMappingBook } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { normalizeAddress } from '@/lib/address/address.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
