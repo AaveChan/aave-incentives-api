@@ -45,10 +45,10 @@ export type BaseIncentive<T extends IncentiveType = IncentiveType> = {
   status: Status;
   description: string;
   claimLink: string;
-  id?: string; // Unique identifier: chainId-rewardedTokens-rewardTokenAddress|point.name
+  allCampaignsConfigs: CampaignConfig[];
   currentCampaignConfig?: CampaignConfig;
   nextCampaignConfig?: CampaignConfig;
-  allCampaignsConfigs?: CampaignConfig[];
+  id?: string; // Unique identifier: chainId-rewardedTokens-rewardTokenAddress|point.name
   infosLink?: string;
   additionalData?: Record<string, unknown>;
 };
