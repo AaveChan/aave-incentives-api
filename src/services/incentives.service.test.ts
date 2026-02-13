@@ -26,7 +26,7 @@ vi.mock('@/constants/price-feeds/index', () => ({
   default: { 1: { '0xToken': '0xOraclePriceFeed' } },
 }));
 
-vi.mock('@/constants/wrapper-address', () => ({
+vi.mock('@/constants/merkl/wrapper-address', () => ({
   wrapperTokenMappingRecord: {
     '0xWrapperToken': { ORACLE: '0xWrapperOracle' },
   },
@@ -74,7 +74,7 @@ const baseTokenIncentive = (overrides: Partial<RawTokenIncentive> = {}): Incenti
   claimLink: 'https://claim.link',
   id: 'inc_test',
   rewardToken: baseToken(),
-  allCampaignsConfigs: [],
+  allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
   ...overrides,
 });
 
@@ -98,7 +98,7 @@ const basePointIncentive = (overrides: Partial<RawPointIncentive> = {}): Incenti
   point: basePoint(),
   pointValue: 100,
   pointValueUnit: 'x',
-  allCampaignsConfigs: [],
+  allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
   ...overrides,
 });
 

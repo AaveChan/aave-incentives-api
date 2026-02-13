@@ -5,7 +5,8 @@ import { CACHE_TTLS } from '@/config/cache-ttls.js';
 import { createLogger } from '@/config/logger.js';
 import { MERKL_DISTRIBUTOR_ABI } from '@/constants/abis/merkl-distributor.js';
 import { ACI_ADDRESSES } from '@/constants/aci-addresses.js';
-import { getMerklDistributorAddress } from '@/constants/merkl-distributors.js';
+import { getMerklDistributorAddress } from '@/constants/merkl/merkl-distributors.js';
+import { WHITELISTED_OPPORTUNITIES } from '@/constants/merkl/whitelisted-opportunity.js';
 import { AaveTokenType, getAaveToken, getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { fetchWithTimeout } from '@/lib/http/fetch-with-timeout.js';
 import { tokenToString } from '@/lib/token/token.js';
@@ -61,6 +62,8 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 
 // Default protocol for all other chains
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
+
+const allProtocolIds = [DEFAULT_PROTOCOL, ...Object.values(chainProtocolMap)];
 
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider extends BaseIncentiveProvider {
@@ -142,9 +145,17 @@ export class MerklProvider extends BaseIncentiveProvider {
         }
 
         // get campaign of the current reward token only
-        const campaigns = opportunity.campaigns.filter(
+        let campaigns = opportunity.campaigns.filter(
           (campaign) => campaign.rewardToken.address === rewardToken.address,
         );
+
+        const whitelisted = WHITELISTED_OPPORTUNITIES.has(opportunity.id);
+        if (!whitelisted) {
+          // by default blacklist the campaigns that have a whitelist
+          // example: For Kraken Earn Vaults on Ink we have a simple "Supply USDC" campaign with a whitelist composed of the 2 kraken vaults addresses
+          // => we need to hide this campaign because it does not concern Aave
+          campaigns = campaigns.filter((campaign) => campaign.params.whitelist.length === 0);
+        }
 
         const { currentCampaignConfig, nextCampaignConfig, allCampaignsConfigs } =
           this.getCampaignConfigs(campaigns);
@@ -199,7 +210,7 @@ export class MerklProvider extends BaseIncentiveProvider {
     const chainIds = fetchOptions?.chainId;
     const protocolIds = chainIds
       ? chainIds.map((chainId) => this.getProtocolId(chainId))
-      : [DEFAULT_PROTOCOL];
+      : allProtocolIds;
     return uniqueArray(protocolIds);
   }
 

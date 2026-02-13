@@ -87,7 +87,7 @@ describe('ExternalPointsProvider - mapPointIncentiveToIncentives', () => {
 
     expect(rawPointIncentive.pointValue).toBe(10);
 
-    expect(rawPointIncentive.allCampaignsConfigs?.length).toBe(2);
+    expect(rawPointIncentive.allCampaignsConfigs.length).toBe(2);
 
     expect(rawPointIncentive.currentCampaignConfig?.startTimestamp).toBe(100);
     expect(rawPointIncentive.currentCampaignConfig?.endTimestamp).toBe(200);
@@ -129,7 +129,7 @@ describe('ExternalPointsProvider - mapPointIncentiveToIncentives', () => {
     // expect(rawPointIncentive.pointValue).toBeUndefined();
     expect(rawPointIncentive.point).toBeDefined();
 
-    expect(rawPointIncentive.allCampaignsConfigs?.length).toBe(2);
+    expect(rawPointIncentive.allCampaignsConfigs.length).toBe(2);
     expect(rawPointIncentive.currentCampaignConfig?.startTimestamp).toBe(200);
     expect(rawPointIncentive.nextCampaignConfig).toBeUndefined();
   });
@@ -158,7 +158,7 @@ describe('ExternalPointsProvider - mapPointIncentiveToIncentives', () => {
     expect(rawPointIncentive.pointValue).toBe(15);
     expect(rawPointIncentive.status).toBe(Status.LIVE);
 
-    expect(rawPointIncentive.allCampaignsConfigs?.length).toBe(2);
+    expect(rawPointIncentive.allCampaignsConfigs.length).toBe(2);
     expect(rawPointIncentive.currentCampaignConfig?.startTimestamp).toBe(100);
   });
 

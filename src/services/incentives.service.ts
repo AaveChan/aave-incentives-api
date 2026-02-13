@@ -3,8 +3,8 @@ import { Address } from 'viem';
 
 import { HTTP_CONFIG } from '@/config/http.js';
 import { createLogger } from '@/config/logger.js';
+import { wrapperTokenMappingBook } from '@/constants/merkl/wrapper-address.js';
 import PRICE_FEED_ORACLES from '@/constants/price-feeds/index.js';
-import { wrapperTokenMappingBook } from '@/constants/wrapper-address.js';
 import { getAaveTokenInfo } from '@/lib/aave/aave-tokens.js';
 import { normalizeAddress } from '@/lib/address/address.js';
 import { toNonEmpty } from '@/lib/utils/non-empty-array.js';
@@ -65,6 +65,10 @@ export class IncentivesService {
     allIncentives = this.applyFilters(allIncentives, filters);
 
     allIncentives = this.gatherEqualIncentives(allIncentives);
+
+    allIncentives = allIncentives.filter(
+      (incentive) => incentive.allCampaignsConfigs.length > 0,
+    );
 
     allIncentives = this.sort(allIncentives);
 
@@ -305,14 +309,14 @@ export class IncentivesService {
       const existingIncentive = incentiveMap[incentive.id];
       if (existingIncentive) {
         const mergedCampaignsConfigs = [
-          ...(existingIncentive.allCampaignsConfigs || []),
-          ...(incentive.allCampaignsConfigs || []),
+          ...existingIncentive.allCampaignsConfigs,
+          ...incentive.allCampaignsConfigs,
         ];
 
         // Determine the most relevant currentCampaignConfig (prefer the more recent)
         if (
-          getMaxTimestamp(existingIncentive.allCampaignsConfigs || []) >
-          getMaxTimestamp(incentive.allCampaignsConfigs || [])
+          getMaxTimestamp(existingIncentive.allCampaignsConfigs) >
+          getMaxTimestamp(incentive.allCampaignsConfigs)
         ) {
           existingIncentive.allCampaignsConfigs = mergedCampaignsConfigs;
         } else {
@@ -334,9 +338,7 @@ export class IncentivesService {
     };
 
     return incentives.map((incentive) => {
-      if (incentive.allCampaignsConfigs) {
-        incentive.allCampaignsConfigs = sortCampaignsByEndTimestamp(incentive.allCampaignsConfigs);
-      }
+      incentive.allCampaignsConfigs = sortCampaignsByEndTimestamp(incentive.allCampaignsConfigs);
       return incentive;
     });
   };
