@@ -74,7 +74,7 @@ const baseTokenIncentive = (overrides: Partial<RawTokenIncentive> = {}): Incenti
   claimLink: 'https://claim.link',
   id: 'inc_test',
   rewardToken: baseToken(),
-  allCampaignsConfigs: [],
+  allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
   ...overrides,
 });
 
@@ -98,7 +98,7 @@ const basePointIncentive = (overrides: Partial<RawPointIncentive> = {}): Incenti
   point: basePoint(),
   pointValue: 100,
   pointValueUnit: 'x',
-  allCampaignsConfigs: [],
+  allCampaignsConfigs: [{ startTimestamp: 0, endTimestamp: 100 }],
   ...overrides,
 });
 

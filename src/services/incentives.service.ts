@@ -66,6 +66,10 @@ export class IncentivesService {
 
     allIncentives = this.gatherEqualIncentives(allIncentives);
 
+    allIncentives = allIncentives.filter(
+      (incentive) => !incentive.allCampaignsConfigs || incentive.allCampaignsConfigs.length > 0,
+    );
+
     allIncentives = this.sort(allIncentives);
 
     return allIncentives;
