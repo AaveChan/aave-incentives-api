@@ -63,6 +63,8 @@ const chainProtocolMap: Record<number, MainProtocolId> = {
 // Default protocol for all other chains
 const DEFAULT_PROTOCOL = MainProtocolId.AAVE;
 
+const allProtocolIds = [DEFAULT_PROTOCOL, ...Object.values(chainProtocolMap)];
+
 const WHITELISTED_CREATORS = [...ACI_ADDRESSES];
 export class MerklProvider extends BaseIncentiveProvider {
   name = ProviderName.Merkl;
@@ -208,7 +210,7 @@ export class MerklProvider extends BaseIncentiveProvider {
     const chainIds = fetchOptions?.chainId;
     const protocolIds = chainIds
       ? chainIds.map((chainId) => this.getProtocolId(chainId))
-      : [DEFAULT_PROTOCOL];
+      : allProtocolIds;
     return uniqueArray(protocolIds);
   }
 
