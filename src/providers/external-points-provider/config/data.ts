@@ -5,12 +5,13 @@ import {
   AaveV3EthereumEtherFi,
   AaveV3EthereumLido,
   AaveV3Linea,
+  AaveV3Mantle,
   AaveV3Plasma,
   AaveV3Scroll,
   AaveV3Sonic,
   AaveV3ZkSync,
-} from '@bgd-labs/aave-address-book';
-import { arbitrum, base, linea, mainnet, plasma, scroll, sonic, zksync } from 'viem/chains';
+} from '@aave-dao/aave-address-book';
+import { arbitrum, base, linea, mainnet, mantle, plasma, scroll, sonic, zksync } from 'viem/chains';
 
 import { IncentiveType } from '@/types/api.js';
 
@@ -347,6 +348,16 @@ export const programPointIncentives: ProgramPointIncentives = {
       ],
       pointValues: {
         '4': 5,
+        '5': 5,
+      },
+    },
+    {
+      chainId: mantle.id,
+      rewardedTokenAddresses: [
+        AaveV3Mantle.ASSETS.USDe.A_TOKEN, // 11/02/26
+        AaveV3Mantle.ASSETS.sUSDe.A_TOKEN, // 11/02/26
+      ],
+      pointValues: {
         '5': 5,
       },
     },

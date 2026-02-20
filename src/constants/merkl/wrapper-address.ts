@@ -7,7 +7,7 @@ import {
   AaveV3Plasma,
   AaveV3Scroll,
   AaveV3Sonic,
-} from '@bgd-labs/aave-address-book';
+} from '@aave-dao/aave-address-book';
 import { Address } from 'viem';
 import { arbitrum, base, linea, mainnet, plasma, scroll, sonic } from 'viem/chains';
 

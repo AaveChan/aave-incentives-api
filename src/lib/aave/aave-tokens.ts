@@ -1,4 +1,4 @@
-import { AaveSafetyModule, AaveV3Ethereum } from '@bgd-labs/aave-address-book';
+import { AaveSafetyModule, AaveV3Ethereum } from '@aave-dao/aave-address-book';
 import { Address, zeroAddress } from 'viem';
 import { ink } from 'viem/chains';
 

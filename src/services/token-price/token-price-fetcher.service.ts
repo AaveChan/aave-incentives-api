@@ -1,4 +1,4 @@
-import { AaveSafetyModule } from '@bgd-labs/aave-address-book';
+import { AaveSafetyModule } from '@aave-dao/aave-address-book';
 import { Address } from 'viem';
 
 import { CACHE_TTLS } from '@/config/cache-ttls.js';
