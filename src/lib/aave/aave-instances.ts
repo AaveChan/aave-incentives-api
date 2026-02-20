@@ -18,7 +18,7 @@ import {
   AaveV3Scroll,
   AaveV3Sonic,
   AaveV3ZkSync,
-} from '@bgd-labs/aave-address-book';
+} from '@aave-dao/aave-address-book';
 
 export enum AaveInstanceType {
   CORE = 'Core',

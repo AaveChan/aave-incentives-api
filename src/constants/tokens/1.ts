@@ -1,4 +1,4 @@
-import { AaveV3Ethereum } from '@bgd-labs/aave-address-book';
+import { AaveV3Ethereum } from '@aave-dao/aave-address-book';
 import { mainnet } from 'viem/chains';
 
 import { Token } from '@/types/index.js';

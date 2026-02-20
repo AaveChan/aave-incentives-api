@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@bgd-labs/aave-address-book':
-        specifier: ^4.38.0
-        version: 4.38.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))
+      '@aave-dao/aave-address-book':
+        specifier: ^4.46.1
+        version: 4.46.1(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))
       '@scalar/express-api-reference':
         specifier: ^0.8.23
         version: 0.8.23
@@ -105,6 +105,11 @@ importers:
 
 packages:
 
+  '@aave-dao/aave-address-book@4.46.1':
+    resolution: {integrity: sha512-XmSoeMKuLVaAy3F7hCMidLY3IrBf9eS6ly0IWRz3sVYTzx5lLwyJve7QGqQrYg2aA9nqNouV6x35LfXpi3LdnA==}
+    peerDependencies:
+      viem: ^2.23.5
+
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
@@ -128,11 +133,6 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
-
-  '@bgd-labs/aave-address-book@4.38.0':
-    resolution: {integrity: sha512-qic555Lqm/qC4BeZsiOmafxnm8E4R04kGhfWPsKjilRFnORHaBPs2+FhIv2wJmO8/xJaKT92pWrUJfc/Brbr0A==}
-    peerDependencies:
-      viem: ^2.23.5
 
   '@colors/colors@1.6.0':
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -2532,6 +2532,10 @@ packages:
 
 snapshots:
 
+  '@aave-dao/aave-address-book@4.46.1(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))':
+    dependencies:
+      viem: 2.38.5(typescript@5.9.3)(zod@4.1.12)
+
   '@adraffy/ens-normalize@1.11.1': {}
 
   '@babel/helper-string-parser@7.27.1': {}
@@ -2548,10 +2552,6 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@1.0.2': {}
-
-  '@bgd-labs/aave-address-book@4.38.0(viem@2.38.5(typescript@5.9.3)(zod@4.1.12))':
-    dependencies:
-      viem: 2.38.5(typescript@5.9.3)(zod@4.1.12)
 
   '@colors/colors@1.6.0': {}
 
