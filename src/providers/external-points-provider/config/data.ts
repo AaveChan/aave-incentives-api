@@ -5,6 +5,7 @@ import {
   AaveV3EthereumEtherFi,
   AaveV3EthereumLido,
   AaveV3Linea,
+  AaveV3Mantle,
   AaveV3Plasma,
   AaveV3Scroll,
   AaveV3Sonic,
@@ -351,6 +352,16 @@ export const programPointIncentives: ProgramPointIncentives = {
       },
     },
     {
+      chainId: mantle.id,
+      rewardedTokenAddresses: [
+        AaveV3Mantle.ASSETS.USDe.A_TOKEN, // 11/02/26
+        AaveV3Mantle.ASSETS.sUSDe.A_TOKEN, // 11/02/26
+      ],
+      pointValues: {
+        '5': 5,
+      },
+    },
+    {
       chainId: mainnet.id,
       rewardedTokenAddresses: [
         AaveV3Ethereum.ASSETS.PT_USDe_31JUL2025.A_TOKEN, // 27/05/25
@@ -374,16 +385,6 @@ export const programPointIncentives: ProgramPointIncentives = {
     },
     {
       chainId: mainnet.id,
-      rewardedTokenAddresses: [
-        AaveV3Ethereum.ASSETS.PT_eUSDE_29MAY2025.A_TOKEN, // 29/04/25
-        AaveV3Ethereum.ASSETS.PT_eUSDE_14AUG2025.A_TOKEN, // 27/05/25
-      ],
-      pointValues: {
-        '4': 2,
-      },
-    },
-    {
-      chainId: mantle.id,
       rewardedTokenAddresses: [
         AaveV3Ethereum.ASSETS.PT_eUSDE_29MAY2025.A_TOKEN, // 29/04/25
         AaveV3Ethereum.ASSETS.PT_eUSDE_14AUG2025.A_TOKEN, // 27/05/25
